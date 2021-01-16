@@ -15,7 +15,7 @@ void TestGame::start() {
     // This code executed once in the beginning:
 
     //world.addMesh(Mesh::Cube(1), "object_1");
-    world.loadObj("../obj/cube.obj", "object_1", 1);
+    world.loadObj("../obj/teapot.obj", "object_1", 1);
     //world["object_1"] *= Matrix4x4::Translation(0, 0, 4);
     world["object_1"].translate(0, -2, 5);
 
@@ -35,6 +35,7 @@ void TestGame::update(double elapsedTime) {
 int main() {
     TestGame game;
     game.create(1920, 1080, "3dzavr test");
+
 
     return 0;
 }
