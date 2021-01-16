@@ -17,6 +17,7 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
     settings.antialiasingLevel = 8;
 
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
+    //window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(verticalSync);
 }
 
@@ -37,17 +38,16 @@ void Screen::clear() {
     window.clear(background);
 }
 
-void Screen::line(const Point4D& p1, const Point4D& p2)
+void Screen::line(const Point4D& p1, const Point4D& p2, sf::Color color)
 {
     if (!window.isOpen())
         return;
 
     sf::Vertex line[] =
     {
-        sf::Vertex(sf::Vector2f(p1.x, p1.y)),
-        sf::Vertex(sf::Vector2f(p2.x, p2.y))
+        sf::Vertex(sf::Vector2f(p1.x, p1.y), color),
+        sf::Vertex(sf::Vector2f(p2.x, p2.y), color)
     };
-
     window.draw(line, 2, sf::Lines);
 }
 
@@ -58,13 +58,18 @@ void Screen::triangle(const Triangle& triangle, sf::Color color, bool boundary)
     convex.setFillColor(color);
     convex.setPointCount(3);
     if(boundary) {
-        convex.setOutlineThickness(1);
-        convex.setOutlineColor({255, 0, 0});
+        // When using this we have significant artefacts on with the small triangles
+        //convex.setOutlineThickness(1);
+        //convex.setOutlineColor({255, 0, 0});
+        // Instead of this we draw 3 lines:
+        line(triangle[0], triangle[1]);
+        line(triangle[1], triangle[2]);
+        line(triangle[2], triangle[0]);
     }
 
-    convex.setPoint(0, sf::Vector2f(triangle.p1.x, triangle.p1.y));
-    convex.setPoint(1, sf::Vector2f(triangle.p2.x, triangle.p2.y));
-    convex.setPoint(2, sf::Vector2f(triangle.p3.x, triangle.p3.y));
+    convex.setPoint(0, sf::Vector2f(triangle[0].x, triangle[0].y));
+    convex.setPoint(1, sf::Vector2f(triangle[1].x, triangle[1].y));
+    convex.setPoint(2, sf::Vector2f(triangle[2].x, triangle[2].y));
 
     window.draw(convex);
 }
@@ -76,4 +81,8 @@ void Screen::title(const std::string& title)
 
 bool Screen::isOpen() {
     return window.isOpen();
+}
+
+void Screen::close() {
+    window.close();
 }

@@ -10,16 +10,17 @@
 
 class Triangle {
 public:
-    Point4D p1{};
-    Point4D p2{};
-    Point4D p3{};
+    Point4D p[3];
 
     Triangle () = default;
     Triangle (const Triangle& triangle) = default;
     Triangle (Point4D p1, Point4D p2, Point4D p3);
     Triangle& operator=(const Triangle& triangle) = default;
 
-    Point4D norm();
+    [[nodiscard]] Point4D operator[] (int i) const;
+    [[nodiscard]] Point4D& operator[] (int i);
+
+    Point4D norm() const;
 
     // Operations with Matrix4x4
     [[nodiscard]] Triangle operator*(const Matrix4x4& matrix4X4) const;

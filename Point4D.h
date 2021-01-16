@@ -10,7 +10,7 @@ public:
     double x = 0;
     double y = 0;
     double z = 0;
-    double w = 1;
+    double w = 0;
 
     Point4D () = default;
     Point4D (double x, double y, double z, double w = 1);
@@ -38,7 +38,6 @@ public:
     Point4D& operator/=(const Point4D& point4D);
 
     [[nodiscard]] double dot(const Point4D& point4D) const; // Returns dot product
-    [[nodiscard]] double dot3D(const Point4D& point4D) const; // Returns dot product
     [[nodiscard]] Point4D cross3D(const Point4D& point4D) const; // Returns cross product
 
     // Operations with numbers

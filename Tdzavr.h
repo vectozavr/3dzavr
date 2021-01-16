@@ -22,6 +22,7 @@ public:
 
     virtual void start() {};
     virtual void update(double elapsedTime) {};
+    void exit();
 
     void viewBoundary(bool view) { boundary = view; }
 };

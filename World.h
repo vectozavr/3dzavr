@@ -9,17 +9,18 @@
 #include "Mesh.h"
 
 class World {
-private:
-    std::map<std::string, Mesh> internal_objects;
-    std::map<std::string, Mesh&> external_objects;
-
 public:
+    std::map<std::string, Mesh> objects;
+
     World() = default;
-    explicit World(const std::string& filename);
+    explicit World(const std::string& filename, double scale = 1.0);
+
+    [[nodiscard]] Mesh& operator[] (const std::string& name);
 
     void addMesh(Mesh& mesh, const std::string& name = "");
+    void addMesh(const Mesh& mesh, const std::string& name = "");
     void removeMesh(const std::string& name);
-    void loadObj(const std::string& filename, const std::string& name = "");
+    void loadObj(const std::string& filename, const std::string& name = "", double scale = 1.0);
 };
 
 

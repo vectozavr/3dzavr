@@ -22,6 +22,9 @@ namespace Time
 
     double deltaTime()
     {
+        if(_deltaTime > 10000)
+            return 0;
+
         return _deltaTime;
     }
 
@@ -48,6 +51,8 @@ namespace Time
         for (auto dt : deltaTime_history)
             sum += dt;
 
+        if(sum == 0)
+            return 0;
         return floor((double)deltaTime_history.size() / sum);
     }
 }
