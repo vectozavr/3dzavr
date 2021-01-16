@@ -7,14 +7,16 @@
 
 class Point4D {
 public:
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    double w = 0;
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    double w = 0.0;
+    double* p[4] = {&x, &y, &z, &w};
+
 
     Point4D () = default;
-    Point4D (double x, double y, double z, double w = 1);
-    Point4D& operator=(const Point4D& point4D) = default;
+    Point4D (double x, double y, double z, double w = 0.0);
+    Point4D& operator=(const Point4D& point4D);
 
     [[nodiscard]] double operator[] (int i) const;
     [[nodiscard]] double& operator[] (int i);

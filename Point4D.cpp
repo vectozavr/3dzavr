@@ -10,27 +10,15 @@ Point4D::Point4D (double x, double y, double z, double w) {
     this->y = y;
     this->z = z;
     this->w = w;
+
+    p[0] = &this->x; p[1] = &this->y; p[2] = &this->z; p[3] = &this->w;
 }
 
 [[nodiscard]] double Point4D::operator[] (int i) const {
-    if(i == 0)
-        return x;
-    if(i == 1)
-        return y;
-    if(i == 2)
-        return z;
-    else
-        return w;
+    return *p[i];
 }
 [[nodiscard]] double& Point4D::operator[] (int i) {
-    if(i == 0)
-        return x;
-    if(i == 1)
-        return y;
-    if(i == 2)
-        return z;
-    else
-        return w;
+    return *p[i];
 }
 
 [[nodiscard]] Point4D Point4D::operator-() const {
@@ -162,5 +150,19 @@ Point4D& Point4D::normalize()
     y /= length;
     z /= length;
     w /= length;
+    return *this;
+}
+
+Point4D &Point4D::operator=(const Point4D &point4D) {
+    this->x = point4D.x;
+    this->y = point4D.y;
+    this->z = point4D.z;
+    this->w = point4D.w;
+    p[0] = &x;
+    p[1] = &y;
+    p[2] = &z;
+    p[3] = &w;
+
+
     return *this;
 }
