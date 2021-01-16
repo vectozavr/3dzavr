@@ -230,24 +230,56 @@ Matrix4x4 Matrix4x4::Scale(double sx, double sy, double sz) {
 
 Matrix4x4 Matrix4x4::Translation(double dx, double dy, double dz) {
     Matrix4x4 t{};
+/*
+ * ( 1 0 0 dx )(x)   (x + dx)
+ * ( 0 1 0 dy )(y) = (y + dy)
+ * ( 0 0 1 dz )(z)   (z + dz)
+ * ( 0 0 0 1  )(1)   (  1   )
+ */
+
+    t[0][0] = 1.0;
+    t[1][1] = 1.0;
+    t[2][2] = 1.0;
+    t[3][3] = 1.0;
+
     t[0][3] = dx;
-    t[0][3] = dy;
-    t[0][3] = dz;
-    t[3][3] = 1;
+    t[1][3] = dy;
+    t[2][3] = dz;
+
+    return t;
+}
+
+Matrix4x4 Matrix4x4::Translation(const Point4D& v) {
+    Matrix4x4 t{};
+/*
+ * ( 1 0 0 dx )(x)   (x + dx)
+ * ( 0 1 0 dy )(y) = (y + dy)
+ * ( 0 0 1 dz )(z)   (z + dz)
+ * ( 0 0 0 1  )(1)   (  1   )
+ */
+
+    t[0][0] = 1.0;
+    t[1][1] = 1.0;
+    t[2][2] = 1.0;
+    t[3][3] = 1.0;
+
+    t[0][3] = v.x;
+    t[1][3] = v.y;
+    t[2][3] = v.z;
 
     return t;
 }
 
 Matrix4x4 Matrix4x4::RotationX(double rx) {
     Matrix4x4 Rx{};
-    Rx[0][0] = 1;
+    Rx[0][0] = 1.0;
 
     Rx[1][1] = cos(rx);
     Rx[1][2] = -sin(rx);
     Rx[2][1] = sin(rx);
     Rx[2][2] = cos(rx);
 
-    Rx[3][3] = 1;
+    Rx[3][3] = 1.0;
 
     return Rx;
 }
@@ -255,14 +287,14 @@ Matrix4x4 Matrix4x4::RotationX(double rx) {
 Matrix4x4 Matrix4x4::RotationY(double ry) {
     Matrix4x4 Ry{};
 
-    Ry[1][1] = 1;
+    Ry[1][1] = 1.0;
 
     Ry[0][0] = cos(ry);
     Ry[0][2] = sin(ry);
     Ry[2][0] = -sin(ry);
     Ry[2][2] = cos(ry);
 
-    Ry[3][3] = 1;
+    Ry[3][3] = 1.0;
 
     return Ry;
 }
@@ -270,14 +302,14 @@ Matrix4x4 Matrix4x4::RotationY(double ry) {
 Matrix4x4 Matrix4x4::RotationZ(double rz) {
     Matrix4x4 Rz{};
 
-    Rz[2][2] = 1;
+    Rz[2][2] = 1.0;
 
     Rz[0][0] = cos(rz);
     Rz[0][1] = -sin(rz);
     Rz[1][0] = sin(rz);
     Rz[1][1] = cos(rz);
 
-    Rz[3][3] = 1;
+    Rz[3][3] = 1.0;
 
     return Rz;
 }
@@ -290,31 +322,52 @@ Matrix4x4 Matrix4x4::Rotation(Point4D v, double rv) {
     Matrix4x4 Rv{};
     v.normalize();
 
-    Rv[0][0] = cos(rv) + (1 - cos(rv))*v.x*v.x;
-    Rv[0][1] = (1 - cos(rv))*v.x*v.y - sin(rv)*v.z;
-    Rv[0][2] = (1 - cos(rv))*v.x*v.z + sin(rv)*v.y;
+    Rv[0][0] = cos(rv) + (1.0 - cos(rv))*v.x*v.x;
+    Rv[0][1] = (1.0 - cos(rv))*v.x*v.y - sin(rv)*v.z;
+    Rv[0][2] = (1.0 - cos(rv))*v.x*v.z + sin(rv)*v.y;
 
-    Rv[1][0] = (1 - cos(rv))*v.x*v.y + sin(rv)*v.z;
-    Rv[1][1] = cos(rv) + (1 - cos(rv))*v.y*v.y;
-    Rv[1][2] = (1 - cos(rv))*v.y*v.z - sin(rv)*v.x;
+    Rv[1][0] = (1.0 - cos(rv))*v.x*v.y + sin(rv)*v.z;
+    Rv[1][1] = cos(rv) + (1.0 - cos(rv))*v.y*v.y;
+    Rv[1][2] = (1.0 - cos(rv))*v.y*v.z - sin(rv)*v.x;
 
-    Rv[2][0] = (1 - cos(rv))*v.z*v.x - sin(rv)*v.y;
-    Rv[2][1] = (1 - cos(rv))*v.z*v.y + sin(rv)*v.x;
-    Rv[2][2] = cos(rv) + (1 - cos(rv))*v.z*v.z;
+    Rv[2][0] = (1.0 - cos(rv))*v.z*v.x - sin(rv)*v.y;
+    Rv[2][1] = (1.0 - cos(rv))*v.z*v.y + sin(rv)*v.x;
+    Rv[2][2] = cos(rv) + (1.0 - cos(rv))*v.z*v.z;
 
-    Rv[3][3] = 1;
+    Rv[3][3] = 1.0;
 
     return Rv;
 }
 
+
+
 Matrix4x4 Matrix4x4::Projection(double fov, double aspect, double ZNear, double ZFar) {
     Matrix4x4 p{};
 
-    p[0][0] = aspect*1.0/tan(M_PI*fov/180.0);
-    p[1][1] = 1.0/tan(M_PI*fov/180.0);
+    p[0][0] = aspect*1.0/tan(M_PI*fov*0.5/180.0);
+    p[1][1] = 1.0/tan(M_PI*fov*0.5/180.0);
     p[2][2] = ZFar/(ZFar - ZNear);
     p[2][3] = -ZFar*ZNear/(ZFar - ZNear);
-    p[3][2] = 1;
+    p[3][2] = 1.0;
 
     return p;
+}
+
+Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
+    Matrix4x4 s{};
+
+    s[0][0] = -0.5*width;
+    s[1][1] = -0.5*height;
+    s[2][2] = 1.0;
+
+    s[0][3] = 0.5*width;
+    s[1][3] = 0.5*height;
+
+    s[3][3] = 1.0;
+
+    return s;
+}
+
+Matrix4x4 Matrix4x4::View(const Point4D &left, const Point4D &up, const Point4D &lookAt, const Point4D &eye) {
+    return Matrix4x4();
 }

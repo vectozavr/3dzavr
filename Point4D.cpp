@@ -71,8 +71,8 @@ Point4D& Point4D::operator+=(const Point4D& point4D)
 {
     this->x += point4D.x;
     this->y += point4D.y;
-    this->z += point4D.x;
-    this->w += point4D.y;
+    this->z += point4D.z;
+    this->w += point4D.w;
     return *this;
 }
 Point4D& Point4D::operator-=(const Point4D& point4D)
@@ -98,9 +98,6 @@ Point4D& Point4D::operator/=(const Point4D& point4D) {
 double Point4D::dot(const Point4D& point4D) const
 {
     return point4D.x * x + point4D.y * y + point4D.z * z + point4D.w * w;
-}
-[[nodiscard]] double Point4D::dot3D(const Point4D& point4D) const {
-    return point4D.x * x + point4D.y * y + point4D.z * z;
 }
 [[nodiscard]] Point4D Point4D::cross3D(const Point4D& point4D) const {
     Point4D cross{};
