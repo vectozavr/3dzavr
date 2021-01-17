@@ -15,6 +15,7 @@ public:
 
 
     Point4D () = default;
+    Point4D (const Point4D& point4D);
     Point4D (double x, double y, double z, double w = 0.0);
     Point4D& operator=(const Point4D& point4D);
 

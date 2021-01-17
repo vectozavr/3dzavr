@@ -35,7 +35,7 @@ std::vector<std::pair<Triangle, sf::Color>> &Camera::project(const Mesh &mesh) {
         result[1] /= result[1].w;
         result[2] /= result[2].w;
 
-        triangles.emplace_back(result, sf::Color(255*(0.3*abs(dot) + 0.7), 245*(0.3*abs(dot) + 0.7), 194*(0.3*abs(dot) + 0.7), 255));
+        triangles.emplace_back(result, sf::Color(255*(0.3*std::abs(dot) + 0.7), 245*(0.3*std::abs(dot) + 0.7), 194*(0.3*std::abs(dot) + 0.7), 255));
     }
 
     return this->triangles;
