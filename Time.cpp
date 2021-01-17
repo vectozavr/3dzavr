@@ -5,6 +5,7 @@
 #include "Time.h"
 #include <chrono>
 #include <list>
+#include <cmath>
 
 namespace Time
 {

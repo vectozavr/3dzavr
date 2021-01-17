@@ -36,6 +36,5 @@ int main() {
     TestGame game;
     game.create(1920, 1080, "3dzavr test");
 
-
     return 0;
 }

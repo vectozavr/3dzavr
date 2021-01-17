@@ -18,7 +18,7 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
 
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
     //window.setFramerateLimit(60);
-    //window.setVerticalSyncEnabled(verticalSync);
+    window.setVerticalSyncEnabled(verticalSync);
 }
 
 void Screen::display() {

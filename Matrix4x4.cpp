@@ -3,6 +3,8 @@
 //
 
 #include "Matrix4x4.h"
+#include <cassert>
+#include <cmath>
 
 [[nodiscard]] const std::array<double, 4>& Matrix4x4::operator[] (int i) const {
     return arr_matrix[i];
