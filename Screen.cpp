@@ -86,3 +86,26 @@ bool Screen::isOpen() {
 void Screen::close() {
     window.close();
 }
+
+bool Screen::isKeyPressed(sf::Keyboard::Key key) {
+    return sf::Keyboard::isKeyPressed(key);
+}
+
+Point4D Screen::getMousePosition() const {
+    sf::Vector2<int> pos = sf::Mouse::getPosition(window);
+    return Point4D(pos.x, pos.y, 0, 0);
+}
+
+Point4D Screen::getMouseDisplacement() const {
+    sf::Vector2<int> disp = sf::Mouse::getPosition(window) - sf::Vector2<int>(w/2, h/2);
+    setMouseInCenter();
+    return Point4D(disp.x, disp.y, 0, 0);
+}
+
+void Screen::setMouseInCenter() const {
+    sf::Mouse::setPosition({ w / 2, h / 2 }, window);
+}
+
+void Screen::setMouseCursorVisible(bool visible) {
+    window.setMouseCursorVisible(visible);
+}

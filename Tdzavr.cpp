@@ -17,7 +17,6 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         screen.clear();
 
         Time::update();
-        camera.keyboardControl(screen.window);
         update(Time::deltaTime());
 
         screen.title(name + " [X: " + std::to_string((int)(camera.eye().x)) + " Y: " + std::to_string((int)(camera.eye().y)) + " Z: " + std::to_string((int)(camera.eye().z)) + "]");

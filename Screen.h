@@ -41,6 +41,13 @@ public:
     int height() const {return h;}
 
     void close();
+
+    // keyboard methods
+    static bool isKeyPressed(sf::Keyboard::Key key);
+    Point4D getMousePosition() const;
+    Point4D getMouseDisplacement() const;
+    void setMouseInCenter() const;
+    void setMouseCursorVisible(bool visible);
 };
 
 

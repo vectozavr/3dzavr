@@ -109,7 +109,7 @@ void Camera::rotate(double rx, double ry, double rz) {
     rotateZ(rz);
 }
 
-void Camera::rotate(Point4D v, double rv) {
+void Camera::rotate(const Point4D& v, double rv) {
     p_left = Matrix4x4::Rotation(v, rv) * p_left;
     p_up = Matrix4x4::Rotation(v, rv) * p_up;
     p_lookAt = Matrix4x4::Rotation(v, rv) * p_lookAt;
@@ -127,40 +127,30 @@ void Camera::rotateLookAt(double rlAt) {
     rotate(p_lookAt, rlAt);
 }
 
-void Camera::keyboardControl(sf::RenderWindow& window) {
+void Camera::keyboardControl(Screen& screen) {
     // Left and right
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    {
+    if (Screen::isKeyPressed(sf::Keyboard::A))
         translate(p_left*Time::deltaTime()*5.0);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
+
+    if (Screen::isKeyPressed(sf::Keyboard::D))
         translate(-p_left*Time::deltaTime()*5.0);
-    }
+
     // Forward and backward
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-    {
+    if (Screen::isKeyPressed(sf::Keyboard::W))
         translate(p_lookAt*Time::deltaTime()*5.0);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
+
+    if (Screen::isKeyPressed(sf::Keyboard::S))
         translate(-p_lookAt*Time::deltaTime()*5.0);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-    {
+
+    if (Screen::isKeyPressed(sf::Keyboard::LShift))
         translate(0.0, -Time::deltaTime()*5.0, 0);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-    {
+
+    if (Screen::isKeyPressed(sf::Keyboard::Space))
         translate(0.0, Time::deltaTime()*5.0, 0);
-    }
 
     // Mouse movement
-    int differenceX = sf::Mouse::getPosition(window).x - (int)window.getSize().x / 2;
-    int differenceY = sf::Mouse::getPosition(window).y - (int)window.getSize().y / 2;
-    sf::Mouse::setPosition({ (int)window.getSize().x / 2, (int)window.getSize().y / 2 }, window);
-    window.setMouseCursorVisible(false);
+    Point4D disp = screen.getMouseDisplacement();
 
-    rotateY(-Time::deltaTime()*differenceX/10.0);
-    rotateLeft(Time::deltaTime()*differenceY/10.0);
+    rotateY(-Time::deltaTime()*disp.x/10.0);
+    rotateLeft(Time::deltaTime()*disp.y/10.0);
 }

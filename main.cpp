@@ -20,6 +20,7 @@ void TestGame::start() {
     world["object_1"].translate(0, -2, 5);
 
     viewBoundary(true);
+    screen.setMouseCursorVisible(false);
 }
 
 void TestGame::update(double elapsedTime) {
@@ -30,6 +31,8 @@ void TestGame::update(double elapsedTime) {
     //world["object_1"] *= Matrix4x4::Rotation({1, 1, 1}, elapsedTime);
     world["object_1"] *= Matrix4x4::RotationY(elapsedTime/10.0);
     //world["object_1"] *= Matrix4x4::Translation(0, 0, elapsedTime);
+
+    camera.keyboardControl(screen);
 }
 
 int main() {
