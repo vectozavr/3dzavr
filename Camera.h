@@ -6,6 +6,7 @@
 #define INC_3DZAVR_CAMERA_H
 
 #include <vector>
+#include "Screen.h"
 #include "Mesh.h"
 
 class Camera {
@@ -49,13 +50,13 @@ public:
     void rotateZ(double rz);
     void rotate(double rx, double ry, double rz);
 
-    void rotate(Point4D v, double rv);
+    void rotate(const Point4D& v, double rv);
 
     void rotateLeft(double rl);
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
 
-    void keyboardControl(sf::RenderWindow& window);
+    void keyboardControl(Screen& screen);
 };
 
 
