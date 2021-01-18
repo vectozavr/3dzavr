@@ -37,3 +37,7 @@ Point4D Triangle::operator[](int i) const {
 Point4D &Triangle::operator[](int i) {
     return p[i];
 }
+
+Point4D Triangle::pos() const {
+    return (p[0] + p[1] + p[2])/3.0;
+}

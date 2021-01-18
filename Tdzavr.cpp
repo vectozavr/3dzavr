@@ -12,6 +12,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
     Log::log("Tdzavr::create(): started 3dzavr (" + std::to_string(screenWidth) + " x " + std::to_string(screenHeight) + ") with name '" + name + "'.");
     start();
     camera.init(screenWidth, screenHeight);
+    screen.getMouseDisplacement(); // We do it to set mouse position in the center (see how getMouseDisplacement() works)
 
     while (screen.isOpen()) {
         screen.clear();
@@ -24,11 +25,11 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         // project all mesh
         camera.record();
         for(auto& m : world.objects)
-            camera.project(m.second);
+            camera.project(m.second, xray);
 
         // draw projected mesh
         for(auto& t : camera.sorted())
-            screen.triangle(t.first, t.second, boundary);
+            screen.triangle(t.first, t.second, boundary, box);
 
         screen.display();
     }

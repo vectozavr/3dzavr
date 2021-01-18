@@ -18,7 +18,7 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
 
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
     //window.setFramerateLimit(60);
-    window.setVerticalSyncEnabled(verticalSync);
+    //window.setVerticalSyncEnabled(verticalSync);
 }
 
 void Screen::display() {
@@ -51,13 +51,9 @@ void Screen::line(const Point4D& p1, const Point4D& p2, sf::Color color)
     window.draw(line, 2, sf::Lines);
 }
 
-void Screen::triangle(const Triangle& triangle, sf::Color color, bool boundary)
+void Screen::triangle(const Triangle& triangle, sf::Color color, bool boundary, bool box)
 {
-    sf::ConvexShape convex;
-
-    convex.setFillColor(color);
-    convex.setPointCount(3);
-    if(boundary) {
+    if(boundary || box) {
         // When using this we have significant artefacts on with the small triangles
         //convex.setOutlineThickness(1);
         //convex.setOutlineColor({255, 0, 0});
@@ -66,6 +62,13 @@ void Screen::triangle(const Triangle& triangle, sf::Color color, bool boundary)
         line(triangle[1], triangle[2]);
         line(triangle[2], triangle[0]);
     }
+    if(box)
+        return;
+
+    sf::ConvexShape convex;
+
+    convex.setFillColor(color);
+    convex.setPointCount(3);
 
     convex.setPoint(0, sf::Vector2f(triangle[0].x, triangle[0].y));
     convex.setPoint(1, sf::Vector2f(triangle[1].x, triangle[1].y));

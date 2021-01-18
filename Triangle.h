@@ -25,6 +25,7 @@ public:
     // Operations with Matrix4x4
     [[nodiscard]] Triangle operator*(const Matrix4x4& matrix4X4) const;
     Triangle& operator*=(const Matrix4x4& matrix4X4);
+    Point4D pos() const;
 };
 
 
