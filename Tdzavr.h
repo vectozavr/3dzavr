@@ -17,6 +17,8 @@ protected:
     Camera camera;
 
     bool boundary = false;
+    bool box = false;
+    bool xray = false;
 public:
     void create(int screenWidth = 1920, int screenHeight = 1080, const std::string& name = "3dzavr", bool verticalSync = true, sf::Color background = sf::Color(255, 255, 255));
 
@@ -25,6 +27,8 @@ public:
     void exit();
 
     void viewBoundary(bool view) { boundary = view; }
+    void boxView(bool view) { box = view; }
+    void xRay(bool view) { xray = view; }
 };
 
 

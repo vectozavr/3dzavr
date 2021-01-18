@@ -17,16 +17,23 @@ private:
     Point4D p_up =      {0, 1, 0, 0}; // internal Y
     Point4D p_lookAt =  {0, 0, 1, 0}; // internal Z
 
-    Matrix4x4 P; // projections matrix
     Matrix4x4 V; // camera matrix
+    Matrix4x4 P; // projections matrix
     Matrix4x4 S; // screen space matrix
+
+    // To accelerate calculations we can use precalculated matrix that does not chance
+    Matrix4x4 SP; // screen-space-projections matrix
+    Matrix4x4 SPV; // screen-space-projections-camera matrix
+    Matrix4x4 SPVM; // screen-space-projections-camera-model matrix
 
     bool ready = false;
 
     std::vector<std::pair<Triangle, sf::Color>> triangles;
+
+
 public:
     void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 1000.0);
-    std::vector<std::pair<Triangle, sf::Color>>& project(const Mesh &mesh);
+    std::vector<std::pair<Triangle, sf::Color>>& project(const Mesh &mesh, bool xray = false);
     [[nodiscard]] std::vector<std::pair<Triangle, sf::Color>> const &data() const { return triangles; }
     void record();
 

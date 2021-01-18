@@ -29,8 +29,8 @@ public:
     void display();
     void clear();
 
-    void line(const Point4D& p1, const Point4D& p2, sf::Color color = {252, 159, 119});
-    void triangle(const Triangle& triangle, sf::Color color, bool boundary = false);
+    void line(const Point4D& p1, const Point4D& p2, sf::Color color = {0, 0, 0});
+    void triangle(const Triangle& triangle, sf::Color color, bool boundary = false, bool box = false);
 
     void title(const std::string& title);
     std::string title() const { return name; };

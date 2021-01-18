@@ -7,22 +7,26 @@
 #include "Time.h"
 #include <iostream>
 
-std::vector<std::pair<Triangle, sf::Color>> &Camera::project(const Mesh &mesh) {
+std::vector<std::pair<Triangle, sf::Color>> &Camera::project(const Mesh &mesh, bool xray) {
 
     if(!ready) {
         Log::log("Camera::project(): cannot project triangles without camera initialization ( Camera::init() ) ");
         return this->triangles;
     }
 
+    // model transform matrix;
     Matrix4x4 M = Matrix4x4::Translation(mesh.position());
+    SPVM = SPV * M; // screen-space-projections-camera-model matrix
 
     for(auto& t : mesh.data()) {
 
         double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
-        if(dot > 0)
+        if(dot > 0 && !xray)
             continue;
 
-        Triangle result = t * M * V * P * S;
+        // To accelerate calculations we can use precalculated matrix that does not chance
+        //Triangle result = t * M * V * P * S;
+        Triangle result = t * SPVM;
         /*
          * t - one triangle from mesh
          *
@@ -30,6 +34,8 @@ std::vector<std::pair<Triangle, sf::Color>> &Camera::project(const Mesh &mesh) {
          * V - transform from world coordinate to camera' coordinate
          * P - project triangles from camera' coordinate to camera 2d plane
          * S - transform 2d plane' coordinate to screen coordinate (in pixels)
+         *
+         * MVPS - pre-calculated resulting matrix
          */
         result[0] /= result[0].w;
         result[1] /= result[1].w;
@@ -45,6 +51,8 @@ void Camera::init(int width, int height, double fov, double ZNear, double ZFar) 
     double aspect = (double)height / (double)width;
     P = Matrix4x4::Projection(fov, aspect, ZNear, ZFar);
     S = Matrix4x4::ScreenSpace(width, height);
+
+    SP = S * P; // screen-space-projections matrix
 
     ready = true;
     Log::log("Camera::init(): camera successfully initialized.");
@@ -83,6 +91,8 @@ void Camera::record() {
     V[2][3] = -p_eye.dot(p_lookAt);
 
     V[3][3] = 1.0;
+
+    SPV = SP * V; // screen-space-projections-camera matrix
 }
 
 void Camera::rotateX(double rx) {
@@ -151,6 +161,6 @@ void Camera::keyboardControl(Screen& screen) {
     // Mouse movement
     Point4D disp = screen.getMouseDisplacement();
 
-    rotateY(-Time::deltaTime()*disp.x/10.0);
-    rotateLeft(Time::deltaTime()*disp.y/10.0);
+    rotateY(-disp.x/1000.0);
+    rotateLeft(disp.y/1000.0);
 }
