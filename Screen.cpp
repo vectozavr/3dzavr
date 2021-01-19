@@ -4,8 +4,8 @@
 
 #include "Screen.h"
 #include "Time.h"
-
 #include <utility>
+#include "Log.h"
 
 void Screen::open(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background) {
     this->name = name;
@@ -19,6 +19,9 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
     //window.setFramerateLimit(60);
     //window.setVerticalSyncEnabled(verticalSync);
+
+    if (!font.loadFromFile("../fonts/Roboto-Thin.ttf"))
+        Log::log("Screen::open: Cannot load font '../fonts/Roboto-Thin.ttf'");
 }
 
 void Screen::display() {
@@ -51,23 +54,23 @@ void Screen::line(const Point4D& p1, const Point4D& p2, sf::Color color)
     window.draw(line, 2, sf::Lines);
 }
 
-void Screen::triangle(const Triangle& triangle, sf::Color color, bool boundary, bool box)
+void Screen::triangle(const Triangle& triangle)
 {
-    if(boundary || box) {
-        // When using this we have significant artefacts on with the small triangles
+    if(vm == Frame || vm == Borders || vm == Xray) {
+        // Using this we have significant artefacts with small triangles
         //convex.setOutlineThickness(1);
         //convex.setOutlineColor({255, 0, 0});
-        // Instead of this we draw 3 lines:
+        // We draw 3 lines instead:
         line(triangle[0], triangle[1]);
         line(triangle[1], triangle[2]);
         line(triangle[2], triangle[0]);
     }
-    if(box)
-        return;
+    if(vm == Frame || vm == Xray)
+        return; // no texture when we turn on Frame or Xray mode
 
     sf::ConvexShape convex;
 
-    convex.setFillColor(color);
+    convex.setFillColor(triangle.color);
     convex.setPointCount(3);
 
     convex.setPoint(0, sf::Vector2f(triangle[0].x, triangle[0].y));
@@ -111,4 +114,42 @@ void Screen::setMouseInCenter() const {
 
 void Screen::setMouseCursorVisible(bool visible) {
     window.setMouseCursorVisible(visible);
+}
+
+void Screen::keyboardControl() {
+    if(isKeyTapped(sf::Keyboard::Num1))
+        setMode(ViewMode::Default);
+    if(isKeyTapped(sf::Keyboard::Num2))
+        setMode(ViewMode::Borders);
+    if(isKeyTapped(sf::Keyboard::Num3))
+        setMode(ViewMode::Frame);
+    if(isKeyTapped(sf::Keyboard::Num4))
+        setMode(ViewMode::Xray);
+}
+
+bool Screen::isKeyTapped(sf::Keyboard::Key key) {
+    if (!Screen::isKeyPressed(key))
+        return false;
+
+    if(tappedKey.count(key) == 0) {
+        tappedKey.emplace(key, Time::time());
+        return true;
+    } else if((Time::time() - tappedKey[key]) > 0.2) {
+        tappedKey[key] = Time::time();
+        return true;
+    }
+    return false;
+}
+
+void Screen::debugText(const std::string& text) {
+    sf::Text t;
+
+    t.setFont(font);
+    t.setString(text);
+    t.setCharacterSize(30);
+    t.setFillColor(sf::Color::Black);
+    //t.setStyle(sf::Text::Bold);
+    t.setPosition(10, 10);
+
+    window.draw(t);
 }

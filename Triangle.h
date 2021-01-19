@@ -7,25 +7,34 @@
 
 #include "Point4D.h"
 #include "Matrix4x4.h"
+#include <SFML/Graphics.hpp>
 
 class Triangle {
 public:
+    enum ClipMode {
+        None = 0,
+        Cropped,
+        Doubled,
+        Skipped
+    };
+    ClipMode clip = None;
+    sf::Color color;
     Point4D p[3];
 
-    Triangle () = default;
-    Triangle (const Triangle& triangle) = default;
-    Triangle (Point4D p1, Point4D p2, Point4D p3);
+    Triangle ();
+    Triangle (const Triangle& triangle);
+    Triangle (const Point4D& p1, const Point4D& p2, const Point4D& p3);
     Triangle& operator=(const Triangle& triangle) = default;
 
     [[nodiscard]] Point4D operator[] (int i) const;
     [[nodiscard]] Point4D& operator[] (int i);
 
-    Point4D norm() const;
+    [[nodiscard]] Point4D norm() const;
 
     // Operations with Matrix4x4
     [[nodiscard]] Triangle operator*(const Matrix4x4& matrix4X4) const;
     Triangle& operator*=(const Matrix4x4& matrix4X4);
-    Point4D pos() const;
+    [[nodiscard]] Point4D pos() const;
 };
 
 

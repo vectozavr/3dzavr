@@ -4,7 +4,13 @@
 
 #include "Triangle.h"
 
-Triangle::Triangle(Point4D p1, Point4D p2, Point4D p3) {
+Triangle::Triangle () {
+    p[0] = {0,0,0,1};
+    p[1] = {0,0,0,1};
+    p[2] = {0,0,0,1};
+}
+
+Triangle::Triangle(const Point4D& p1, const Point4D& p2, const Point4D& p3) {
     p[0] = p1;
     p[1] = p2;
     p[2] = p3;
@@ -40,4 +46,13 @@ Point4D &Triangle::operator[](int i) {
 
 Point4D Triangle::pos() const {
     return (p[0] + p[1] + p[2])/3.0;
+}
+
+Triangle::Triangle(const Triangle &triangle) {
+    clip = triangle.clip;
+    color = triangle.color;
+    p[0] = triangle[0];
+    p[1] = triangle[1];
+    p[2] = triangle[2];
+
 }

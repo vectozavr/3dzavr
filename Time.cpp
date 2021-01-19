@@ -23,9 +23,6 @@ namespace Time
 
     double deltaTime()
     {
-        if(_deltaTime > 10000)
-            return 0;
-
         return _deltaTime;
     }
 
