@@ -10,15 +10,22 @@
 #include <SFML/Graphics.hpp>
 
 class Mesh {
-private:
+protected:
     std::vector<Triangle> triangles;
 
     Point4D p_position;
 
     sf::Color c_color;
+
+    bool animation = false;
+    Point4D animTranslationTranform;
+    Point4D animRotationTranform;
+    double endAnimationPoint = 0;
+    double startAnimationPoint = 0;
 public:
     Mesh() = default;
-    Mesh& operator=(const Mesh& point4D) = default;
+    explicit Mesh(const std::vector<Triangle>& tries);
+    Mesh& operator=(const Mesh& mesh) = default;
     explicit Mesh(const std::string& filename);
 
     Mesh& loadObj(const std::string& filename);
@@ -34,6 +41,9 @@ public:
     [[nodiscard]] Point4D const & position() const { return p_position; }
     [[nodiscard]] sf::Color color() const { return c_color; }
     void setColor(sf::Color c) { c_color = c; }
+
+    void animateTo(const Point4D& translation, const Point4D& rotation, double duration);
+    Matrix4x4 animationMatrix();
 
     Mesh static Cube(double size = 1.0);
     Mesh static Obj(const std::string& filename);

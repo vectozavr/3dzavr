@@ -8,6 +8,7 @@
 #include <vector>
 #include "Screen.h"
 #include "Mesh.h"
+#include "Plane.h"
 
 class Camera {
 private:
@@ -17,36 +18,48 @@ private:
     Point4D p_up =      {0, 1, 0, 0}; // internal Y
     Point4D p_lookAt =  {0, 0, 1, 0}; // internal Z
 
-    Matrix4x4 V; // camera matrix
-    Matrix4x4 P; // projections matrix
     Matrix4x4 S; // screen space matrix
+    Matrix4x4 P; // projections matrix
+    Matrix4x4 V; // camera matrix
+
+    double aspect;
 
     // To accelerate calculations we can use precalculated matrix that does not chance
     Matrix4x4 SP; // screen-space-projections matrix
-    Matrix4x4 SPV; // screen-space-projections-camera matrix
-    Matrix4x4 SPVM; // screen-space-projections-camera-model matrix
+    Matrix4x4 VMA; // camera-model-animation matrix
+
+    std::vector<Triangle> triangles;
+    std::vector<Plane> clipPlanes;
+    Matrix4x4 Vint; // inverse camera matrix
 
     bool ready = false;
 
-    std::vector<std::pair<Triangle, sf::Color>> triangles;
+    std::vector<Triangle> traced;
+    bool trace = false;
+    bool isExternal = false;
 
-
+    double Far;
+    double Near;
+    double fov;
+    double w;
+    double h;
 public:
-    void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 1000.0);
-    std::vector<std::pair<Triangle, sf::Color>>& project(const Mesh &mesh, bool xray = false);
-    [[nodiscard]] std::vector<std::pair<Triangle, sf::Color>> const &data() const { return triangles; }
+
+    void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 100.0);
+
+    std::vector<Triangle>& project(Mesh &mesh, Screen::ViewMode mode);
+
+    [[nodiscard]] std::vector<Triangle> const &data() const { return triangles; }
     void record();
 
-    std::vector<std::pair<Triangle, sf::Color>>& sorted();
+    [[nodiscard]] int buffSize() const { return triangles.size(); }
+    std::vector<Triangle>& sorted();
 
     [[nodiscard]] Point4D eye() const { return p_eye; }
-
     [[nodiscard]] Point4D left() const { return p_left; }
     [[nodiscard]] Point4D right() const { return -p_left; }
-
     [[nodiscard]] Point4D up() const { return p_up; }
     [[nodiscard]] Point4D down() const { return -p_up; }
-
     [[nodiscard]] Point4D lookAt() const { return p_lookAt; }
 
     void translate(const Point4D& dv) { p_eye += dv; }
@@ -64,6 +77,21 @@ public:
     void rotateLookAt(double rlAt);
 
     void keyboardControl(Screen& screen);
+    void setTrace(bool t) { trace = t; } // Performance heavy (to observe what see camera from external camera)
+
+    std::vector<Triangle>& tracedTrianglesSorted();
+
+    void makeExternal() {isExternal = true;}
+
+    [[nodiscard]] Matrix4x4& view() { return V; }
+    [[nodiscard]] Matrix4x4 const & viewInv() const { return Vint; }
+
+    [[nodiscard]] double Zfar() const {return Far;}
+    [[nodiscard]] double Znear() const {return Near;}
+    [[nodiscard]] double Zproj() const {return 1.0/tan(M_PI*fov*0.5/180.0);}
+    [[nodiscard]] double Fov() const {return fov;}
+    [[nodiscard]] double width() const {return w;}
+    [[nodiscard]] double height() const {return h;}
 };
 
 

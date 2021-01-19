@@ -8,6 +8,7 @@
 #include <utility>
 #include "Mesh.h"
 #include "Log.h"
+#include "Time.h"
 
 using namespace std;
 
@@ -67,9 +68,44 @@ Mesh::Mesh(const std::string& filename) {
     loadObj(filename);
 }
 
+Mesh::Mesh(const vector<Triangle> &tries) {
+    triangles = tries;
+}
+
 Mesh Mesh::Obj(const std::string& filename) {
     return Mesh(filename);
 }
+
+void Mesh::animateTo(const Point4D& translation, const Point4D& rotation, double duration) {
+    animation = true;
+    startAnimationPoint = Time::time();
+    endAnimationPoint = Time::time() + duration;
+
+    animTranslationTranform = translation;
+    animRotationTranform = rotation;
+}
+
+Matrix4x4 Mesh::animationMatrix() {
+    if(!animation)
+        return Matrix4x4::Identity();
+
+    // linear progress:
+    double progress = (Time::time() - startAnimationPoint)/(endAnimationPoint - startAnimationPoint);
+    // sin like progress:
+    progress = 0.5*(1.0 - cos(M_PI*progress));
+
+    Matrix4x4 animTranform = Matrix4x4::Translation(animTranslationTranform*progress)*Matrix4x4::Rotation(animRotationTranform*progress);
+
+    if(progress >= 0.999) {
+        animation = false;
+        for(auto& t : triangles)
+            t *= animTranform;
+        return Matrix4x4::Identity();
+    }
+    return animTranform;
+}
+
+
 
 Mesh Mesh::Cube(double size) {
     Mesh cube{};

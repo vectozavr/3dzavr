@@ -346,7 +346,7 @@ Matrix4x4 Matrix4x4::Rotation(Point4D v, double rv) {
 Matrix4x4 Matrix4x4::Projection(double fov, double aspect, double ZNear, double ZFar) {
     Matrix4x4 p{};
 
-    p[0][0] = aspect*1.0/tan(M_PI*fov*0.5/180.0);
+    p[0][0] = 1.0/(tan(M_PI*fov*0.5/180.0)*aspect);
     p[1][1] = 1.0/tan(M_PI*fov*0.5/180.0);
     p[2][2] = ZFar/(ZFar - ZNear);
     p[2][3] = -ZFar*ZNear/(ZFar - ZNear);
@@ -371,5 +371,55 @@ Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
 }
 
 Matrix4x4 Matrix4x4::View(const Point4D &left, const Point4D &up, const Point4D &lookAt, const Point4D &eye) {
-    return Matrix4x4();
+    Matrix4x4 V{};
+
+    V.setZero();
+
+    V[0][0] = left[0];
+    V[0][1] = left[1];
+    V[0][2] = left[2];
+    V[0][3] = -eye.dot(left);
+
+    V[1][0] = up[0];
+    V[1][1] = up[1];
+    V[1][2] = up[2];
+    V[1][3] = -eye.dot(up);
+
+    V[2][0] = lookAt[0];
+    V[2][1] = lookAt[1];
+    V[2][2] = lookAt[2];
+    V[2][3] = -eye.dot(lookAt);
+
+    V[3][3] = 1.0;
+
+    return V;
+}
+
+Matrix4x4 Matrix4x4::ViewInverse(const Point4D &left, const Point4D &up, const Point4D &lookAt, const Point4D &eye) {
+    Matrix4x4 inv{};
+
+    inv.setZero();
+
+    inv[0][0] = left[0];
+    inv[1][0] = left[1];
+    inv[2][0] = left[2];
+    inv[0][3] = eye[0];
+
+    inv[0][1] = up[0];
+    inv[1][1] = up[1];
+    inv[2][1] = up[2];
+    inv[1][3] = eye[1];
+
+    inv[0][2] = lookAt[0];
+    inv[1][2] = lookAt[1];
+    inv[2][2] = lookAt[2];
+    inv[2][3] = eye[2];
+
+    inv[3][3] = 1.0;
+
+    return inv;
+}
+
+Matrix4x4 Matrix4x4::Rotation(const Point4D &v) {
+    return RotationX(v.x)*RotationY(v.y)*RotationZ(v.z);
 }

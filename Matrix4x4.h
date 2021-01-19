@@ -70,6 +70,7 @@ public:
     Matrix4x4 static Scale(double sx, double sy, double sz);
     Matrix4x4 static Translation(double dx, double dy, double dz);
     Matrix4x4 static Translation(const Point4D& v);
+    Matrix4x4 static Rotation(const Point4D& r);
     Matrix4x4 static RotationX (double rx);
     Matrix4x4 static RotationY (double ry);
     Matrix4x4 static RotationZ (double rz);
@@ -77,6 +78,7 @@ public:
     Matrix4x4 static Rotation (Point4D v, double rv);
 
     Matrix4x4 static View(const Point4D& left, const Point4D& up, const Point4D& lookAt, const Point4D& eye);
+    Matrix4x4 static ViewInverse(const Point4D& left, const Point4D& up, const Point4D& lookAt, const Point4D& eye);
     Matrix4x4 static Projection (double fov = 90.0, double aspect = 1.0, double ZNear = 1.0, double ZFar = 10.0);
     Matrix4x4 static ScreenSpace (int width, int height);
 };
