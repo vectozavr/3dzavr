@@ -10,7 +10,7 @@ For this moment I already implemented:
 - Basic smooth animations for meshes
 - External camera (You can see how 3D world projected on 2D plane and the procces pf clipping)
 
-Future TODO:
+TODO:
 - Animation of camera
 - Improvement of animations by using Bézier curves
 - Textures
