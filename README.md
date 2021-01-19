@@ -3,7 +3,7 @@ Simple 3d engine based on SFML library.
 I try to make this engine powerful and easy to understand.
 
 The main goal - to implement basic 3D graphics from scratch (without OpenGL or any other 3D graphics library)
-For this moment I already implemented%
+For this moment I already implemented:
 - Operations with Point4D, Matrix4x4, Triangles and Mesh. I used operators overloading to simplify coding.
 - Projections from 3D on 2D plane, movement and rotation of camera and meshes.
 - Triangles clipping
