@@ -79,7 +79,7 @@ public:
     void keyboardControl(Screen& screen);
     void setTrace(bool t) { trace = t; } // Performance heavy (to observe what see camera from external camera)
 
-    std::vector<Triangle>& tracedTrianglesSorted();
+    std::vector<Triangle>& tracedTriangles();
 
     void makeExternal() {isExternal = true;}
 

@@ -42,7 +42,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         else {
             // Draw from the perspective of external observer
             external_camera.record();
-            Mesh tracedTriangles(camera.tracedTrianglesSorted());
+            Mesh tracedTriangles(camera.tracedTriangles());
             CameraMesh cameraMesh(camera);
 
 
@@ -55,11 +55,19 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
 
         triPerSec = camera.buffSize() * Time::fps();
 
-        if(cameraMode == CameraMode::LocalCamera)
-            screen.debugText(name + "\n\n X: " + std::to_string((camera.eye().x)) + "\n Y: " + std::to_string((camera.eye().y)) + "\n Z: " + std::to_string((camera.eye().z)) + "\n\n" + std::to_string(Time::fps()) + " fps \n" + std::to_string((int)triPerSec) + " triangles/s");
-        else
-            screen.debugText(name + "\n\n X: " + std::to_string((external_camera.eye().x)) + "\n Y: " + std::to_string((external_camera.eye().y)) + "\n Z: " + std::to_string((external_camera.eye().z)) + "\n\n" + std::to_string(Time::fps()) + " fps \n" + std::to_string((int)triPerSec) + " triangles/s");
+        if(!screen.isRender()) {
+            Point4D cameraPosition{};
+            double cameraY;
+            if (cameraMode == CameraMode::LocalCamera)
+                cameraPosition = camera.eye();
+            else
+                cameraPosition = external_camera.eye();
 
+            screen.debugText(name + "\n\n X: " + std::to_string((cameraPosition.x)) + "\n Y: " +
+                             std::to_string((cameraPosition.y)) + "\n Z: " +
+                             std::to_string((cameraPosition.z)) + "\n\n" + std::to_string(Time::fps()) +
+                             " fps \n" + std::to_string((int) triPerSec) + " triangles/s");
+        }
 
         screen.display();
     }
