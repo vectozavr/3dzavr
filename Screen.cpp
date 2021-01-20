@@ -6,6 +6,8 @@
 #include "Time.h"
 #include <utility>
 #include "Log.h"
+#include <cstdio>
+
 
 void Screen::open(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background) {
     this->name = name;
@@ -27,12 +29,19 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
 void Screen::display() {
     sf::Event event{};
     while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed) {
             window.close();
+            if(rendered)
+                popen("ffmpeg -framerate 60 -i film/jpg/%d_3dzavr.jpg film/mp4/output.mp4 ffplay film/mp4/output.mp4", "w");
+        }
     }
 
     std::string title = name + " (" + std::to_string(Time::fps()) + " fps)";
     window.setTitle(title);
+
+    frame++;
+    if(renderVideo)
+        window.capture().saveToFile("film/jpg/" + std::to_string(frame) + "_" + name + ".jpg");
 
     window.display();
 }
@@ -152,4 +161,10 @@ void Screen::debugText(const std::string& text) {
     t.setPosition(10, 10);
 
     window.draw(t);
+}
+
+void Screen::setRender(bool r) {
+    renderVideo = r;
+    frame = 0;
+    rendered = r ? r : rendered;
 }

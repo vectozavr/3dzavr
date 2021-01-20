@@ -34,6 +34,10 @@ private:
     std::map<sf::Keyboard::Key, double> tappedKey;
 
     sf::Font font;
+
+    bool rendered = false;
+    bool renderVideo = false; // performance heavy. I use this to make sequence of .jpg files of screen and then convert this to .mp4 file
+    int frame = 0;
 public:
     sf::RenderWindow window;
 
@@ -69,6 +73,9 @@ public:
     void keyboardControl();
 
     void debugText(const std::string& text);
+
+    void setRender(bool r);
+    bool isRender() { return renderVideo; }
 };
 
 

@@ -8,24 +8,25 @@ CameraMesh::CameraMesh(const Camera& camera) {
     double aspect = (double)camera.width() / (double)camera.height();
 
     // boarders around the screen
-    triangles.push_back({{aspect, 1, 1, 1},
-                         {aspect, 1, 1, 1},
-                         {-aspect, 1, 1, 1}});
-    triangles.push_back({{-aspect, 1, 1, 1},
-                         {-aspect, 1, 1, 1},
-                         {-aspect, -1, 1, 1}});
+    double z = camera.Zproj();
+    triangles.push_back({{aspect, 1, z, 1},
+                         {aspect, 1, z, 1},
+                         {-aspect, 1, z, 1}});
+    triangles.push_back({{-aspect, 1, z, 1},
+                         {-aspect, 1, z, 1},
+                         {-aspect, -1, z, 1}});
 
-    triangles.push_back({{-aspect, -1, 1, 1},
-                         {-aspect, -1, 1, 1},
-                         {aspect, -1, 1, 1}});
-    triangles.push_back({{aspect, -1, 1, 1},
-                         {aspect, -1, 1, 1},
-                         {aspect, 1, 1, 1}});
+    triangles.push_back({{-aspect, -1, z, 1},
+                         {-aspect, -1, z, 1},
+                         {aspect, -1, z, 1}});
+    triangles.push_back({{aspect, -1, z, 1},
+                         {aspect, -1, z, 1},
+                         {aspect, 1, z, 1}});
 
     // Near plane
     double h = camera.Znear() * tan(M_PI*camera.Fov()*0.5/180.0);
     double w = aspect * h;
-    double z = camera.Znear();
+    z = camera.Znear();
     triangles.push_back({{w, h, z, 1},
                          {w, h, z, 1},
                          {-w, h, z, 1}});
