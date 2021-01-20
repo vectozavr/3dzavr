@@ -14,6 +14,7 @@ TODO:
 - Animation of camera
 - Improvement of animations by using Bézier curves
 - Textures
+- Save animated scene to .mp4 files (or sequence of .png files)
 
 Demonstration of how does this engine work:
 ![Project demonstration](img/external_camera_1.png)
