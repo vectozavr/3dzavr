@@ -54,5 +54,5 @@ Triangle::Triangle(const Triangle &triangle) {
     p[0] = triangle[0];
     p[1] = triangle[1];
     p[2] = triangle[2];
-
+    z = triangle.z;
 }

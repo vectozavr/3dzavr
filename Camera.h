@@ -45,7 +45,7 @@ private:
     double h;
 public:
 
-    void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 100.0);
+    void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 500.0);
 
     std::vector<Triangle>& project(Mesh &mesh, Screen::ViewMode mode);
 
