@@ -35,9 +35,9 @@ private:
 
     sf::Font font;
 
-    bool rendered = false;
     bool renderVideo = false; // performance heavy. I use this to make sequence of .jpg files of screen and then convert this to .mp4 file
     int frame = 0;
+    int scene = 0; // the number of scene
 public:
     sf::RenderWindow window;
 
@@ -54,8 +54,8 @@ public:
 
     bool isOpen();
 
-    int width() const {return w;}
-    int height() const {return h;}
+    int width() const {return window.getSize().x;}
+    int height() const {return window.getSize().y;}
 
     void close();
 
@@ -74,8 +74,8 @@ public:
 
     void debugText(const std::string& text);
 
-    void setRender(bool r);
-    bool isRender() { return renderVideo; }
+    __attribute__ ((deprecated)) void setRender(bool r);
+    __attribute__ ((deprecated)) bool isRender() const { return renderVideo; }
 };
 
 

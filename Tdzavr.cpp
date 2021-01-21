@@ -63,10 +63,14 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
             else
                 cameraPosition = external_camera.eye();
 
-            screen.debugText(name + "\n\n X: " + std::to_string((cameraPosition.x)) + "\n Y: " +
-                             std::to_string((cameraPosition.y)) + "\n Z: " +
-                             std::to_string((cameraPosition.z)) + "\n\n" + std::to_string(Time::fps()) +
-                             " fps \n" + std::to_string((int) triPerSec) + " triangles/s");
+            screen.debugText(name + "\n\n X: " +
+            std::to_string((cameraPosition.x)) + "\n Y: " +
+            std::to_string((cameraPosition.y)) + "\n Z: " +
+            std::to_string((cameraPosition.z)) + "\n\n" +
+            std::to_string(screen.width()) + "x" +
+            std::to_string(screen.height()) + "\n" +
+            std::to_string(Time::fps()) +
+            " fps \n" + std::to_string((int) triPerSec) + " triangles/s");
         }
 
         screen.display();

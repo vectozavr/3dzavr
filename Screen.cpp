@@ -19,7 +19,7 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
     settings.antialiasingLevel = 8;
 
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
-    //window.setFramerateLimit(60);
+    window.setFramerateLimit(90);
     //window.setVerticalSyncEnabled(verticalSync);
 
     if (!font.loadFromFile("../fonts/Roboto-Thin.ttf"))
@@ -31,17 +31,14 @@ void Screen::display() {
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             window.close();
-            if(rendered)
-                popen("ffmpeg -framerate 60 -i film/jpg/%d_3dzavr.jpg film/mp4/output.mp4 ffplay film/mp4/output.mp4", "w");
         }
     }
 
     std::string title = name + " (" + std::to_string(Time::fps()) + " fps)";
     window.setTitle(title);
 
-    frame++;
     if(renderVideo)
-        window.capture().saveToFile("film/jpg/" + std::to_string(frame) + "_" + name + ".jpg");
+        window.capture().saveToFile("../film/png/" + std::to_string(frame++) + ".png");
 
     window.display();
 }
@@ -164,7 +161,11 @@ void Screen::debugText(const std::string& text) {
 }
 
 void Screen::setRender(bool r) {
+    if(renderVideo && !r) {
+        std::string c = "ffmpeg -stats -r 60 -i ../film/png/%d.png -vcodec libx264 -crf 1 -pix_fmt yuv420p -frames " + std::to_string(frame) + " ../film/mp4/" + std::to_string(scene) + "_" + name + ".mp4";
+        popen(c.c_str(), "w");
+        frame = 0;
+        scene++;
+    }
     renderVideo = r;
-    frame = 0;
-    rendered = r ? r : rendered;
 }

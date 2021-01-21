@@ -34,7 +34,7 @@ void TestGame::start() {
     //world["object_4"].translate(-4, 0, 9);
 
     screen.setMode(Screen::ViewMode::Borders);
-    screen.setMouseCursorVisible(false);
+    //screen.setMouseCursorVisible(false);
 
     //camera.translate(-5, 22, 25);
     //camera.rotate(0, 0, 0);
@@ -64,16 +64,16 @@ void TestGame::update(double elapsedTime) {
 
     //world["object_1"] *= Matrix4x4::Translation(elapsedTime, elapsedTime, elapsedTime);
 
-    if(cameraMode == CameraMode::LocalCamera)
-        camera.keyboardControl(screen);
-    else
-        external_camera.keyboardControl(screen);
+    //if(cameraMode == CameraMode::LocalCamera)
+    //    camera.keyboardControl(screen);
+    //else
+    //    external_camera.keyboardControl(screen);
     //camera.keyboardControl(screen);
 
 
     //screen.keyboardControl();
 
-    camera.rotateUp(1.0/600.0);
+    camera.rotateUp(elapsedTime/10.0);
 
     if(screen.isKeyTapped(sf::Keyboard::E)) {
         if(cameraMode == CameraMode::LocalCamera)
@@ -81,17 +81,14 @@ void TestGame::update(double elapsedTime) {
         else
             setCameraMode(CameraMode::LocalCamera);
     }
-
-    if(screen.isKeyTapped(sf::Keyboard::R))
-        screen.setRender(true);
-    if(screen.isKeyTapped(sf::Keyboard::T))
-        screen.setRender(false);
 }
 
 int main() {
     TestGame game;
     //game.create(1920, 1080);
-    game.create(1920, 1080);
+    //game.create(2048, 1152);
+    game.create(3072, 1920);
+    //game.create(3840, 2160);
 
     return 0;
 }

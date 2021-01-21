@@ -69,27 +69,27 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
                     clippedTriangle.color = sf::Color(255*(0.3*std::abs(dot) + 0.7), 0, 0, 255);
             }
 
+            double z = (clippedTriangle[0].z + clippedTriangle[1].z + clippedTriangle[2].z) / 3.0;
+
             // Before we projected aur clipped colored triangle, we need to save it's state
             // If we want to observe them from external camera. When we call Tdzavr::setCameraMode(CameraMode::ExternalObserver);
             // we also should call Camera::setTrace(true) in the main camera.
             if(trace) {
-                double z0 = clippedTriangle[0].z; // We will use this coordinate to save the right order
-                double z1 = clippedTriangle[1].z; // of triangles on the screen.
-                double z2 = clippedTriangle[2].z;
-
                 // Because we will not apply Screen space transform for traced triangles, we need to avoid aspect factor.
                 P[0][0] *= aspect;
                 Triangle prj = clippedTriangle * P;
+                prj.z = z/1000.0;   // for projected triangle we should set z position
+                                    // but we scale z to
                 P[0][0] /= aspect;
 
                 prj[0] /= prj[0].w;
                 prj[1] /= prj[1].w;
                 prj[2] /= prj[2].w;
 
-                prj[0].z = Zproj() + z0/1000.0; // To keep the order of projected triangles it is necessary
-                prj[1].z = Zproj() + z1/1000.0; // to set their Z coordinate in appropriate (scaled in 1000 times) order.
-                prj[2].z = Zproj() + z2/1000.0; // Using prj[i].z does not work well for this goal.
-                                                // So, I used original coordinate clippedTriangle[i].z instead.
+                prj[0].z = Zproj();
+                prj[1].z = Zproj();
+                prj[2].z = Zproj();
+
 
                 // We can also draw lines from points to the origin of camera
                 // to show how each particular point is being projected.
