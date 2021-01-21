@@ -9,12 +9,14 @@ For this moment I already implemented:
 - Triangles clipping
 - Basic smooth animations for meshes
 - External camera (You can see how 3D world projected on 2D plane and the procces pf clipping)
+- You can render animated scene to .mp4 files or sequence of .png files (film/img/ & film/mp4). But it is extremely slow process due-to SFML waste a lot of time on saving .png files. It is still better ti capture you screen by some additional program.
+
 
 TODO:
 - Animation of camera
 - Improvement of animations by using Bézier curves
 - Textures
-- Save animated scene to .mp4 files (or sequence of .png files)
+- Solve external camera bug: projected 2D triangles should be drawed following their order (in camera system) and not Z component in external camera system.
 
 Demonstration of how does this engine work:
 ![Project demonstration](img/external_camera_1.png)
