@@ -3,7 +3,7 @@
 //
 
 #include "Tdzavr.h"
-#include "Time.h"
+#include "utils/Time.h"
 #include <iostream>
 #include "CameraMesh.h"
 
@@ -55,7 +55,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
 
         triPerSec = camera.buffSize() * Time::fps();
 
-        if(!screen.isRender()) {
+        if(b_debugText) {
             Point4D cameraPosition{};
             double cameraY;
             if (cameraMode == CameraMode::LocalCamera)

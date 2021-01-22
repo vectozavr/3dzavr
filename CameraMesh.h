@@ -10,7 +10,7 @@
 
 class CameraMesh : public Mesh {
 public:
-    CameraMesh(const Camera& camera);
+    explicit CameraMesh(const Camera& camera);
 };
 
 

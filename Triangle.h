@@ -5,12 +5,13 @@
 #ifndef INC_3DZAVR_TRIANGLE_H
 #define INC_3DZAVR_TRIANGLE_H
 
-#include "Point4D.h"
-#include "Matrix4x4.h"
+#include "utils/Point4D.h"
+#include "utils/Matrix4x4.h"
 #include <SFML/Graphics.hpp>
 
 class Triangle {
 public:
+    // This is for clipping debug: you can distinguish how this triangle was clipped
     enum ClipMode {
         None = 0,
         Cropped,

@@ -10,7 +10,7 @@
 #include "Triangle.h"
 #include <SFML/Graphics.hpp>
 #include <map>
-#include "Time.h"
+#include "utils/Time.h"
 
 class Screen {
 public:

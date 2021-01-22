@@ -17,6 +17,7 @@ protected:
 
     sf::Color c_color;
 
+    // TODO: make class 'Animation' for this goal
     bool animation = false;
     Point4D animTranslationTranform;
     Point4D animRotationTranform;

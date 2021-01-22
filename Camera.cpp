@@ -3,8 +3,8 @@
 //
 
 #include "Camera.h"
-#include "Log.h"
-#include "Time.h"
+#include "utils/Log.h"
+#include "utils/Time.h"
 #include <iostream>
 #include <list>
 
@@ -57,16 +57,17 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
             // dou-to the goal of external camera is to show how see the main camera.
             // That's why we keep color of triangles as it is.
             if(!isExternal) {
-                //clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), 255);
+                clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), 255);
                 // This is for clipping demonstration.
                 // If you want to debug clipping just comment previous line and uncomment this block of code.
+                /*
                 if(clippedTriangle.clip == Triangle::None)
-                    clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7),
-                                                      194 * (0.3 * std::abs(dot) + 0.7), 255);
+                    clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), 255);
                 else if(clippedTriangle.clip == Triangle::Cropped)
                     clippedTriangle.color = sf::Color(0, 0, 194*(0.3*std::abs(dot) + 0.7), 255);
                 else if(clippedTriangle.clip == Triangle::Doubled)
                     clippedTriangle.color = sf::Color(255*(0.3*std::abs(dot) + 0.7), 0, 0, 255);
+                    */
             }
 
             double z = (clippedTriangle[0].z + clippedTriangle[1].z + clippedTriangle[2].z) / 3.0;

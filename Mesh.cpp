@@ -7,8 +7,8 @@
 #include <strstream>
 #include <utility>
 #include "Mesh.h"
-#include "Log.h"
-#include "Time.h"
+#include "utils/Log.h"
+#include "utils/Time.h"
 
 using namespace std;
 

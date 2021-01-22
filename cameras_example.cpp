@@ -70,10 +70,15 @@ void TestGame::update(double elapsedTime) {
     //    external_camera.keyboardControl(screen);
     //camera.keyboardControl(screen);
 
+    //if(screen.isKeyTapped(sf::Keyboard::R))
+    //    screen.setRender(true);
+    //if(screen.isKeyTapped(sf::Keyboard::T))
+    //    screen.setRender(false);
+
 
     //screen.keyboardControl();
 
-    camera.rotateUp(elapsedTime/10.0);
+    camera.rotateUp(1.0/600.0);
 
     if(screen.isKeyTapped(sf::Keyboard::E)) {
         if(cameraMode == CameraMode::LocalCamera)

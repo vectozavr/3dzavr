@@ -3,7 +3,7 @@ project(3dzavr)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(3dzavr main.cpp Time.h Time.cpp Point4D.h Point4D.cpp Matrix4x4.h Matrix4x4.cpp Triangle.h Triangle.cpp Mesh.h Mesh.cpp Log.h Log.cpp World.h World.cpp Camera.h Camera.cpp Screen.h Screen.cpp Tdzavr.h Tdzavr.cpp Plane.h Plane.cpp CameraMesh.h CameraMesh.cpp)
+add_executable(3dzavr physics_example.cpp utils/Time.h utils/Time.cpp utils/Point4D.h utils/Point4D.cpp utils/Matrix4x4.h utils/Matrix4x4.cpp Triangle.h Triangle.cpp Mesh.h Mesh.cpp utils/Log.h utils/Log.cpp World.h World.cpp Camera.h Camera.cpp Screen.h Screen.cpp Tdzavr.h Tdzavr.cpp Plane.h Plane.cpp CameraMesh.h CameraMesh.cpp)
 
 if(${APPLE})
     include_directories(/usr/local/include)
