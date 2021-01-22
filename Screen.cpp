@@ -3,9 +3,9 @@
 //
 
 #include "Screen.h"
-#include "Time.h"
+#include "utils/Time.h"
 #include <utility>
-#include "Log.h"
+#include "utils/Log.h"
 #include <cstdio>
 
 
@@ -19,8 +19,8 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
     settings.antialiasingLevel = 8;
 
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
-    window.setFramerateLimit(90);
-    //window.setVerticalSyncEnabled(verticalSync);
+    //window.setFramerateLimit(60);
+    window.setVerticalSyncEnabled(verticalSync);
 
     if (!font.loadFromFile("../fonts/Roboto-Thin.ttf"))
         Log::log("Screen::open: Cannot load font '../fonts/Roboto-Thin.ttf'");

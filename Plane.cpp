@@ -4,12 +4,21 @@
 
 #include "Plane.h"
 
+Plane::Plane(const Triangle& tri) {
+    triangle = tri;
+    n = tri.norm();
+    p = tri[0];
+}
+
 Plane::Plane(const Point4D &N, const Point4D &P) {
-    n = N; p = P;
+    n = N;
+    p = P;
 }
 
 Plane::Plane(const Plane &plane) {
-    n = plane.n; p = plane.p;
+    triangle = plane.triangle;
+    n = plane.n;
+    p = plane.p;
 }
 
 double Plane::distance(const Point4D &point4D) const {

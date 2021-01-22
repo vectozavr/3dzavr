@@ -8,7 +8,7 @@
 #include "Screen.h"
 #include "World.h"
 #include "Camera.h"
-#include "Log.h"
+#include "utils/Log.h"
 
 class Tdzavr {
 public:
@@ -24,6 +24,8 @@ protected:
 
     double triPerSec = 0;
 
+    bool b_debugText = true;
+
     CameraMode cameraMode = LocalCamera;
 public:
     void create(int screenWidth = 1920, int screenHeight = 1080, const std::string& name = "3dzavr", bool verticalSync = true, sf::Color background = sf::Color(255, 255, 255));
@@ -32,6 +34,7 @@ public:
     virtual void update(double elapsedTime) {};
     void exit();
     void setCameraMode(CameraMode mode);
+    void debugText(bool value) { b_debugText = value; }
 };
 
 
