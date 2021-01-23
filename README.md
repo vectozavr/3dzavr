@@ -13,7 +13,7 @@ For this moment I already implemented:
 
 
 TODO:
-- Animation of camera
+- TransformAnimation of camera
 - Improvement of animations by using Bézier curves
 - Textures
 - Solve external camera bug: projected 2D triangles should be drawed following their order (in camera system) and not Z component in external camera system.

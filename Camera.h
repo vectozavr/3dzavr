@@ -26,7 +26,7 @@ private:
 
     // To accelerate calculations we can use precalculated matrix that does not chance
     Matrix4x4 SP; // screen-space-projections matrix
-    Matrix4x4 VMA; // camera-model-animation matrix
+    Matrix4x4 VM; // camera-model-animation matrix
 
     std::vector<Triangle> triangles;
     std::vector<Plane> clipPlanes;
@@ -69,6 +69,7 @@ public:
     void rotateY(double ry);
     void rotateZ(double rz);
     void rotate(double rx, double ry, double rz);
+    void rotate(const Point4D& r);
 
     void rotate(const Point4D& v, double rv);
 
@@ -76,7 +77,6 @@ public:
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
 
-    void keyboardControl(Screen& screen);
     void setTrace(bool t) { trace = t; } // Performance heavy (to observe what see camera from external camera)
 
     std::vector<Triangle>& tracedTriangles();
@@ -92,6 +92,8 @@ public:
     [[nodiscard]] double Fov() const {return fov;}
     [[nodiscard]] double width() const {return w;}
     [[nodiscard]] double height() const {return h;}
+
+    Animation<Camera> animation;
 };
 
 

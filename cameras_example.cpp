@@ -86,6 +86,8 @@ void TestGame::update(double elapsedTime) {
         else
             setCameraMode(CameraMode::LocalCamera);
     }
+    if(screen.isKeyTapped(sf::Keyboard::Escape))
+        screen.setMouseCursorVisible(true);
 }
 
 int main() {

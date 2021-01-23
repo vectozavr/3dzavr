@@ -68,6 +68,7 @@ public:
     Matrix4x4 static Constant (double value);
 
     Matrix4x4 static Scale(double sx, double sy, double sz);
+    Matrix4x4 static Scale(const Point4D& s);
     Matrix4x4 static Translation(double dx, double dy, double dz);
     Matrix4x4 static Translation(const Point4D& v);
     Matrix4x4 static Rotation(const Point4D& r);
