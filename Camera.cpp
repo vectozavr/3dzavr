@@ -19,12 +19,11 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
     Matrix4x4 M = Matrix4x4::Translation(mesh.position());
     // mesh.animationMatrix() apply one step to the animation and returns how should we
     // transform our mesh to be in intermediate state of animation
-    Matrix4x4 A = mesh.animationMatrix();
-    VMA = V * M * A;
+    VM = V * M;
 
     for(auto& t : mesh.data()) {
 
-        double dot = (t*A).norm().dot((mesh.position() + A*t[0] - p_eye).normalize());
+        double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
         if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !isExternal)
             continue;
 
@@ -34,7 +33,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
 
         // In the beginning we need to to translate triangle from world coordinate to our camera system:
         // After that we apply clipping for all planes from clipPlanes
-        clippedTriangles.emplace_back(t * VMA);
+        clippedTriangles.emplace_back(t * VM);
         for(auto& plane : clipPlanes)
         {
             while(newTriangles > 0)
@@ -214,11 +213,16 @@ void Camera::rotateZ(double rz) {
     p_lookAt = Matrix4x4::RotationZ(rz) * p_lookAt;
 }
 
-void Camera::rotate(double rx, double ry, double rz) {
-    rotateX(rx);
-    rotateY(ry);
-    rotateZ(rz);
+void Camera::rotate(double rl, double ru, double ra) {
+    rotateLeft(rl);
+    rotateUp(ru);
+    rotateLookAt(ra);
 }
+
+void Camera::rotate(const Point4D& r) {
+    rotate(r.x, r.y, r.z);
+}
+
 
 void Camera::rotate(const Point4D& v, double rv) {
     p_left = Matrix4x4::Rotation(v, rv) * p_left;
@@ -236,34 +240,6 @@ void Camera::rotateUp(double ru) {
 
 void Camera::rotateLookAt(double rlAt) {
     rotate(p_lookAt, rlAt);
-}
-
-void Camera::keyboardControl(Screen& screen) {
-    // Left and right
-    if (Screen::isKeyPressed(sf::Keyboard::A))
-        translate(p_left*Time::deltaTime()*5.0);
-
-    if (Screen::isKeyPressed(sf::Keyboard::D))
-        translate(-p_left*Time::deltaTime()*5.0);
-
-    // Forward and backward
-    if (Screen::isKeyPressed(sf::Keyboard::W))
-        translate(p_lookAt*Time::deltaTime()*5.0);
-
-    if (Screen::isKeyPressed(sf::Keyboard::S))
-        translate(-p_lookAt*Time::deltaTime()*5.0);
-
-    if (Screen::isKeyPressed(sf::Keyboard::LShift))
-        translate(0.0, -Time::deltaTime()*5.0, 0);
-
-    if (Screen::isKeyPressed(sf::Keyboard::Space))
-        translate(0.0, Time::deltaTime()*5.0, 0);
-
-    // Mouse movement
-    Point4D disp = screen.getMouseDisplacement();
-
-    rotateY(-disp.x/1000.0);
-    rotateLeft(disp.y/1000.0);
 }
 
 std::vector<Triangle> &Camera::tracedTriangles() {

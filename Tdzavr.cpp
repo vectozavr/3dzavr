@@ -23,6 +23,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         screen.clear();
 
         Time::update();
+        screen.keyboardControl();
         update(Time::deltaTime());
 
         /* Project all mesh
@@ -30,8 +31,10 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
          * When we call camera.project(m.second),
          */
         camera.record();
-        for(auto& m : world.objects)
+        for(auto& m : world.objects) {
             camera.project(m.second, screen.mode());
+            m.second.animation.update(m.second);
+        }
 
         // draw projected mesh
         if(cameraMode == LocalCamera) {
@@ -52,6 +55,9 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
             for (auto &t : external_camera.sorted())
                 screen.triangle(t);
         }
+
+        camera.animation.update(camera);
+        external_camera.animation.update(external_camera);
 
         triPerSec = camera.buffSize() * Time::fps();
 

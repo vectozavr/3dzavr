@@ -423,3 +423,7 @@ Matrix4x4 Matrix4x4::ViewInverse(const Point4D &left, const Point4D &up, const P
 Matrix4x4 Matrix4x4::Rotation(const Point4D &v) {
     return RotationX(v.x)*RotationY(v.y)*RotationZ(v.z);
 }
+
+Matrix4x4 Matrix4x4::Scale(const Point4D &s) {
+    return Matrix4x4::Scale(s.x, s.y, s.z);
+}
