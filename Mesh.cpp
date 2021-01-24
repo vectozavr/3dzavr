@@ -64,12 +64,16 @@ Mesh &Mesh::loadObj(const std::string& filename) {
     return *this;
 }
 
-Mesh::Mesh(const std::string& filename) {
+Mesh::Mesh(const std::string& filename) : animation(*this){
     loadObj(filename);
 }
 
-Mesh::Mesh(const vector<Triangle> &tries) {
+Mesh::Mesh(const vector<Triangle> &tries) : animation(*this) {
     triangles = tries;
+}
+
+Mesh::Mesh(const Mesh& mesh) : animation(*this) {
+    *this = mesh;
 }
 
 Mesh Mesh::Obj(const std::string& filename) {
@@ -131,4 +135,57 @@ Mesh &Mesh::operator=(const Mesh &mesh) {
     p_position = mesh.p_position;
     c_color = mesh.c_color;
     return *this;
+}
+
+Mesh &Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
+    // Translate XYZ by vector r1
+    Point4D r1 = p_position - s;
+    *this *= Matrix4x4::Translation(r1);
+
+    // In translated coordinate system we rotate mesh and position
+    Matrix4x4 rotationMatrix = Matrix4x4::Rotation(rx, ry, rz);
+    Point4D r2 = rotationMatrix*r1;
+    *this *= rotationMatrix;
+
+    // After rotation we translate XYZ by vector -r2 and recalculate position
+    *this *= Matrix4x4::Translation(-r2);
+    p_position = s + r2;
+
+
+    return *this;
+}
+
+Mesh &Mesh::rotateRelativePoint(const Point4D &s, const Point4D &r) {
+    return rotateRelativePoint(s, r.x, r.y, r.z);
+}
+
+Mesh &Mesh::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
+    // Translate XYZ by vector r1
+    Point4D r1 = p_position - s;
+    *this *= Matrix4x4::Translation(r1);
+
+    // In translated coordinate system we rotate mesh and position
+    Matrix4x4 rotationMatrix = Matrix4x4::Rotation(v, r);
+    Point4D r2 = rotationMatrix*r1;
+    *this *= rotationMatrix;
+
+    // After rotation we translate XYZ by vector -r2 and recalculate position
+    *this *= Matrix4x4::Translation(-r2);
+    p_position = s + r2;
+
+    return *this;
+}
+
+Mesh &Mesh::attractToPoint(const Point4D &point, double r) {
+    Point4D v = (point - p_position).normalize();
+    return translate(v*r);
+}
+
+Mesh &Mesh::translateToPoint(const Point4D &point) {
+    p_position = point;
+    return *this;
+}
+
+Mesh &Mesh::rotateUpLeftLookAt(const Point4D &r) {
+    return rotate(r);
 }

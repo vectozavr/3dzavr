@@ -33,7 +33,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         camera.record();
         for(auto& m : world.objects) {
             camera.project(m.second, screen.mode());
-            m.second.animation.update(m.second);
+            m.second.animation.update();
         }
 
         // draw projected mesh
@@ -56,8 +56,8 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
                 screen.triangle(t);
         }
 
-        camera.animation.update(camera);
-        external_camera.animation.update(external_camera);
+        camera.animation.update();
+        external_camera.animation.update();
 
         triPerSec = camera.buffSize() * Time::fps();
 
