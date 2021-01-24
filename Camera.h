@@ -9,6 +9,7 @@
 #include "Screen.h"
 #include "Mesh.h"
 #include "Plane.h"
+#include "Animation.h"
 
 class Camera {
 private:
@@ -22,7 +23,7 @@ private:
     Matrix4x4 P; // projections matrix
     Matrix4x4 V; // camera matrix
 
-    double aspect;
+    double aspect = 0;
 
     // To accelerate calculations we can use precalculated matrix that does not chance
     Matrix4x4 SP; // screen-space-projections matrix
@@ -38,12 +39,15 @@ private:
     bool trace = false;
     bool isExternal = false;
 
-    double Far;
-    double Near;
-    double fov;
-    double w;
-    double h;
+    double Far = 0;
+    double Near = 0;
+    double fov = 0;
+    double w = 0;
+    double h = 0;
 public:
+    Camera() : animation(*this){}
+    Camera(const Camera& camera) = delete;
+
 
     void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 500.0);
 
@@ -55,6 +59,7 @@ public:
     [[nodiscard]] int buffSize() const { return triangles.size(); }
     std::vector<Triangle>& sorted();
 
+    [[nodiscard]] Point4D position() const { return p_eye; }
     [[nodiscard]] Point4D eye() const { return p_eye; }
     [[nodiscard]] Point4D left() const { return p_left; }
     [[nodiscard]] Point4D right() const { return -p_left; }
@@ -64,6 +69,8 @@ public:
 
     void translate(const Point4D& dv) { p_eye += dv; }
     void translate(double dx, double dy, double dz) { p_eye += Point4D(dx, dy, dz, 0); }
+    void attractToPoint(const Point4D& point, double r);
+    void translateToPoint(const Point4D& point);
 
     void rotateX(double rx);
     void rotateY(double ry);
@@ -76,6 +83,14 @@ public:
     void rotateLeft(double rl);
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
+    void rotateUpLeftLookAt(const Point4D& r);
+
+    // Rotate mesh around XYZ by (rx, ry, rz) radians relative val 'point4D'
+    void rotateRelativePoint(const Point4D& s, double rl, double ru, double rlAt);
+    // Rotate mesh around XYZ by (r.x, r.y, r.z) radians relative val 'point4D'
+    void rotateRelativePoint(const Point4D& s, const Point4D& r);
+    // Rotate mesh around normalised vector 'v' by 'r' radians relative val 'point4D'
+    void rotateRelativePoint(const Point4D& s, const Point4D& v, double r);
 
     void setTrace(bool t) { trace = t; } // Performance heavy (to observe what see camera from external camera)
 
@@ -93,7 +108,7 @@ public:
     [[nodiscard]] double width() const {return w;}
     [[nodiscard]] double height() const {return h;}
 
-    Animation<Camera> animation;
+    Animation<Camera, camera> animation;
 };
 
 

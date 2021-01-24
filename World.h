@@ -18,6 +18,7 @@ public:
     [[nodiscard]] Mesh& operator[] (const std::string& name);
 
     void addMesh(Mesh& mesh, const std::string& name = "");
+    void copyMesh(const std::string& meshName, const std::string& copyName);
     void addMesh(const Mesh& mesh, const std::string& name = "");
     void removeMesh(const std::string& name);
     void loadObj(const std::string& filename, const std::string& name = "", double scale = 1.0);

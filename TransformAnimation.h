@@ -5,35 +5,47 @@
 #ifndef INC_3DZAVR_TRANSFORMANIMATION_H
 #define INC_3DZAVR_TRANSFORMANIMATION_H
 
-#include "utils/Matrix4x4.h"
 #include "utils/Time.h"
+#include "utils/Log.h"
+#include "Mesh.h"
 
-template <typename T>
+enum ObjectType {
+    mesh,
+    camera
+};
+
+template <typename T, ObjectType objectType>
 class TransformAnimation {
 public:
     enum Type{
         transition,
+        attractToPoint,
         rotation,
+        rotateRelativePoint,
+        rotateUpLeftLookAt,
         wait,
-        function
     };
-private:
+public:
     double time = 0; // normalized time (from 0 to 1)
 
     double endAnimationPoint = 0;
     double startAnimationPoint = 0;
-    Point4D point;
+    Point4D val{};
+    Point4D p{};
+    double r = 0;
     Type t_type;
 
-    double duration;
+    double duration = 0;
 
     bool started = false;
 
     Point4D bezier4[4] = {{0,0}, {0.8, 0}, {0.2, 1}, {1, 1}};
-    double bezier(double dtime);
-public:
-    explicit TransformAnimation(Type t, const Point4D& p, double d);
-    explicit TransformAnimation(Type t, double duration);
+    double bezier(double time_);
+
+    explicit TransformAnimation(Type t, const Point4D& value, double d);
+    explicit TransformAnimation(Type t, const Point4D& point, const Point4D& value, double d);
+    explicit TransformAnimation(Type t, const Point4D& point, double rate, double d);
+    explicit TransformAnimation(Type t, double d);
 
     bool update(T& obj);
     [[nodiscard]] Type type() const { return t_type; }
@@ -43,22 +55,38 @@ public:
 // Created by Иван Ильин on 23.01.2021.
 //
 
-template <typename T>
-TransformAnimation<T>::TransformAnimation(Type t, const Point4D& p, double d) {
+template <typename T, ObjectType objectType>
+TransformAnimation<T, objectType>::TransformAnimation(Type t, const Point4D& value, double d) {
     duration = d;
     t_type = t;
-    point = p;
+    val = value;
 }
 
-template <typename T>
-TransformAnimation<T>::TransformAnimation(TransformAnimation::Type t, double d) {
+template <typename T, ObjectType objectType>
+TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t, double d) {
     duration = d;
     t_type = t;
-    point = {0, 0, 0};
 }
 
-template <typename T>
-double TransformAnimation<T>::bezier(double dtime) {
+template <typename T, ObjectType objectType>
+TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t, const Point4D& point, const Point4D& value, double d) {
+    duration = d;
+    t_type = t;
+    val = value;
+    p = point;
+}
+
+template <typename T, ObjectType objectType>
+TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t, const Point4D &point, double rate, double d) {
+    duration = d;
+    t_type = t;
+    p = point;
+    r = rate;
+}
+
+
+template <typename T, ObjectType objectType>
+double TransformAnimation<T, objectType>::bezier(double time_) {
 
     double h = 0.000001;
     double eps = 0.000001;
@@ -81,26 +109,15 @@ double TransformAnimation<T>::bezier(double dtime) {
 
     while(abs(k1 - k2) > eps) {
         k1 = k2;
-        k2 = k1 - f(k1, time) / df(k1, time);
+        k2 = k1 - f(k1, time_) / df(k1, time_);
         s++;
     }
 
-    double py1 = py(k1);
-
-    k1 = 0.0, k2 = 0.5;
-    int m = 0;
-
-    while(abs(k1 - k2) > eps) {
-        k1 = k2;
-        k2 = k1 - f(k1, time+dtime) / df(k1, time+dtime);
-        m++;
-    }
-
-    return py(k1) - py1;
+    return py(k1);
 }
 
-template <typename T>
-bool TransformAnimation<T>::update(T& obj) {
+template <typename T, ObjectType objectType>
+bool TransformAnimation<T, objectType>::update(T& obj) {
     if(!started) {
         startAnimationPoint = Time::time();
         endAnimationPoint = startAnimationPoint + duration;
@@ -114,20 +131,29 @@ bool TransformAnimation<T>::update(T& obj) {
     double dtime = time - t_old;
     // sin like progress:
     //double dp = 0.5*M_PI*sin(M_PI*time)*dt;
+
     // Bézier curves progress:
-
-
     //double dp = ( -p1 * 3*(1-time)*(1-time) - p2 * 6*time*(1-time) + p2 * 3*time*(1-time)*(1-time) - p3 * 3*time*time + p3 * 6*(1-time)*time + p4 * 3*time*time ).y*dt;
     //double dp = 3.0*((p2-p1)*(1-time)*(1-time) + (p3-p2)*2.0*time*(1.0-time) + (p4-p3)*time*time).y*dt;
-    double dp = bezier(dtime);
-    //double dp = dt;
+    double dp = bezier(time) - bezier(t_old);
+
+    Point4D dval = val * dp;
 
     switch (t_type) {
         case transition:
-            obj.translate(point * dp);
+            obj.translate(dval);
+            break;
+        case attractToPoint:
+            obj.attractToPoint(p, dp * r);
             break;
         case rotation:
-            obj.rotate(point * dp);
+            obj.rotate(dval);
+            break;
+        case rotateRelativePoint:
+            obj.rotateRelativePoint(p, dval);
+            break;
+        case rotateUpLeftLookAt:
+            obj.rotateUpLeftLookAt(dval);
             break;
         case wait:
 

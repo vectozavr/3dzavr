@@ -92,7 +92,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
 
 
                 // We can also draw lines from points to the origin of camera
-                // to show how each particular point is being projected.
+                // to show how each particular val is being projected.
                 /*
                 Triangle line1 = {{clippedTriangle[0].x, clippedTriangle[0].y, clippedTriangle[0].z, 1},
                                   {clippedTriangle[0].x, clippedTriangle[0].y, clippedTriangle[0].z, 1},
@@ -213,10 +213,10 @@ void Camera::rotateZ(double rz) {
     p_lookAt = Matrix4x4::RotationZ(rz) * p_lookAt;
 }
 
-void Camera::rotate(double rl, double ru, double ra) {
-    rotateLeft(rl);
-    rotateUp(ru);
-    rotateLookAt(ra);
+void Camera::rotate(double rx, double ry, double rz) {
+    rotateX(rx);
+    rotateY(ry);
+    rotateZ(rz);
 }
 
 void Camera::rotate(const Point4D& r) {
@@ -241,7 +241,51 @@ void Camera::rotateUp(double ru) {
 void Camera::rotateLookAt(double rlAt) {
     rotate(p_lookAt, rlAt);
 }
+void Camera::rotateUpLeftLookAt(const Point4D &r) {
+    rotateLeft(r.x);
+    rotateUp(r.y);
+    rotateLookAt(r.z);
+}
 
 std::vector<Triangle> &Camera::tracedTriangles() {
     return traced;
+}
+
+void Camera::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
+    Point4D p_eye1 = p_eye;
+
+    // Translate XYZ by vector r1
+    Point4D r1 = p_eye - s;
+    // In translated coordinate system we rotate camera and position
+    Point4D r2 = Matrix4x4::Rotation(rx, ry, rz)*r1;
+    rotate(rx, ry, rz);
+
+    // After rotation we translate XYZ by vector -r2 and recalculate position
+    p_eye = s + r2;
+}
+
+void Camera::rotateRelativePoint(const Point4D &s, const Point4D &r) {
+    rotateRelativePoint(s, r.x, r.y, r.z);
+}
+
+void Camera::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
+    Point4D p_eye1 = p_eye;
+
+    // Translate XYZ by vector r1
+    Point4D r1 = p_eye - s;
+    // In translated coordinate system we rotate camera and position
+    Point4D r2 = Matrix4x4::Rotation(v, r)*r1;
+    rotate(v, r);
+
+    // After rotation we translate XYZ by vector -r2 and recalculate position
+    p_eye = s + r2;
+}
+
+void Camera::attractToPoint(const Point4D &point, double r) {
+    Point4D v = (point - p_eye).normalize();
+    translate(v*r);
+}
+
+void Camera::translateToPoint(const Point4D &point) {
+    p_eye = point;
 }

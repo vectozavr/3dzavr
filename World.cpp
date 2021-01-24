@@ -41,3 +41,7 @@ Mesh &World::operator[](const string &name) {
         Log::log("World::operator[]: mesh '" + name + "' does not exist.");
     return objects.find(name)->second;
 }
+
+void World::copyMesh(const string &meshName, const string &copyName) {
+    objects.emplace(copyName, objects[meshName]);
+}
