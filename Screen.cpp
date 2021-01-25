@@ -62,7 +62,7 @@ void Screen::line(const Point4D& p1, const Point4D& p2, sf::Color color)
 
 void Screen::triangle(const Triangle& triangle)
 {
-    if(vm == Frame || vm == Borders || vm == Xray) {
+    if(vm == Frame || vm == Borders || vm == Xray || vm == Clipped || vm == Transparency) {
         // Using this we have significant artefacts with small triangles
         //convex.setOutlineThickness(1);
         //convex.setOutlineColor({255, 0, 0});
@@ -128,9 +128,15 @@ void Screen::keyboardControl() {
     if(isKeyTapped(sf::Keyboard::Num2))
         setMode(ViewMode::Borders);
     if(isKeyTapped(sf::Keyboard::Num3))
-        setMode(ViewMode::Frame);
+        setMode(ViewMode::Transparency);
     if(isKeyTapped(sf::Keyboard::Num4))
+        setMode(ViewMode::Frame);
+    if(isKeyTapped(sf::Keyboard::Num5))
         setMode(ViewMode::Xray);
+    if(isKeyTapped(sf::Keyboard::Num6))
+        setMode(ViewMode::Clipped);
+    if(isKeyTapped(sf::Keyboard::Num7))
+        setMode(ViewMode::Normals);
 }
 
 bool Screen::isKeyTapped(sf::Keyboard::Key key) {

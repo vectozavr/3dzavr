@@ -9,11 +9,11 @@
 #include <list>
 #include "utils/Time.h"
 
-template <typename T, ObjectType objectType>
+template <typename T>
 class Animation {
 private:
     T& obj;
-    std::list<TransformAnimation<T, objectType>> animations;
+    std::list<TransformAnimation<T>> animations;
 public:
     explicit Animation(T& o) : obj(o) {}
 
@@ -27,6 +27,8 @@ public:
     void scale(const Point4D& s, double duration = 1);
     void scale(double s, double duration = 1);
 
+    void showCreation(double duration = 1);
+
     void wait(double duration = 1);
 
     void update();
@@ -39,66 +41,71 @@ public:
 // Created by Иван Ильин on 23.01.2021.
 //
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::translate(const Point4D &t, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::transition, t, duration);
+template <typename T>
+void Animation<T>::translate(const Point4D &t, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::transition, t, duration);
 }
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::attractToPoint(const Point4D &point, double r, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::attractToPoint, point, r, duration);
+template <typename T>
+void Animation<T>::attractToPoint(const Point4D &point, double r, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::attractToPoint, point, r, duration);
 }
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::translateToPoint(const Point4D &point, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::transition, point - obj.position(), duration);
-}
-
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::rotate(const Point4D &r, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::rotation, r, duration);
+template <typename T>
+void Animation<T>::translateToPoint(const Point4D &point, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::translateToPoint, point, duration);
 }
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::rotateRelativePoint(const Point4D &s, const Point4D &r, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::rotateRelativePoint, s, r, duration);
-}
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::rotateUpLeftLookAt(const Point4D& r, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::rotateUpLeftLookAt, r, duration);
+template <typename T>
+void Animation<T>::rotate(const Point4D &r, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::rotation, r, duration);
 }
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::scale(const Point4D &s, double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::scale, s, duration);
+template <typename T>
+void Animation<T>::rotateRelativePoint(const Point4D &s, const Point4D &r, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::rotateRelativePoint, s, r, duration);
+}
+template <typename T>
+void Animation<T>::rotateUpLeftLookAt(const Point4D& r, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::rotateUpLeftLookAt, r, duration);
 }
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::scale(double s, double duration) {
+template <typename T>
+void Animation<T>::scale(const Point4D &s, double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::scale, s, duration);
+}
+
+template <typename T>
+void Animation<T>::scale(double s, double duration) {
     scale(s, s, s, duration);
 }
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::wait(double duration) {
-    animations.emplace_back(TransformAnimation<T, objectType>::wait, duration);
+template<typename T>
+void Animation<T>::showCreation(double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::showCreation, duration);
 }
 
-template <typename T, ObjectType objectType>
-void Animation<T, objectType>::update() {
+template <typename T>
+void Animation<T>::wait(double duration) {
+    animations.emplace_back(obj, TransformAnimation<T>::wait, duration);
+}
+
+template <typename T>
+void Animation<T>::update() {
     if(animations.empty())
         return;
     auto it = animations.begin();
 
     // If it the first commend is wait we should wait until waiting time is over
-    if(it->type() == TransformAnimation<T, objectType>::wait)
+    if(it->type() == TransformAnimation<T>::wait)
     {
-        if(!it->update(obj))
+        if(!it->update())
             animations.erase(it);
         return;
     }
     // Otherwise we iterate over all animation until we meet animations.end() or wait animation
-    while(!animations.empty() && (it != animations.end()) && (it->type() != TransformAnimation<T, objectType>::wait))
+    while(!animations.empty() && (it != animations.end()) && (it->type() != TransformAnimation<T>::wait))
     {
-        if(!it->update(obj))
+        if(!it->update())
             animations.erase(it++);
         else
             it++;

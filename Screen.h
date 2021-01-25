@@ -19,7 +19,9 @@ public:
         Frame,
         Borders,
         Xray,
-        Clipped
+        Clipped,
+        Transparency,
+        Normals
     };
 private:
     int w = 1920;
