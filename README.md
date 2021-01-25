@@ -18,6 +18,8 @@ TODO:
 - Textures
 
 Demonstration of how does this engine work:
+![hippo](gif/teapot.gif)
+![hippo](gif/cube.gif)
 ![Project demonstration](img/external_camera_1.png)
 ![Project demonstration](img/clipping.png)
 ![Project demonstration](img/mountains.png)
