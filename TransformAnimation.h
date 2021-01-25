@@ -9,23 +9,22 @@
 #include "utils/Log.h"
 #include "Mesh.h"
 
-enum ObjectType {
-    mesh,
-    camera
-};
-
-template <typename T, ObjectType objectType>
+template <typename T>
 class TransformAnimation {
 public:
     enum Type{
         transition,
+        translateToPoint,
         attractToPoint,
         rotation,
         rotateRelativePoint,
         rotateUpLeftLookAt,
+        showCreation,
         wait,
     };
 public:
+    T& obj;
+
     double time = 0; // normalized time (from 0 to 1)
 
     double endAnimationPoint = 0;
@@ -42,42 +41,46 @@ public:
     Point4D bezier4[4] = {{0,0}, {0.8, 0}, {0.2, 1}, {1, 1}};
     double bezier(double time_);
 
-    explicit TransformAnimation(Type t, const Point4D& value, double d);
-    explicit TransformAnimation(Type t, const Point4D& point, const Point4D& value, double d);
-    explicit TransformAnimation(Type t, const Point4D& point, double rate, double d);
-    explicit TransformAnimation(Type t, double d);
+    explicit TransformAnimation(T& o, Type t, const Point4D& value, double d);
+    explicit TransformAnimation(T& o, Type t, const Point4D& point, const Point4D& value, double d);
+    explicit TransformAnimation(T& o, Type t, const Point4D& point, double rate, double d);
+    explicit TransformAnimation(T& o, Type t, double d);
 
-    bool update(T& obj);
+    bool update();
     [[nodiscard]] Type type() const { return t_type; }
+
+    std::vector<Triangle> triangles;
 };
 
 //
 // Created by Иван Ильин on 23.01.2021.
 //
 
-template <typename T, ObjectType objectType>
-TransformAnimation<T, objectType>::TransformAnimation(Type t, const Point4D& value, double d) {
+template <typename T>
+TransformAnimation<T>::TransformAnimation(T& o, Type t, const Point4D& value, double d) : obj(o) {
     duration = d;
     t_type = t;
     val = value;
 }
 
-template <typename T, ObjectType objectType>
-TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t, double d) {
+template <typename T>
+TransformAnimation<T>::TransformAnimation(T& o, TransformAnimation::Type t, double d) : obj(o)  {
     duration = d;
     t_type = t;
+    if(t == showCreation)
+        triangles = obj.data();
 }
 
-template <typename T, ObjectType objectType>
-TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t, const Point4D& point, const Point4D& value, double d) {
+template <typename T>
+TransformAnimation<T>::TransformAnimation(T& o, TransformAnimation::Type t, const Point4D& point, const Point4D& value, double d) : obj(o)  {
     duration = d;
     t_type = t;
     val = value;
     p = point;
 }
 
-template <typename T, ObjectType objectType>
-TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t, const Point4D &point, double rate, double d) {
+template <typename T>
+TransformAnimation<T>::TransformAnimation(T& o, TransformAnimation::Type t, const Point4D &point, double rate, double d) : obj(o) {
     duration = d;
     t_type = t;
     p = point;
@@ -85,8 +88,8 @@ TransformAnimation<T, objectType>::TransformAnimation(TransformAnimation::Type t
 }
 
 
-template <typename T, ObjectType objectType>
-double TransformAnimation<T, objectType>::bezier(double time_) {
+template <typename T>
+double TransformAnimation<T>::bezier(double time_) {
 
     double h = 0.000001;
     double eps = 0.000001;
@@ -116,13 +119,12 @@ double TransformAnimation<T, objectType>::bezier(double time_) {
     return py(k1);
 }
 
-template <typename T, ObjectType objectType>
-bool TransformAnimation<T, objectType>::update(T& obj) {
+template <typename T>
+bool TransformAnimation<T>::update() {
     if(!started) {
         startAnimationPoint = Time::time();
         endAnimationPoint = startAnimationPoint + duration;
     }
-    started = true;
 
     double t_old = time;
     // linear normalized time:
@@ -139,9 +141,17 @@ bool TransformAnimation<T, objectType>::update(T& obj) {
 
     Point4D dval = val * dp;
 
+    std::vector<Triangle> newTriangles;
+
     switch (t_type) {
         case transition:
             obj.translate(dval);
+            break;
+        case translateToPoint:
+            if(!started) {
+                val = val - obj.position();
+                t_type = transition;
+            }
             break;
         case attractToPoint:
             obj.attractToPoint(p, dp * r);
@@ -155,6 +165,19 @@ bool TransformAnimation<T, objectType>::update(T& obj) {
         case rotateUpLeftLookAt:
             obj.rotateUpLeftLookAt(dval);
             break;
+        case showCreation:
+            for(auto &t : triangles) {
+                double d1 = (t[1] - t[0]).abs();
+                double d2 = (t[2] - t[1]).abs();
+                double sum = d1 + d2;
+                double a = bezier(time) * sum;
+                if(a < d1)
+                    newTriangles.emplace_back(t[0], t[0], t[0] + (t[1] - t[0])*a/d1);
+                else
+                    newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1])*(a-d1)/d2);
+            }
+            obj.data() = newTriangles;
+            break;
         case wait:
 
             break;
@@ -162,6 +185,7 @@ bool TransformAnimation<T, objectType>::update(T& obj) {
 
     }
 
+    started = true;
     return time < 0.999;
 }
 

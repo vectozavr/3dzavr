@@ -54,6 +54,7 @@ public:
     std::vector<Triangle>& project(Mesh &mesh, Screen::ViewMode mode);
 
     [[nodiscard]] std::vector<Triangle> const &data() const { return triangles; }
+    [[nodiscard]] std::vector<Triangle>& data() { return triangles; }
     void record();
 
     [[nodiscard]] int buffSize() const { return triangles.size(); }
@@ -108,7 +109,7 @@ public:
     [[nodiscard]] double width() const {return w;}
     [[nodiscard]] double height() const {return h;}
 
-    Animation<Camera, camera> animation;
+    Animation<Camera> animation;
 };
 
 

@@ -24,6 +24,7 @@ namespace Time
     double deltaTime()
     {
         return _deltaTime;
+        //return 1.0/30.0;
     }
 
     void update()

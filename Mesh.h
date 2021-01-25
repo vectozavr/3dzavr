@@ -60,7 +60,7 @@ public:
     Mesh static Cube(double size = 1.0);
     Mesh static Obj(const std::string& filename);
 
-    Animation<Mesh, mesh> animation;
+    Animation<Mesh> animation;
 };
 
 

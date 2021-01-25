@@ -24,7 +24,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
     for(auto& t : mesh.data()) {
 
         double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
-        if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !isExternal)
+        if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !(mode == Screen::ViewMode::Transparency) && !isExternal )
             continue;
 
         int newTriangles = 1;
@@ -56,17 +56,20 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
             // dou-to the goal of external camera is to show how see the main camera.
             // That's why we keep color of triangles as it is.
             if(!isExternal) {
-                clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), 255);
+                if(mode != Screen::ViewMode::Clipped)
+                    clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), mode == Screen::ViewMode::Transparency ? 100 : 255);
                 // This is for clipping demonstration.
                 // If you want to debug clipping just comment previous line and uncomment this block of code.
-                /*
-                if(clippedTriangle.clip == Triangle::None)
-                    clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), 255);
-                else if(clippedTriangle.clip == Triangle::Cropped)
-                    clippedTriangle.color = sf::Color(0, 0, 194*(0.3*std::abs(dot) + 0.7), 255);
-                else if(clippedTriangle.clip == Triangle::Doubled)
-                    clippedTriangle.color = sf::Color(255*(0.3*std::abs(dot) + 0.7), 0, 0, 255);
-                    */
+                else {
+                    if (clippedTriangle.clip == Triangle::None)
+                        clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7),
+                                                          245 * (0.3 * std::abs(dot) + 0.7),
+                                                          194 * (0.3 * std::abs(dot) + 0.7), 255);
+                    else if (clippedTriangle.clip == Triangle::Cropped)
+                        clippedTriangle.color = sf::Color(0, 0, 194 * (0.3 * std::abs(dot) + 0.7), 255);
+                    else if (clippedTriangle.clip == Triangle::Doubled)
+                        clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 0, 0, 255);
+                }
             }
 
             double z = (clippedTriangle[0].z + clippedTriangle[1].z + clippedTriangle[2].z) / 3.0;
@@ -107,6 +110,19 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
                 traced.emplace_back(line2 * Vint);
                 traced.emplace_back(line3 * Vint);
                  */
+
+                Triangle line1 = {clippedTriangle[0],
+                                  clippedTriangle[0],
+                                  {0, 0, 0, 1}};
+                Triangle line2 = {clippedTriangle[1],
+                                  clippedTriangle[1],
+                                  {0, 0, 0, 1}};
+                Triangle line3 = {clippedTriangle[2],
+                                  clippedTriangle[2],
+                                  {0, 0, 0, 1}};
+                traced.emplace_back(line1 * Vint);
+                traced.emplace_back(line2 * Vint);
+                traced.emplace_back(line3 * Vint);
 
                 traced.emplace_back(prj * Vint);                // trace projected clipped triangle
                 traced.emplace_back(clippedTriangle * Vint);    // trace clipped triangle
@@ -252,8 +268,6 @@ std::vector<Triangle> &Camera::tracedTriangles() {
 }
 
 void Camera::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
-    Point4D p_eye1 = p_eye;
-
     // Translate XYZ by vector r1
     Point4D r1 = p_eye - s;
     // In translated coordinate system we rotate camera and position
@@ -269,8 +283,6 @@ void Camera::rotateRelativePoint(const Point4D &s, const Point4D &r) {
 }
 
 void Camera::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
-    Point4D p_eye1 = p_eye;
-
     // Translate XYZ by vector r1
     Point4D r1 = p_eye - s;
     // In translated coordinate system we rotate camera and position
