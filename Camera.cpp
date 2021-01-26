@@ -11,17 +11,17 @@
 std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
 
     if(!ready) {
-        Log::log("Camera::project(): cannot project triangles without camera initialization ( Camera::init() ) ");
+        Log::log("Camera::project(): cannot project tris without camera initialization ( Camera::init() ) ");
         return this->triangles;
     }
 
-    // Model transform matrix: translate triangles in the origin of mesh.
+    // Model transform matrix: translate tris in the origin of mesh.
     Matrix4x4 M = Matrix4x4::Translation(mesh.position());
     // mesh.animationMatrix() apply one step to the animation and returns how should we
     // transform our mesh to be in intermediate state of animation
     VM = V * M;
 
-    for(auto& t : mesh.data()) {
+    for(auto& t : mesh.triangles()) {
 
         double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
         if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !(mode == Screen::ViewMode::Transparency) && !isExternal )
@@ -51,10 +51,10 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
         }
 
         for(auto& clippedTriangle : clippedTriangles) {
-            // When we calculate all clipped triangles it is time color them.
-            // We dont need to change the color of triangles in case of external camera
+            // When we calculate all clipped tris it is time color them.
+            // We dont need to change the color of tris in case of external camera
             // dou-to the goal of external camera is to show how see the main camera.
-            // That's why we keep color of triangles as it is.
+            // That's why we keep color of tris as it is.
             if(!isExternal) {
                 if(mode != Screen::ViewMode::Clipped)
                     clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), mode == Screen::ViewMode::Transparency ? 100 : 255);
@@ -78,7 +78,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
             // If we want to observe them from external camera. When we call Tdzavr::setCameraMode(CameraMode::ExternalObserver);
             // we also should call Camera::setTrace(true) in the main camera.
             if(trace) {
-                // Because we will not apply Screen space transform for traced triangles, we need to avoid aspect factor.
+                // Because we will not apply Screen space transform for traced tris, we need to avoid aspect factor.
                 P[0][0] *= aspect;
                 Triangle prj = clippedTriangle * P;
                 prj.z = z/1000.0;   // for projected triangle we should set z position
@@ -138,7 +138,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
              * M - translation from mesh coordinate to world coordinate
              * A - animation matrix (to express transitional state of the mesh)
              * V - transform from world coordinate to camera' coordinate
-             * P - project triangles from camera' coordinate to camera 2d plane
+             * P - project tris from camera' coordinate to camera 2d plane
              * S - transform 2d plane' coordinate to screen coordinate (in pixels)
             */
             clippedTriangle[0] /= clippedTriangle[0].w;
@@ -165,8 +165,8 @@ void Camera::init(int width, int height, double fov, double ZNear, double ZFar) 
 
     SP = S * P; // screen-space-projections matrix
 
-    // This is planes for clipping triangles.
-    // Motivation: we are not interest in triangles that we cannot see.
+    // This is planes for clipping tris.
+    // Motivation: we are not interest in tris that we cannot see.
     clipPlanes.emplace_back(Plane({0, 0, 1}, {0, 0, ZNear})); // near plane
     clipPlanes.emplace_back(Plane({0, 0, -1}, {0, 0, ZFar})); // far plane
 
@@ -187,7 +187,7 @@ void Camera::init(int width, int height, double fov, double ZNear, double ZFar) 
 
 std::vector<Triangle> &Camera::sorted() {
 
-    // Sort triangles from back to front
+    // Sort tris from back to front
     // This is some replacement for Z-buffer
     sort(triangles.begin(), triangles.end(), [](Triangle &t1, Triangle &t2)
     {
@@ -200,7 +200,7 @@ std::vector<Triangle> &Camera::sorted() {
 }
 
 void Camera::record() {
-    // Cleaning all triangles and recalculation of View matrix
+    // Cleaning all tris and recalculation of View matrix
     // That is like preparation for new camera shot: we need to set
     // the position of camera and insert new cartridge for photo.
     triangles.clear();

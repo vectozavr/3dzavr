@@ -17,7 +17,7 @@ Mesh Mesh::operator*(const Matrix4x4 &matrix4X4) const {
 }
 
 Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
-    for (auto& t : triangles)
+    for (auto& t : tris)
         t *= matrix4X4;
 
     return *this;
@@ -55,7 +55,7 @@ Mesh &Mesh::loadObj(const std::string& filename) {
         {
             int f[3];
             s >> junk >> f[0] >> f[1] >> f[2];
-            triangles.emplace_back(verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1] );
+            tris.emplace_back(verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1] );
         }
     }
 
@@ -64,15 +64,15 @@ Mesh &Mesh::loadObj(const std::string& filename) {
     return *this;
 }
 
-Mesh::Mesh(const std::string& filename) : animation(*this){
+Mesh::Mesh(const std::string& filename){
     loadObj(filename);
 }
 
-Mesh::Mesh(const vector<Triangle> &tries) : animation(*this) {
-    triangles = tries;
+Mesh::Mesh(const vector<Triangle> &tries){
+    tris = tries;
 }
 
-Mesh::Mesh(const Mesh& mesh) : animation(*this) {
+Mesh::Mesh(const Mesh& mesh) : Animatable(mesh) {
     *this = mesh;
 }
 
@@ -82,7 +82,7 @@ Mesh Mesh::Obj(const std::string& filename) {
 
 Mesh Mesh::Cube(double size) {
     Mesh cube{};
-    cube.triangles = {
+    cube.tris = {
             { {0.0, 0.0, 0.0, 1.0},    {0.0, 1.0, 0.0, 1.0},    {1.0, 1.0, 0.0, 1.0} },
             { {0.0, 0.0, 0.0, 1.0},    {1.0, 1.0, 0.0, 1.0},    {1.0, 0.0, 0.0, 1.0} },
             { {1.0, 0.0, 0.0, 1.0},    {1.0, 1.0, 0.0, 1.0},    {1.0, 1.0, 1.0, 1.0} },
@@ -101,43 +101,42 @@ Mesh Mesh::Cube(double size) {
     return cube *= Matrix4x4::Scale(size, size, size);
 }
 
-Mesh &Mesh::translate(double dx, double dy, double dz) {
+void Mesh::translate(double dx, double dy, double dz) {
     p_position += Point4D(dx, dy, dz, 0);
-    return *this;
 }
 
-Mesh &Mesh::rotate(double rx, double ry, double rz) {
-    return *this *= Matrix4x4::Rotation(rx, ry, rz);
+void Mesh::rotate(double rx, double ry, double rz) {
+    *this *= Matrix4x4::Rotation(rx, ry, rz);
 }
 
-Mesh &Mesh::rotate(const Point4D &r) {
-    return *this *= Matrix4x4::Rotation(r);
+void Mesh::rotate(const Point4D &r) {
+    *this *= Matrix4x4::Rotation(r);
 }
 
-Mesh &Mesh::rotate(const Point4D &v, double r) {
-    return *this *= Matrix4x4::Rotation(v, r);
+void Mesh::rotate(const Point4D &v, double r) {
+    *this *= Matrix4x4::Rotation(v, r);
 }
 
-Mesh &Mesh::scale(double sx, double sy, double sz) {
-    return *this *= Matrix4x4::Scale(sx, sy, sz);
+void Mesh::scale(double sx, double sy, double sz) {
+    *this *= Matrix4x4::Scale(sx, sy, sz);
 }
 
-Mesh &Mesh::scale(const Point4D &s) {
-    return *this *= Matrix4x4::Scale(s.x, s.y, s.z);
+void Mesh::scale(const Point4D &s) {
+    *this *= Matrix4x4::Scale(s.x, s.y, s.z);
 }
 
-Mesh &Mesh::translate(const Point4D &t) {
-    return translate(t.x, t.y, t.z);
+void Mesh::translate(const Point4D &t) {
+    translate(t.x, t.y, t.z);
 }
 
 Mesh &Mesh::operator=(const Mesh &mesh) {
-    triangles = mesh.triangles;
+    tris = mesh.tris;
     p_position = mesh.p_position;
     c_color = mesh.c_color;
     return *this;
 }
 
-Mesh &Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
+void Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
     // Translate XYZ by vector r1
     Point4D r1 = p_position - s;
     *this *= Matrix4x4::Translation(r1);
@@ -150,16 +149,13 @@ Mesh &Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double r
     // After rotation we translate XYZ by vector -r2 and recalculate position
     *this *= Matrix4x4::Translation(-r2);
     p_position = s + r2;
-
-
-    return *this;
 }
 
-Mesh &Mesh::rotateRelativePoint(const Point4D &s, const Point4D &r) {
-    return rotateRelativePoint(s, r.x, r.y, r.z);
+void Mesh::rotateRelativePoint(const Point4D &s, const Point4D &r) {
+    rotateRelativePoint(s, r.x, r.y, r.z);
 }
 
-Mesh &Mesh::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
+void Mesh::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
     // Translate XYZ by vector r1
     Point4D r1 = p_position - s;
     *this *= Matrix4x4::Translation(r1);
@@ -172,20 +168,13 @@ Mesh &Mesh::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
     // After rotation we translate XYZ by vector -r2 and recalculate position
     *this *= Matrix4x4::Translation(-r2);
     p_position = s + r2;
-
-    return *this;
 }
 
-Mesh &Mesh::attractToPoint(const Point4D &point, double r) {
+void Mesh::attractToPoint(const Point4D &point, double r) {
     Point4D v = (point - p_position).normalize();
-    return translate(v*r);
+    translate(v*r);
 }
 
-Mesh &Mesh::translateToPoint(const Point4D &point) {
+void Mesh::translateToPoint(const Point4D &point) {
     p_position = point;
-    return *this;
-}
-
-Mesh &Mesh::rotateUpLeftLookAt(const Point4D &r) {
-    return rotate(r);
 }

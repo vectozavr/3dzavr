@@ -21,7 +21,7 @@ public:
     ClipMode clip = None;
     sf::Color color;
     Point4D p[3];
-    // Z component makes sense only for 2D projected triangles.
+    // Z component makes sense only for 2D projected tris.
     // It is some replacement for Z-buffer
     double z = 0;
 

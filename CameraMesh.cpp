@@ -9,17 +9,17 @@ CameraMesh::CameraMesh(const Camera& camera) {
 
     // boarders around the screen
     double z = camera.Zproj();
-    triangles.push_back({{aspect, 1, z, 1},
+    tris.push_back({{aspect, 1, z, 1},
                          {aspect, 1, z, 1},
                          {-aspect, 1, z, 1}});
-    triangles.push_back({{-aspect, 1, z, 1},
+    tris.push_back({{-aspect, 1, z, 1},
                          {-aspect, 1, z, 1},
                          {-aspect, -1, z, 1}});
 
-    triangles.push_back({{-aspect, -1, z, 1},
+    tris.push_back({{-aspect, -1, z, 1},
                          {-aspect, -1, z, 1},
                          {aspect, -1, z, 1}});
-    triangles.push_back({{aspect, -1, z, 1},
+    tris.push_back({{aspect, -1, z, 1},
                          {aspect, -1, z, 1},
                          {aspect, 1, z, 1}});
 
@@ -27,17 +27,17 @@ CameraMesh::CameraMesh(const Camera& camera) {
     double h = camera.Znear() * tan(M_PI*camera.Fov()*0.5/180.0);
     double w = aspect * h;
     z = camera.Znear();
-    triangles.push_back({{w, h, z, 1},
+    tris.push_back({{w, h, z, 1},
                          {w, h, z, 1},
                          {-w, h, z, 1}});
-    triangles.push_back({{-w, h, z, 1},
+    tris.push_back({{-w, h, z, 1},
                          {-w, h, z, 1},
                          {-w, -h, z, 1}});
 
-    triangles.push_back({{-w, -h, z, 1},
+    tris.push_back({{-w, -h, z, 1},
                          {-w, -h, z, 1},
                          {w, -h, z, 1}});
-    triangles.push_back({{w, -h, z, 1},
+    tris.push_back({{w, -h, z, 1},
                          {w, -h, z, 1},
                          {w, h, z, 1}});
 
@@ -45,34 +45,34 @@ CameraMesh::CameraMesh(const Camera& camera) {
     h = camera.Zfar() * tan(M_PI*camera.Fov()*0.5/180.0);
     w = aspect * h;
     z = camera.Zfar();
-    triangles.push_back({{w, h, z, 1},
+    tris.push_back({{w, h, z, 1},
                          {w, h, z, 1},
                          {-w, h, z, 1}});
-    triangles.push_back({{-w, h, z, 1},
+    tris.push_back({{-w, h, z, 1},
                          {-w, h, z, 1},
                          {-w, -h, z, 1}});
 
-    triangles.push_back({{-w, -h, z, 1},
+    tris.push_back({{-w, -h, z, 1},
                          {-w, -h, z, 1},
                          {w, -h, z, 1}});
-    triangles.push_back({{w, -h, z, 1},
+    tris.push_back({{w, -h, z, 1},
                          {w, -h, z, 1},
                          {w, h, z, 1}});
 
     // borders
-    triangles.push_back({{0, 0, 0, 1},
+    tris.push_back({{0, 0, 0, 1},
                          {0, 0, 0, 1},
                          {w, h, z, 1}});
-    triangles.push_back({{0, 0, 0, 1},
+    tris.push_back({{0, 0, 0, 1},
                          {0, 0, 0, 1},
                          {-w, h, z, 1}});
-    triangles.push_back({{0, 0, 0, 1},
+    tris.push_back({{0, 0, 0, 1},
                          {0, 0, 0, 1},
                          {w, -h, z, 1}});
-    triangles.push_back({{0, 0, 0, 1},
+    tris.push_back({{0, 0, 0, 1},
                          {0, 0, 0, 1},
                          {-w, -h, z, 1}});
 
-    for(auto& t : triangles)
+    for(auto& t : tris)
         t *= camera.viewInv();
 }

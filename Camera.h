@@ -7,11 +7,11 @@
 
 #include <vector>
 #include "Screen.h"
-#include "Mesh.h"
 #include "Plane.h"
-#include "Animation.h"
+#include "Animatable.h"
+#include "Mesh.h"
 
-class Camera {
+class Camera : public Animatable{
 private:
     Point4D p_eye;
 
@@ -45,7 +45,7 @@ private:
     double w = 0;
     double h = 0;
 public:
-    Camera() : animation(*this){}
+    Camera() = default;
     Camera(const Camera& camera) = delete;
 
 
@@ -60,7 +60,7 @@ public:
     [[nodiscard]] int buffSize() const { return triangles.size(); }
     std::vector<Triangle>& sorted();
 
-    [[nodiscard]] Point4D position() const { return p_eye; }
+    [[nodiscard]] Point4D position() const override { return p_eye; }
     [[nodiscard]] Point4D eye() const { return p_eye; }
     [[nodiscard]] Point4D left() const { return p_left; }
     [[nodiscard]] Point4D right() const { return -p_left; }
@@ -68,28 +68,28 @@ public:
     [[nodiscard]] Point4D down() const { return -p_up; }
     [[nodiscard]] Point4D lookAt() const { return p_lookAt; }
 
-    void translate(const Point4D& dv) { p_eye += dv; }
+    void translate(const Point4D& dv) override { p_eye += dv; }
     void translate(double dx, double dy, double dz) { p_eye += Point4D(dx, dy, dz, 0); }
-    void attractToPoint(const Point4D& point, double r);
+    void attractToPoint(const Point4D& point, double r) override;
     void translateToPoint(const Point4D& point);
 
     void rotateX(double rx);
     void rotateY(double ry);
     void rotateZ(double rz);
     void rotate(double rx, double ry, double rz);
-    void rotate(const Point4D& r);
+    void rotate(const Point4D& r) override;
 
     void rotate(const Point4D& v, double rv);
 
     void rotateLeft(double rl);
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
-    void rotateUpLeftLookAt(const Point4D& r);
+    void rotateUpLeftLookAt(const Point4D& r) override;
 
     // Rotate mesh around XYZ by (rx, ry, rz) radians relative val 'point4D'
     void rotateRelativePoint(const Point4D& s, double rl, double ru, double rlAt);
     // Rotate mesh around XYZ by (r.x, r.y, r.z) radians relative val 'point4D'
-    void rotateRelativePoint(const Point4D& s, const Point4D& r);
+    void rotateRelativePoint(const Point4D& s, const Point4D& r) override;
     // Rotate mesh around normalised vector 'v' by 'r' radians relative val 'point4D'
     void rotateRelativePoint(const Point4D& s, const Point4D& v, double r);
 
@@ -108,8 +108,6 @@ public:
     [[nodiscard]] double Fov() const {return fov;}
     [[nodiscard]] double width() const {return w;}
     [[nodiscard]] double height() const {return h;}
-
-    Animation<Camera> animation;
 };
 
 
