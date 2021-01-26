@@ -3,7 +3,7 @@ project(3dzavr)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(3dzavr animations_example.cpp utils/Time.h utils/Time.cpp utils/Point4D.h utils/Point4D.cpp utils/Matrix4x4.h utils/Matrix4x4.cpp Triangle.h Triangle.cpp Mesh.h Mesh.cpp utils/Log.h utils/Log.cpp World.h World.cpp Camera.h Camera.cpp Screen.h Screen.cpp Tdzavr.h Tdzavr.cpp Plane.h Plane.cpp CameraMesh.h CameraMesh.cpp CameraController.h CameraController.cpp Animatable.h Animation.h utils/Interpolation.h Animatable.cpp Animation.cpp)
+add_executable(3dzavr animations_example.cpp tdzavrlib/utils/Time.h tdzavrlib/utils/Time.cpp tdzavrlib/utils/Point4D.h tdzavrlib/utils/Point4D.cpp tdzavrlib/utils/Matrix4x4.h tdzavrlib/utils/Matrix4x4.cpp tdzavrlib/Triangle.h tdzavrlib/Triangle.cpp tdzavrlib/Mesh.h tdzavrlib/Mesh.cpp tdzavrlib/utils/Log.h tdzavrlib/utils/Log.cpp tdzavrlib/World.h tdzavrlib/World.cpp tdzavrlib/Camera.h tdzavrlib/Camera.cpp tdzavrlib/Screen.h tdzavrlib/Screen.cpp tdzavrlib/Tdzavr.h tdzavrlib/Tdzavr.cpp tdzavrlib/Plane.h tdzavrlib/Plane.cpp tdzavrlib/CameraMesh.h tdzavrlib/CameraMesh.cpp tdzavrlib/CameraController.h tdzavrlib/CameraController.cpp tdzavrlib/Animatable.h tdzavrlib/Animation.h tdzavrlib/utils/Interpolation.h tdzavrlib/Animatable.cpp tdzavrlib/Animation.cpp)
 
 if(${APPLE})
     include_directories(/usr/local/include)

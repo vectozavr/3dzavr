@@ -2,10 +2,10 @@
 // Created by Иван Ильин on 23.01.2021.
 //
 
-#include "Tdzavr.h"
-#include "CameraController.h"
+#include "tdzavrlib/Tdzavr.h"
+#include "tdzavrlib/CameraController.h"
 #include <iostream>
-#include "Animation.h"
+#include "tdzavrlib/Animation.h"
 
 using namespace std;
 
