@@ -27,13 +27,13 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         update(Time::deltaTime());
 
         /* Project all mesh
-         * Here we project all triangles for each mesh from world.objects.
+         * Here we project all tris for each mesh from world.objects.
          * When we call camera.project(m.second),
          */
         camera.record();
         for(auto& m : world.objects) {
+            m.second.a_update();
             camera.project(m.second, screen.mode());
-            m.second.animation.update();
         }
 
         // draw projected mesh
@@ -56,8 +56,8 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
                 screen.triangle(t);
         }
 
-        camera.animation.update();
-        external_camera.animation.update();
+        camera.a_update();
+        external_camera.a_update();
 
         triPerSec = camera.buffSize() * Time::fps();
 
@@ -76,7 +76,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
             std::to_string(screen.width()) + "x" +
             std::to_string(screen.height()) + "\n" +
             std::to_string(Time::fps()) +
-            " fps \n" + std::to_string((int) triPerSec) + " triangles/s");
+            " fps \n" + std::to_string((int) triPerSec) + " tris/s");
         }
 
         screen.display();

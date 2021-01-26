@@ -84,24 +84,24 @@ void TestGame::start() {
     //world["cube_1"].animation.showCreation(5);
 
     //world["mountains"].animation.wait(3);
-    world["cube_1"].animation.showCreation(5);
-    world["cube_1"].animation.wait(0);
-    world["cube_1"].animation.rotate({M_PI, M_PI, M_PI}, 15);
+    world["cube_1"].a_showCreation(5);
+    world["cube_1"].a_wait(0);
+    world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 15);
     //camera.animation.rotateRelativePoint(world["cube_1"].position(), {0, M_PI, 0}, 20);
     //camera.animation.attractToPoint(world["cube_1"].position(), 3, 20);
-    external_camera.animation.attractToPoint(world["cube_1"].position(), -3, 15);
-    external_camera.animation.attractToPoint(camera.position(), 3, 15);
-    external_camera.animation.rotateRelativePoint(world["cube_1"].position(), {0, -M_PI/2, 0}, 15);
-    external_camera.animation.rotate({0, -M_PI/6, 0}, 15);
-    external_camera.animation.wait();
-    external_camera.animation.attractToPoint(camera.position() + Point4D{0,-1,1}, 2, 3);
-    external_camera.animation.rotateUpLeftLookAt({-M_PI/6, 0, 0}, 3);
-    world["cube_1"].animation.wait(3);
-    world["cube_1"].animation.rotate({M_PI, M_PI, M_PI}, 10);
-    external_camera.animation.wait(10);
+    external_camera.a_attractToPoint(world["cube_1"].position(), -3, 15);
+    external_camera.a_attractToPoint(camera.position(), 3, 15);
+    external_camera.a_rotateRelativePoint(world["cube_1"].position(), {0, -M_PI/2, 0}, 15);
+    external_camera.a_rotate({0, -M_PI/6, 0}, 15);
+    external_camera.a_wait();
+    external_camera.a_attractToPoint(camera.position() + Point4D{0,-1,1}, 2, 3);
+    external_camera.a_rotateUpLeftLookAt({-M_PI/6, 0, 0}, 3);
+    world["cube_1"].a_wait(3);
+    world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 10);
+    external_camera.a_wait(10);
 
-    external_camera.animation.translateToPoint(camera.position() + Point4D{5, 0, 1}, 3);
-    external_camera.animation.rotate({0, -M_PI/5, 0}, 3);
+    external_camera.a_translateToPoint(camera.position() + Point4D{5, 0, 1}, 3);
+    external_camera.a_rotate({0, -M_PI/5, 0}, 3);
 
 }
 

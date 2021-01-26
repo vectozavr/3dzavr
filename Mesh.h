@@ -7,18 +7,18 @@
 
 #include <vector>
 #include "Triangle.h"
-#include "Animation.h"
+#include "Animatable.h"
 #include <SFML/Graphics.hpp>
 
-class Mesh {
+class Mesh : public Animatable {
 protected:
-    std::vector<Triangle> triangles;
+    std::vector<Triangle> tris;
 
     Point4D p_position;
 
     sf::Color c_color;
 public:
-    Mesh() : animation(*this){}
+    Mesh() = default;
     Mesh(const Mesh& mesh);
 
     explicit Mesh(const std::vector<Triangle>& tries);
@@ -31,36 +31,34 @@ public:
     [[nodiscard]] Mesh operator*(const Matrix4x4& matrix4X4) const;
     Mesh& operator*=(const Matrix4x4& matrix4X4);
 
-    [[nodiscard]] std::vector<Triangle>const &data() const { return triangles; }
-    [[nodiscard]] std::vector<Triangle>& data() { return triangles; }
+    [[nodiscard]] std::vector<Triangle>const &triangles() const { return tris; }
+    [[nodiscard]] std::vector<Triangle> triangles() override { return tris; }
+    void setTriangles(const std::vector<Triangle>& t) override { tris = t; }
 
     // Translate mesh
-    Mesh& translate(double dx, double dy, double dz);
-    Mesh& translate(const Point4D& t);
-    Mesh& attractToPoint(const Point4D& point, double r);
-    Mesh& translateToPoint(const Point4D& point);
+    void translate(double dx, double dy, double dz);
+    void translate(const Point4D& t) override;
+    void attractToPoint(const Point4D& point, double r) override;
+    void translateToPoint(const Point4D& point);
     // Rotate mesh around XYZ axes
-    Mesh& rotate(double rx, double ry, double rz);
-    Mesh& rotate(const Point4D& r);
+    void rotate(double rx, double ry, double rz);
+    void rotate(const Point4D& r) override;
     // Rotate mesh around normalised vector 'v' by 'r' radians
-    Mesh& rotate(const Point4D& v, double r);
+    void rotate(const Point4D& v, double r);
     // Rotate mesh around XYZ by (rx, ry, rz) radians relative val 'point4D'
-    Mesh& rotateRelativePoint(const Point4D& point4D, double rx, double ry, double rz);
+    void rotateRelativePoint(const Point4D& point4D, double rx, double ry, double rz);
     // Rotate mesh around XYZ by (r.x, r.y, r.z) radians relative val 'point4D'
-    Mesh& rotateRelativePoint(const Point4D& point4D, const Point4D& r);
+    void rotateRelativePoint(const Point4D& point4D, const Point4D& r) override;
     // Rotate mesh around normalised vector 'v' by 'r' radians relative val 'point4D'
-    Mesh& rotateRelativePoint(const Point4D& point4D, const Point4D& v, double r);
-    Mesh& rotateUpLeftLookAt(const Point4D& r);
-    Mesh& scale(double sx, double sy, double sz);
-    Mesh& scale(const Point4D& s);
-    [[nodiscard]] Point4D const & position() const { return p_position; }
+    void rotateRelativePoint(const Point4D& point4D, const Point4D& v, double r);
+    void scale(double sx, double sy, double sz);
+    void scale(const Point4D& s);
+    [[nodiscard]] Point4D position() const override { return p_position; }
     [[nodiscard]] sf::Color color() const { return c_color; }
     void setColor(sf::Color c) { c_color = c; }
 
     Mesh static Cube(double size = 1.0);
     Mesh static Obj(const std::string& filename);
-
-    Animation<Mesh> animation;
 };
 
 

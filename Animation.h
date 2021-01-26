@@ -1,115 +1,81 @@
 //
-// Created by Иван Ильин on 23.01.2021.
+// Created by Иван Ильин on 26.01.2021.
 //
 
 #ifndef INC_3DZAVR_ANIMATION_H
 #define INC_3DZAVR_ANIMATION_H
 
-#include "TransformAnimation.h"
-#include <list>
 #include "utils/Time.h"
+#include "utils/Interpolation.h"
+#include "Triangle.h"
 
-template <typename T>
 class Animation {
-private:
-    T& obj;
-    std::list<TransformAnimation<T>> animations;
 public:
-    explicit Animation(T& o) : obj(o) {}
+    enum Type{
+        translate,
+        translateToPoint,
+        attractToPoint,
+        scale,
+        rotate,
+        rotateRelativePoint,
+        rotateUpLeftLookAt,
+        showCreation,
+        wait,
+    };
+    enum InterpolationType {
+        linear,
+        cos,
+        bezier
+    };
+private:
+    double _time = 0; // normalized time (from 0 to 1)
+    double _endAnimationPoint = 0;
+    double _startAnimationPoint = 0;
+    double _duration = 0;
+    bool _started = false;
+    // p - animation progress
+    double _p = 0;
+    double _dp = 0;
+    // some useful parameters for dealing with animation
+    Point4D _p_value{};
+    Point4D _p_point{};
+    double _d_value = 0;
+    double _d_point = 0;
+    Type _type;
+    InterpolationType _intType = bezier;
 
-    void translate(const Point4D& t, double duration = 1);
-    void translateToPoint(const Point4D& point, double duration = 1);
-    void attractToPoint(const Point4D& point, double r, double duration = 1);
-    void rotate(const Point4D& r, double duration = 1);
-    void rotateRelativePoint(const Point4D& s, const Point4D& r, double duration = 1);
-    void rotateUpLeftLookAt(const Point4D& r, double duration = 1);
-    // TODO: implement scale
-    void scale(const Point4D& s, double duration = 1);
-    void scale(double s, double duration = 1);
+    Point4D _bezier[2] = {{0.8, 0}, {0.2, 1}};
 
-    void showCreation(double duration = 1);
+    std::vector<Triangle> _triangles;
+public:
+    explicit Animation(Type t, const Point4D& value, double duration, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, const Point4D& value, double duration, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, double value, double duration, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, double duration, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, std::vector<Triangle> tris, double duration, InterpolationType interpolationType = bezier);
 
-    void wait(double duration = 1);
+    bool update();
+    [[nodiscard]] double time() const { return _time; };
+    [[nodiscard]] double p() const { return _p; };
+    [[nodiscard]] double dp() const { return _dp; };
+    [[nodiscard]] Point4D const& p_value() const { return _p_value; }
+    [[nodiscard]] Point4D const& p_point() const { return _p_point; }
+    [[nodiscard]] double d_value() const { return _d_value; }
+    [[nodiscard]] double d_point() const { return _d_point; }
+    [[nodiscard]] std::vector<Triangle>& triangles() { return _triangles; }
 
-    void update();
+    void setValue(const Point4D& value) { _p_value = value; }
+    void setPoint(const Point4D& point) { _p_point = point; }
+    void setValue(double value) { _d_value = value; }
+    void setPoint(double point) { _d_point = point; }
+    void setType(Type type) { _type = type; }
 
-    [[nodiscard]] bool isInAnim() const { return animations.size() > 0; }
+    [[nodiscard]] Type type() const { return _type; }
+
+    void setBezierParams(const Point4D& p1, const Point4D& p2) { _bezier[0] = p1; _bezier[1] = p2; }
+
+    [[nodiscard]] bool started() const { return _started; }
+
 };
-
-
-//
-// Created by Иван Ильин on 23.01.2021.
-//
-
-template <typename T>
-void Animation<T>::translate(const Point4D &t, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::transition, t, duration);
-}
-
-template <typename T>
-void Animation<T>::attractToPoint(const Point4D &point, double r, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::attractToPoint, point, r, duration);
-}
-template <typename T>
-void Animation<T>::translateToPoint(const Point4D &point, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::translateToPoint, point, duration);
-}
-
-template <typename T>
-void Animation<T>::rotate(const Point4D &r, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::rotation, r, duration);
-}
-
-template <typename T>
-void Animation<T>::rotateRelativePoint(const Point4D &s, const Point4D &r, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::rotateRelativePoint, s, r, duration);
-}
-template <typename T>
-void Animation<T>::rotateUpLeftLookAt(const Point4D& r, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::rotateUpLeftLookAt, r, duration);
-}
-
-template <typename T>
-void Animation<T>::scale(const Point4D &s, double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::scale, s, duration);
-}
-
-template <typename T>
-void Animation<T>::scale(double s, double duration) {
-    scale(s, s, s, duration);
-}
-
-template<typename T>
-void Animation<T>::showCreation(double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::showCreation, duration);
-}
-
-template <typename T>
-void Animation<T>::wait(double duration) {
-    animations.emplace_back(obj, TransformAnimation<T>::wait, duration);
-}
-
-template <typename T>
-void Animation<T>::update() {
-    if(animations.empty())
-        return;
-    auto it = animations.begin();
-
-    // If it the first commend is wait we should wait until waiting time is over
-    if(it->type() == TransformAnimation<T>::wait)
-    {
-        if(!it->update())
-            animations.erase(it);
-        return;
-    }
-    // Otherwise we iterate over all animation until we meet animations.end() or wait animation
-    while(!animations.empty() && (it != animations.end()) && (it->type() != TransformAnimation<T>::wait))
-    {
-        if(!it->update())
-            animations.erase(it++);
-        else
-            it++;
-    }
-}
 
 #endif //INC_3DZAVR_ANIMATION_H
