@@ -6,7 +6,7 @@ The main goal - to implement basic 3D graphics from scratch (without OpenGL or a
 
 For this moment I already implemented:
 - Operations with Point4D, Matrix4x4, Triangles and Mesh. I used operators overloading to simplify coding.
-- Projections from 3D on 2D plane, mcovement and rotation of camera and meshes.
+- Projections from 3D on 2D plane, movement and rotation of camera and meshes.
 - Triangles clipping
 - Advanced smooth animations by using Bézier curves for meshes and camera
 - External camera (You can see how 3D world projected on 2D plane and the procces pf clipping)
