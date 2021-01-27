@@ -22,6 +22,9 @@ Animation::Animation(Type t, double duration, bool looped, InterpolationType int
 Animation::Animation(Type t, std::vector<Triangle> tris, double duration, bool looped, InterpolationType interpolationType) : _type(t), _duration(duration), _looped(looped), _intType(interpolationType) {
     _triangles = std::move(tris);
 }
+Animation::Animation(Type t, const Point4D& point, std::vector<Triangle> tris, double duration, bool looped, InterpolationType interpolationType)  : _type(t), _p_point(point), _duration(duration), _looped(looped), _intType(interpolationType) {
+    _triangles = std::move(tris);
+}
 
 bool Animation::update() {
     if(!_started) {

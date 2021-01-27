@@ -22,10 +22,11 @@ public:
     void a_rotate(const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_rotateRelativePoint(const Point4D& point, const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_rotateUpLeftLookAt(const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    // TODO: implement scale
     void a_scale(const Point4D& s, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_scale(double s, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-
+    // TODO: implement rotateToAngle(const Point4D& r) - for camera and meshes
+    // TODO: implement a_rotateUpLeftLookAtToAngle(const Point4D& r) - for camera
+    // TODO: implement a_decompose(double value) - for camera, meshes and compositions
     void a_showCreation(double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
 
     void a_wait(double duration = 1, bool looped = false);

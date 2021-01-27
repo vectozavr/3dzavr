@@ -32,33 +32,22 @@ void TestGame::start() {
     external_camera.translate(-4, -0.5, 10);
     external_camera.rotate({0, M_PI/2.2, 0});
     external_camera.rotateUpLeftLookAt({M_PI/6, 0, 0});
+
     camera.setProjectionLines(true);
 
-    //debugText(false);
     setCameraMode(CameraMode::ExternalObserver);
 
-
-    //world.addMesh(Mesh::Cube(1), "object_1");
     world.loadObj("../obj/cube.obj", "cube_1", 1);
-    //world.loadObj("../obj/cube.obj", "cube_2", 1);
 
-    //world.loadObj("../obj/mountains.obj", "mountains", 1);
-
-    //world["mountains"].translate(0, -8, 0);
     world["cube_1"].translate(0, -3, 10);
-    //world["cube_2"].translate(0, -3, 20);
 
     screen.setMode(Screen::ViewMode::Transparency);
     screen.setMouseCursorVisible(false);
 
     camera.translate(0, -2,5);
 
-    //camera.translateToPoint({0, 10, 0});
-
-    world["cube_1"].scale({1, 2, 1});
-
-    world["cube_1"].a_showCreation(5);
-    world["cube_1"].a_wait(0);
+    // Animations:
+    //world["cube_1"].a_showCreation(5);
     world["cube_1"].a_translate({0, 1, 0}, 1, true, Animation::cos);
 
     world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 15, true);

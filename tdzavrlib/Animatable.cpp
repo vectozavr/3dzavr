@@ -30,7 +30,8 @@ void Animatable::a_rotateUpLeftLookAt(const Point4D &r, double duration, bool lo
 }
 
 void Animatable::a_scale(const Point4D &s, double duration, bool looped, Animation::InterpolationType interpolationType) {
-    animations.emplace_back(Animation::scale, s, duration, looped, interpolationType);
+    animations.emplace_back(Animation::scale, s,triangles(), duration, looped, interpolationType);
+    a_wait(0);
 }
 
 void Animatable::a_scale(double s, double duration, bool looped, Animation::InterpolationType interpolationType) {
@@ -39,6 +40,7 @@ void Animatable::a_scale(double s, double duration, bool looped, Animation::Inte
 
 void Animatable::a_showCreation(double duration, bool looped, Animation::InterpolationType interpolationType) {
     animations.emplace_back(Animation::showCreation, triangles(), duration, looped, interpolationType);
+    a_wait(0);
 }
 
 void Animatable::a_wait(double duration, bool looped) {
@@ -100,6 +102,12 @@ void Animatable::a_update() {
                             newTriangles.emplace_back(t[0], t[0], t[0] + (t[1] - t[0])*a/d1);
                         else
                             newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1])*(a-d1)/d2);
+                    }
+                    setTriangles(newTriangles);
+                    break;
+                case Animation::scale:
+                    for(auto &t : it->triangles()) {
+                        newTriangles.emplace_back(t*Matrix4x4::Scale(it->p_point()*it->p()));
                     }
                     setTriangles(newTriangles);
                     break;

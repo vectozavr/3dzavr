@@ -55,6 +55,7 @@ public:
     explicit Animation(Type t, const Point4D& point, double value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
     explicit Animation(Type t, double duration, bool looped = false, InterpolationType interpolationType = bezier);
     explicit Animation(Type t, std::vector<Triangle> tris, double duration, bool looped = false, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, std::vector<Triangle> tris, double duration, bool looped = false, InterpolationType interpolationType = bezier);
 
     bool update();
     [[nodiscard]] double time() const { return _time; };
