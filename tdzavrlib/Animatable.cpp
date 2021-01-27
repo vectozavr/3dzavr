@@ -5,44 +5,44 @@
 #include "Animatable.h"
 #include <iostream>
 
-void Animatable::a_translate(const Point4D &t, double duration) {
-    animations.emplace_back(Animation::translate, t, duration);
+void Animatable::a_translate(const Point4D &t, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::translate, t, duration, looped, interpolationType);
 }
 
-void Animatable::a_translateToPoint(const Point4D &point, double duration) {
-    animations.emplace_back(Animation::translateToPoint, point, duration);
+void Animatable::a_translateToPoint(const Point4D &point, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::translateToPoint, point, duration, looped, interpolationType);
 }
 
-void Animatable::a_attractToPoint(const Point4D &point, double value, double duration) {
-    animations.emplace_back(Animation::attractToPoint, point, value, duration);
+void Animatable::a_attractToPoint(const Point4D &point, double value, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::attractToPoint, point, value, duration, looped, interpolationType);
 }
 
-void Animatable::a_rotate(const Point4D &r, double duration) {
-    animations.emplace_back(Animation::rotate, r, duration);
+void Animatable::a_rotate(const Point4D &r, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::rotate, r, duration, looped, interpolationType);
 }
 
-void Animatable::a_rotateRelativePoint(const Point4D &point, const Point4D &r, double duration) {
-    animations.emplace_back(Animation::rotateRelativePoint, point, r, duration);
+void Animatable::a_rotateRelativePoint(const Point4D &point, const Point4D &r, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::rotateRelativePoint, point, r, duration, looped, interpolationType);
 }
 
-void Animatable::a_rotateUpLeftLookAt(const Point4D &r, double duration) {
-    animations.emplace_back(Animation::rotateUpLeftLookAt, r, duration);
+void Animatable::a_rotateUpLeftLookAt(const Point4D &r, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::rotateUpLeftLookAt, r, duration, looped, interpolationType);
 }
 
-void Animatable::a_scale(const Point4D &s, double duration) {
-    animations.emplace_back(Animation::scale, s, duration);
+void Animatable::a_scale(const Point4D &s, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::scale, s, duration, looped, interpolationType);
 }
 
-void Animatable::a_scale(double s, double duration) {
-    a_scale(Point4D{s, s, s}, duration);
+void Animatable::a_scale(double s, double duration, bool looped, Animation::InterpolationType interpolationType) {
+    a_scale(Point4D{s, s, s}, duration, looped, interpolationType);
 }
 
-void Animatable::a_showCreation(double duration) {
-    animations.emplace_back(Animation::showCreation, triangles(), duration);
+void Animatable::a_showCreation(double duration, bool looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(Animation::showCreation, triangles(), duration, looped, interpolationType);
 }
 
-void Animatable::a_wait(double duration) {
-    animations.emplace_back(Animation::wait, duration);
+void Animatable::a_wait(double duration, bool looped) {
+    animations.emplace_back(Animation::wait, duration, looped);
 }
 
 void Animatable::a_update() {
@@ -101,7 +101,6 @@ void Animatable::a_update() {
                         else
                             newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1])*(a-d1)/d2);
                     }
-
                     setTriangles(newTriangles);
                     break;
                 case Animation::wait:

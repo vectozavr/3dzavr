@@ -20,7 +20,7 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
 
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
     //window.setFramerateLimit(60);
-    //window.setVerticalSyncEnabled(verticalSync);
+    window.setVerticalSyncEnabled(verticalSync);
 
     if (!font.loadFromFile("../fonts/Roboto-Thin.ttf"))
         Log::log("Screen::open: Cannot load font '../fonts/Roboto-Thin.ttf'");
@@ -62,7 +62,7 @@ void Screen::line(const Point4D& p1, const Point4D& p2, sf::Color color)
 
 void Screen::triangle(const Triangle& triangle)
 {
-    if(vm == Frame || vm == Borders || vm == Xray || vm == Clipped || vm == Transparency) {
+    if(vm == Frame || vm == Borders || vm == Xray || vm == Clipped || vm == Transparency || vm == Normals) {
         // Using this we have significant artefacts with small tris
         //convex.setOutlineThickness(1);
         //convex.setOutlineColor({255, 0, 0});

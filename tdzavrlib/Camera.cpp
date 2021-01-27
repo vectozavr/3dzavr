@@ -24,7 +24,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
     for(auto& t : mesh.triangles()) {
 
         double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
-        if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !(mode == Screen::ViewMode::Transparency) && !isExternal )
+        if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !(mode == Screen::ViewMode::Transparency) && !(mode == Screen::ViewMode::Normals) && !isExternal )
             continue;
 
         int newTriangles = 1;
@@ -57,7 +57,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
             // That's why we keep color of tris as it is.
             if(!isExternal) {
                 if(mode != Screen::ViewMode::Clipped)
-                    clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), mode == Screen::ViewMode::Transparency ? 100 : 255);
+                    clippedTriangle.color = sf::Color(255 * (0.3 * std::abs(dot) + 0.7), 245 * (0.3 * std::abs(dot) + 0.7), 194 * (0.3 * std::abs(dot) + 0.7), (mode == Screen::ViewMode::Transparency || mode == Screen::ViewMode::Normals) ? 100 : 255);
                 // This is for clipping demonstration.
                 // If you want to debug clipping just comment previous line and uncomment this block of code.
                 else {
@@ -96,36 +96,45 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
 
                 // We can also draw lines from points to the origin of camera
                 // to show how each particular val is being projected.
-                /*
-                Triangle line1 = {{clippedTriangle[0].x, clippedTriangle[0].y, clippedTriangle[0].z, 1},
-                                  {clippedTriangle[0].x, clippedTriangle[0].y, clippedTriangle[0].z, 1},
-                                  {0, 0, 0, 1}};
-                Triangle line2 = {{clippedTriangle[1].x, clippedTriangle[1].y, clippedTriangle[1].z, 1},
-                                  {clippedTriangle[1].x, clippedTriangle[1].y, clippedTriangle[1].z, 1},
-                                  {0, 0, 0, 1}};
-                Triangle line3 = {{clippedTriangle[2].x, clippedTriangle[2].y, clippedTriangle[2].z, 1},
-                                  {clippedTriangle[2].x, clippedTriangle[2].y, clippedTriangle[2].z, 1},
-                                  {0, 0, 0, 1}};
-                traced.emplace_back(line1 * Vint);
-                traced.emplace_back(line2 * Vint);
-                traced.emplace_back(line3 * Vint);
-                 */
+                if(projectionLines) {
+                    Triangle line1 = {clippedTriangle[0],
+                                      clippedTriangle[0],
+                                      {0, 0, 0, 1}};
+                    Triangle line2 = {clippedTriangle[1],
+                                      clippedTriangle[1],
+                                      {0, 0, 0, 1}};
+                    Triangle line3 = {clippedTriangle[2],
+                                      clippedTriangle[2],
+                                      {0, 0, 0, 1}};
+                    traced.emplace_back(line1 * Vint);
+                    traced.emplace_back(line2 * Vint);
+                    traced.emplace_back(line3 * Vint);
+                }
 
-                Triangle line1 = {clippedTriangle[0],
-                                  clippedTriangle[0],
-                                  {0, 0, 0, 1}};
-                Triangle line2 = {clippedTriangle[1],
-                                  clippedTriangle[1],
-                                  {0, 0, 0, 1}};
-                Triangle line3 = {clippedTriangle[2],
-                                  clippedTriangle[2],
-                                  {0, 0, 0, 1}};
-                traced.emplace_back(line1 * Vint);
-                traced.emplace_back(line2 * Vint);
-                traced.emplace_back(line3 * Vint);
+                // Draw normals in external camera
+                /*
+                if(mode == Screen::Normals) {
+                    Triangle norm = {clippedTriangle.pos(),
+                                     clippedTriangle.pos(),
+                                     clippedTriangle.pos() + clippedTriangle.norm()};
+                    traced.emplace_back(norm * Vint);
+                }*/
 
                 traced.emplace_back(prj * Vint);                // trace projected clipped triangle
                 traced.emplace_back(clippedTriangle * Vint);    // trace clipped triangle
+            }
+            // You can draw normals
+            if((mode == Screen::Normals) && !trace && !isExternal) {
+                Triangle norm = {clippedTriangle.pos(),
+                                 clippedTriangle.pos(),
+                                 clippedTriangle.pos() + clippedTriangle.norm()};
+
+                norm *= SP;
+                norm[0] /= norm[0].w;
+                norm[1] /= norm[1].w;
+                norm[2] /= norm[2].w;
+
+                triangles.emplace_back(norm);
             }
             // Finally its time to project our clipped colored triangle from 3D -> 2D
             // and transform it's coordinate to screen space (in pixels):
