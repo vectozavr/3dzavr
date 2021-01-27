@@ -1,5 +1,5 @@
 //
-// Created by Иван Ильин on 23.01.2021.
+// Created by Иван Ильин on 27.01.2021.
 //
 
 #include "tdzavrlib/Tdzavr.h"
@@ -33,40 +33,24 @@ void TestGame::start() {
     external_camera.rotate({0, M_PI/2.2, 0});
     external_camera.rotateUpLeftLookAt({M_PI/6, 0, 0});
 
-    camera.setProjectionLines(true);
+    world.loadObj("../obj/lab1.obj", "teapot", 1);
 
-    setCameraMode(CameraMode::ExternalObserver);
-
-    world.loadObj("../obj/cube.obj", "cube_1", 1);
-
-    world["cube_1"].translate(0, -3, 10);
+    world["teapot"].translate(0, -3, 10);
 
     screen.setMode(Screen::ViewMode::Transparency);
     screen.setMouseCursorVisible(false);
 
-    camera.translate(0, -2,5);
+    camera.translate(0, 10,-20);
+    camera.rotateUpLeftLookAt({M_PI/6, 0, 0});
 
     // Animations:
-    world["cube_1"].a_showCreation(5);
-    world["cube_1"].a_decompose(1, 5);
-    world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 5);
-    world["cube_1"].a_wait(0);
-    world["cube_1"].a_decompose(-1, 5);
-    world["cube_1"].a_wait(5);
+    world["teapot"].a_showCreation(5);
+    camera.a_rotateRelativePoint(world["teapot"].position(), {0, M_PI/4.0, 0}, 10, Animation::Continue);
+    camera.a_attractToPoint(world["teapot"].position(), -10, 11);
 
-    external_camera.a_attractToPoint(world["cube_1"].position(), -3, 15);
-    external_camera.a_attractToPoint(camera.position(), 3, 15);
-    external_camera.a_rotateRelativePoint(world["cube_1"].position(), {0, -M_PI/2, 0}, 15);
-    external_camera.a_rotate({0, -M_PI/6, 0}, 15);
-    external_camera.a_wait();
-    external_camera.a_attractToPoint(camera.position() + Point4D{0,-1,1}, 2, 3);
-    external_camera.a_rotateUpLeftLookAt({-M_PI/6, 0, 0}, 3);
-    world["cube_1"].a_wait(0);
-    world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 10);
-    external_camera.a_wait(3);
-
-    external_camera.a_translateToPoint(camera.position() + Point4D{5, 0, 1}, 3);
-    external_camera.a_rotate({0, -M_PI/5, 0}, 3);
+    world["teapot"].a_decompose(10, 3);
+    world["teapot"].a_wait(0);
+    world["teapot"].a_decompose(-10, 3);
 }
 
 void TestGame::update(double elapsedTime) {

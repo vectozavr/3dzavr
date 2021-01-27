@@ -16,6 +16,7 @@ public:
         translateToPoint,
         attractToPoint,
         scale,
+        decompose,
         rotate,
         rotateRelativePoint,
         rotateUpLeftLookAt,
@@ -27,13 +28,21 @@ public:
         cos,
         bezier
     };
+    enum LoopOut {
+        None,
+        Cycle,
+        Continue
+    };
 private:
     double _time = 0; // normalized time (from 0 to 1)
+    double _dtime = 0;
+    double _timeOld = 0;
+
     double _endAnimationPoint = 0;
     double _startAnimationPoint = 0;
     double _duration = 0;
     bool _started = false;
-    bool _looped = false;
+    LoopOut _looped = None;
     bool _inverse = false;
     // p - animation progress
     double _p = 0;
@@ -50,12 +59,13 @@ private:
 
     std::vector<Triangle> _triangles;
 public:
-    explicit Animation(Type t, const Point4D& value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, const Point4D& point, const Point4D& value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, const Point4D& point, double value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, double duration, bool looped = false, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, std::vector<Triangle> tris, double duration, bool looped = false, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, const Point4D& point, std::vector<Triangle> tris, double duration, bool looped = false, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& value, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, const Point4D& value, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, double value, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, double value, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, std::vector<Triangle> tris, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, std::vector<Triangle> tris, double duration, LoopOut looped = None, InterpolationType interpolationType = bezier);
 
     bool update();
     [[nodiscard]] double time() const { return _time; };

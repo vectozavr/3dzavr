@@ -178,3 +178,8 @@ void Mesh::attractToPoint(const Point4D &point, double r) {
 void Mesh::translateToPoint(const Point4D &point) {
     p_position = point;
 }
+
+void Mesh::decompose(double value) {
+    for (auto& t : tris)
+        t *= Matrix4x4::Translation((t.pos()).normalize()*value);
+}

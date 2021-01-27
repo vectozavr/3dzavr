@@ -53,6 +53,7 @@ public:
     void rotateRelativePoint(const Point4D& point4D, const Point4D& v, double r);
     void scale(double sx, double sy, double sz);
     void scale(const Point4D& s);
+    void decompose(double value) override;
     [[nodiscard]] Point4D position() const override { return p_position; }
     [[nodiscard]] sf::Color color() const { return c_color; }
     void setColor(sf::Color c) { c_color = c; }

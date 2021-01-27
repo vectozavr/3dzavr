@@ -16,20 +16,20 @@ protected:
 public:
     Animatable() = default;
     // All methods about animation begins with 'a_'
-    void a_translate(const Point4D& t, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_translateToPoint(const Point4D& point, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_attractToPoint(const Point4D& point, double value, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_rotate(const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_rotateRelativePoint(const Point4D& point, const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_rotateUpLeftLookAt(const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_scale(const Point4D& s, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_scale(double s, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
-    // TODO: implement rotateToAngle(const Point4D& r) - for camera and meshes
+    void a_translate(const Point4D& t, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_translateToPoint(const Point4D& point, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_attractToPoint(const Point4D& point, double value, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotate(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotateRelativePoint(const Point4D& point, const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotateUpLeftLookAt(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_scale(const Point4D& s, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_scale(double s, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    // TODO: implement a_rotateToAngle(const Point4D& r) - for camera and meshes
     // TODO: implement a_rotateUpLeftLookAtToAngle(const Point4D& r) - for camera
-    // TODO: implement a_decompose(double value) - for camera, meshes and compositions
-    void a_showCreation(double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_decompose(double value, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
 
-    void a_wait(double duration = 1, bool looped = false);
+    void a_showCreation(double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_wait(double duration = 1);
 
     void a_update();
 
@@ -48,6 +48,7 @@ public:
     virtual void rotateRelativePoint(const Point4D& point, const Point4D& r) {}
     [[nodiscard]] virtual std::vector<Triangle> triangles() { return std::vector<Triangle>{}; }
     virtual void setTriangles(const std::vector<Triangle>& tris) {}
+    virtual void decompose(double value) {}
 };
 
 #endif //INC_3DZAVR_ANIMATABLE_H
