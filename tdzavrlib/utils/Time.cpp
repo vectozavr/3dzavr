@@ -24,12 +24,15 @@ namespace Time
     double deltaTime()
     {
         return _deltaTime;
-        //return 1.0/60.0;
     }
 
     void update()
     {
         std::chrono::duration<double> t = std::chrono::system_clock::now().time_since_epoch();
+        // fixed delta time
+        //_deltaTime = 1.0/60.0;
+        //_time = _time + _deltaTime;
+
         _deltaTime = t.count() - _time;
         _time = t.count();
 
