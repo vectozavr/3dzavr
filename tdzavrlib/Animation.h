@@ -33,6 +33,8 @@ private:
     double _startAnimationPoint = 0;
     double _duration = 0;
     bool _started = false;
+    bool _looped = false;
+    bool _inverse = false;
     // p - animation progress
     double _p = 0;
     double _dp = 0;
@@ -48,11 +50,11 @@ private:
 
     std::vector<Triangle> _triangles;
 public:
-    explicit Animation(Type t, const Point4D& value, double duration, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, const Point4D& point, const Point4D& value, double duration, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, const Point4D& point, double value, double duration, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, double duration, InterpolationType interpolationType = bezier);
-    explicit Animation(Type t, std::vector<Triangle> tris, double duration, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, const Point4D& value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, const Point4D& point, double value, double duration, bool looped = false, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, double duration, bool looped = false, InterpolationType interpolationType = bezier);
+    explicit Animation(Type t, std::vector<Triangle> tris, double duration, bool looped = false, InterpolationType interpolationType = bezier);
 
     bool update();
     [[nodiscard]] double time() const { return _time; };

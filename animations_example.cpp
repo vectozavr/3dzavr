@@ -5,7 +5,6 @@
 #include "tdzavrlib/Tdzavr.h"
 #include "tdzavrlib/CameraController.h"
 #include <iostream>
-#include "tdzavrlib/Animation.h"
 
 using namespace std;
 
@@ -33,9 +32,9 @@ void TestGame::start() {
     external_camera.translate(-4, -0.5, 10);
     external_camera.rotate({0, M_PI/2.2, 0});
     external_camera.rotateUpLeftLookAt({M_PI/6, 0, 0});
+    camera.setProjectionLines(true);
 
-
-    debugText(false);
+    //debugText(false);
     setCameraMode(CameraMode::ExternalObserver);
 
 
@@ -52,43 +51,17 @@ void TestGame::start() {
     screen.setMode(Screen::ViewMode::Transparency);
     screen.setMouseCursorVisible(false);
 
-    //Mesh triangle{};
-    //Triangle t = {{1, 0, 0, 1},
-    //              {-1, 0, 0, 1},
-    //              {0, 1, 0, 1}};
-    //triangle.data().push_back({t});
-    //world.addMesh(triangle, "object_2");
-
     camera.translate(0, -2,5);
 
     //camera.translateToPoint({0, 10, 0});
 
-    // Animation
-    //world["cube_1"].animation.wait(6);
-    //camera.animation.translateToPoint({-11,2,0}, 5);
-    //camera.animation.rotate({0, M_PI/6, 0}, 5);
-    //camera.animation.wait();
+    world["cube_1"].scale({1, 2, 1});
 
-    //world["cube_1"].animation.rotateRelativePoint(world["cube_2"].position(), {0, 2*M_PI, 0}, 16);
-    //world["cube_1"].animation.rotate({0, 20*M_PI, 0}, 16);
-    //camera.animation.rotateRelativePoint(world["cube_2"].position(), {0, 2*M_PI, 0}, 16);
-    //camera.animation.attractToPoint(world["cube_2"].position(), -30, 16);
-    //camera.animation.translate({0, 30, 0}, 16);
-    //camera.animation.rotateUpLeftLookAt({M_PI/6, 0, 0}, 16);
-    //camera.animation.wait();
-
-    //camera.animation.attractToPoint(world["cube_2"].position(), 30, 5);
-    //camera.animation.translate({0, -30, 0}, 5);
-    //camera.animation.rotateUpLeftLookAt({-M_PI/6, 0, 0}, 5);
-
-    //world["cube_1"].animation.showCreation(5);
-
-    //world["mountains"].animation.wait(3);
     world["cube_1"].a_showCreation(5);
     world["cube_1"].a_wait(0);
-    world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 15);
-    //camera.animation.rotateRelativePoint(world["cube_1"].position(), {0, M_PI, 0}, 20);
-    //camera.animation.attractToPoint(world["cube_1"].position(), 3, 20);
+    world["cube_1"].a_translate({0, 1, 0}, 1, true, Animation::cos);
+
+    world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 15, true);
     external_camera.a_attractToPoint(world["cube_1"].position(), -3, 15);
     external_camera.a_attractToPoint(camera.position(), 3, 15);
     external_camera.a_rotateRelativePoint(world["cube_1"].position(), {0, -M_PI/2, 0}, 15);
@@ -98,11 +71,10 @@ void TestGame::start() {
     external_camera.a_rotateUpLeftLookAt({-M_PI/6, 0, 0}, 3);
     world["cube_1"].a_wait(3);
     world["cube_1"].a_rotate({M_PI, M_PI, M_PI}, 10);
-    external_camera.a_wait(10);
+    external_camera.a_wait(5);
 
     external_camera.a_translateToPoint(camera.position() + Point4D{5, 0, 1}, 3);
     external_camera.a_rotate({0, -M_PI/5, 0}, 3);
-
 }
 
 void TestGame::update(double elapsedTime) {
@@ -132,4 +104,3 @@ int main() {
 
     return 0;
 }
-

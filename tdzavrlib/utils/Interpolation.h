@@ -13,17 +13,16 @@ namespace Interpolation {
     static double Cos(double t);
     static double Bezier(const Point4D& p1, const Point4D& p2, double t);
 
-    static double dLinear(double dt);
+    static double dLinear(double t, double dt);
     static double dCos(double t, double dt);
     static double dBezier(const Point4D& p1, const Point4D& p2, double t, double dt);
 };
 
 double Interpolation::Linear(double t) {
-    if(t >= 1.0)
-        return 1.0;
-    if(t <= 0.0)
-        return 0.0;
-    return t;
+    if(t >= 0)
+        return ((int)trunc(t) % 2) ? 1.0 - (t-trunc(t)) : (t-trunc(t));
+    else
+        return Interpolation::Linear(-t);
 }
 
 double Interpolation::Cos(double t) {
@@ -31,6 +30,8 @@ double Interpolation::Cos(double t) {
 }
 
 double Interpolation::Bezier(const Point4D &p1, const Point4D &p2, double t) {
+    t = Interpolation::Linear(t);
+
     double h = 0.000001;
     double eps = 0.000001;
 
@@ -61,16 +62,16 @@ double Interpolation::Bezier(const Point4D &p1, const Point4D &p2, double t) {
 }
 
 
-double Interpolation::dLinear(double dt) {
-    return dt;
+double Interpolation::dLinear(double t, double dt) {
+    return ((int)trunc(t) % 2) ? -dt : dt;
 }
 
 double Interpolation::dCos(double t, double dt) {
-    return 0.5*M_PI*sin(M_PI*Interpolation::Linear(t))*dt;
+    return 0.5*M_PI*sin(M_PI*t)*dt;
 }
 
 double Interpolation::dBezier(const Point4D &p1, const Point4D &p2, double t, double dt) {
-    return Interpolation::Bezier(p1, p2, Interpolation::Linear(t + dt)) - Interpolation::Bezier(p1, p2, Interpolation::Linear(t));
+    return Interpolation::Bezier(p1, p2, t + dt) - Interpolation::Bezier(p1, p2, t);
 }
 
 #endif //INC_3DZAVR_INTERPOLATION_H

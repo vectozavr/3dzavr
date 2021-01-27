@@ -38,6 +38,7 @@ private:
     std::vector<Triangle> traced;
     bool trace = false;
     bool isExternal = false;
+    bool projectionLines = false;
 
     double Far = 0;
     double Near = 0;
@@ -108,6 +109,7 @@ public:
     [[nodiscard]] double Fov() const {return fov;}
     [[nodiscard]] double width() const {return w;}
     [[nodiscard]] double height() const {return h;}
+    void setProjectionLines(bool p) { projectionLines = p; }
 };
 
 

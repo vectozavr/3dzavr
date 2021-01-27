@@ -16,21 +16,23 @@ protected:
 public:
     Animatable() = default;
     // All methods about animation begins with 'a_'
-    void a_translate(const Point4D& t, double duration = 1);
-    void a_translateToPoint(const Point4D& point, double duration = 1);
-    void a_attractToPoint(const Point4D& point, double value, double duration = 1);
-    void a_rotate(const Point4D& r, double duration = 1);
-    void a_rotateRelativePoint(const Point4D& point, const Point4D& r, double duration = 1);
-    void a_rotateUpLeftLookAt(const Point4D& r, double duration = 1);
+    void a_translate(const Point4D& t, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_translateToPoint(const Point4D& point, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_attractToPoint(const Point4D& point, double value, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotate(const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotateRelativePoint(const Point4D& point, const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotateUpLeftLookAt(const Point4D& r, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
     // TODO: implement scale
-    void a_scale(const Point4D& s, double duration = 1);
-    void a_scale(double s, double duration = 1);
+    void a_scale(const Point4D& s, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_scale(double s, double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
 
-    void a_showCreation(double duration = 1);
+    void a_showCreation(double duration = 1, bool looped = false, Animation::InterpolationType interpolationType = Animation::bezier);
 
-    void a_wait(double duration = 1);
+    void a_wait(double duration = 1, bool looped = false);
 
     void a_update();
+
+    void a_clearAnimations() { animations.clear(); }
 
     [[nodiscard]] bool isInAnim() const { return !animations.empty(); }
 
