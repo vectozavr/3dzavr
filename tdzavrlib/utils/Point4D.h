@@ -5,13 +5,17 @@
 #ifndef INC_3DZAVR_POINT4D_H
 #define INC_3DZAVR_POINT4D_H
 
+//#define STORE_POINTERS
+
 class Point4D {
 public:
     double x = 0.0;
     double y = 0.0;
     double z = 0.0;
     double w = 0.0;
+#ifdef STORE_POINTERS
     double* p[4] = {&x, &y, &z, &w};
+#endif
 
 
     Point4D () = default;

@@ -11,14 +11,24 @@ Point4D::Point4D (double x, double y, double z, double w) {
     this->z = z;
     this->w = w;
 
+#ifdef STORE_POINTERS
     p[0] = &this->x; p[1] = &this->y; p[2] = &this->z; p[3] = &this->w;
+#endif
 }
 
 Point4D::Point4D(const Point4D &point4D) {
-    x = point4D.x; p[0] = &x;
-    y = point4D.y; p[1] = &y;
-    z = point4D.z; p[2] = &z;
-    w = point4D.w; p[3] = &w;
+#ifdef STORE_POINTERS
+    p[0] = &x;
+    p[1] = &y;
+    p[2] = &z;
+    p[3] = &w;
+#else
+    static_assert(sizeof(Point4D) == sizeof(double) * 4);
+#endif
+    x = point4D.x;
+    y = point4D.y;
+    z = point4D.z;
+    w = point4D.w;
 }
 
 Point4D &Point4D::operator=(const Point4D &point4D) {
@@ -33,12 +43,21 @@ Point4D &Point4D::operator=(const Point4D &point4D) {
 }
 
 
+#ifdef STORE_POINTERS
 [[nodiscard]] double Point4D::operator[] (int i) const {
     return *p[i];
 }
 [[nodiscard]] double& Point4D::operator[] (int i) {
     return *p[i];
 }
+#else
+[[nodiscard]] double Point4D::operator[] (int i) const {
+    return (&x)[i];
+}
+[[nodiscard]] double& Point4D::operator[] (int i) {
+    return (&x)[i];
+}
+#endif
 
 [[nodiscard]] Point4D Point4D::operator-() const {
     return Point4D(-x, -y, -z, -w);
