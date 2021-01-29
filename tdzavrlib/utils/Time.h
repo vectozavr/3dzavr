@@ -11,6 +11,7 @@ namespace Time
     int fps();
     double time();
     double deltaTime();
+    double realDeltaTime();
     void update();
 }
 
