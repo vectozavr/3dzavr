@@ -7,7 +7,7 @@
 
 #include <vector>
 #include "Triangle.h"
-#include "Animatable.h"
+#include "animation/Animatable.h"
 #include <SFML/Graphics.hpp>
 
 class Mesh : public Animatable {

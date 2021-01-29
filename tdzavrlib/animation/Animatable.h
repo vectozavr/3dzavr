@@ -6,13 +6,15 @@
 #define INC_3DZAVR_ANIMATABLE_H
 
 #include <list>
+#include "../Triangle.h"
+
+//class Animation;
 #include "Animation.h"
-#include "Triangle.h"
 
 // All objects in 3dzavr that should be animated must inherit class Animatable:
 class Animatable {
 protected:
-    std::list<Animation> animations;
+    std::list<Animation*> animations;
 public:
     Animatable() = default;
     // All methods about animation begins with 'a_'

@@ -6,6 +6,7 @@
 #include "utils/Time.h"
 #include <iostream>
 #include "CameraMesh.h"
+#include "utils/ResourceManager.h"
 
 void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background) {
     screen.open(screenWidth, screenHeight, name, verticalSync, background);
@@ -87,6 +88,7 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
 void Tdzavr::exit() {
     if(screen.isOpen())
         screen.close();
+    ResourceManager::unloadAllResources();
     Log::log("Tdzavr::exit(): exit 3dzavr (" + std::to_string(screen.width()) + " x " + std::to_string(screen.height()) + ") with name '" + screen.title() + "'.");
 }
 

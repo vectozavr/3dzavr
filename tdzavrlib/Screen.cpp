@@ -6,6 +6,7 @@
 #include "utils/Time.h"
 #include <utility>
 #include "utils/Log.h"
+#include "utils/ResourceManager.h"
 #include <cstdio>
 
 
@@ -21,9 +22,6 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
     window.create(sf::VideoMode(w, h), name, sf::Style::Default, settings);
     //window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(verticalSync);
-
-    if (!font.loadFromFile("../fonts/Roboto-Thin.ttf"))
-        Log::log("Screen::open: Cannot load font '../fonts/Roboto-Thin.ttf'");
 }
 
 void Screen::display() {
@@ -82,6 +80,14 @@ void Screen::triangle(const Triangle& triangle)
     convex.setPoint(0, sf::Vector2f(triangle[0].x, triangle[0].y));
     convex.setPoint(1, sf::Vector2f(triangle[1].x, triangle[1].y));
     convex.setPoint(2, sf::Vector2f(triangle[2].x, triangle[2].y));
+
+    // Texturing
+    /*
+    sf::Shader* textureShader = ResourceManager::loadShader(shader, sf::Shader::Fragment);
+    (*textureShader).setUniform("texture", sf::Shader::CurrentTexture);
+    convex.setTexture(ResourceManager::loadTexture("../textures/stone_tiles.jpg"));
+    window.draw(convex, textureShader);
+     */
 
     window.draw(convex);
 }
@@ -156,11 +162,10 @@ bool Screen::isKeyTapped(sf::Keyboard::Key key) {
 void Screen::debugText(const std::string& text) {
     sf::Text t;
 
-    t.setFont(font);
+    t.setFont(*ResourceManager::loadFont(font));
     t.setString(text);
     t.setCharacterSize(30);
     t.setFillColor(sf::Color::Black);
-    //t.setStyle(sf::Text::Bold);
     t.setPosition(10, 10);
 
     window.draw(t);

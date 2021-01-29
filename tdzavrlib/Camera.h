@@ -8,7 +8,6 @@
 #include <vector>
 #include "Screen.h"
 #include "Plane.h"
-#include "Animatable.h"
 #include "Mesh.h"
 
 class Camera : public Animatable{
