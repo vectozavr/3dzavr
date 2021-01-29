@@ -38,7 +38,12 @@ void Screen::display() {
     window.setTitle(title);
 
     if(renderVideo)
-        window.capture().saveToFile("../film/png/" + std::to_string(frame++) + ".png");
+    {
+        sf::Texture copyTexture;
+        copyTexture.create(window.getSize().x, window.getSize().y);
+        copyTexture.update(window);
+        copyTexture.copyToImage().saveToFile("../film/png/" + std::to_string(frame++) + ".png");
+    }
 
     window.display();
 }
