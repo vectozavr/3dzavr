@@ -4,7 +4,7 @@
 
 #include <string>
 #include <fstream>
-#include <strstream>
+#include <sstream>
 #include <utility>
 #include "Mesh.h"
 #include "utils/Log.h"
@@ -40,7 +40,7 @@ Mesh &Mesh::loadObj(const std::string& filename) {
         char line[128];
         file.getline(line, 128);
 
-        strstream s;
+        stringstream s;
         s << line;
 
         char junk;

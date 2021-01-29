@@ -76,8 +76,8 @@ public:
 
     void debugText(const std::string& text);
 
-    __attribute__ ((deprecated)) void setRender(bool r);
-    __attribute__ ((deprecated)) bool isRender() const { return renderVideo; }
+    [[deprecated]] void setRender(bool r);
+    [[deprecated]] bool isRender() const { return renderVideo; }
 };
 
 
