@@ -81,8 +81,6 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
                 // Because we will not apply Screen space transform for traced tris, we need to avoid aspect factor.
                 P[0][0] *= aspect;
                 Triangle prj = clippedTriangle * P;
-                prj.z = z/1000.0;   // for projected triangle we should set z position
-                                    // but we scale z to
                 P[0][0] /= aspect;
 
                 prj[0] /= prj[0].w;
