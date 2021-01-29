@@ -4,16 +4,28 @@
 
 #include "Time.h"
 #include <chrono>
-#include <list>
-#include <cmath>
+//#define FIXED_STEP (1.0/60.0)
+
+using namespace std::chrono;
 
 namespace Time
 {
     namespace
     {
+        // High precision time
+        high_resolution_clock::time_point _start = high_resolution_clock::now();
+        high_resolution_clock::time_point _last;
+
+        // FPS counter
+        high_resolution_clock::time_point _fpsStart;
+        milliseconds _fpsCountTime = milliseconds(1000);
+        int _fpsCounter = 0;
+        double _lastFps = 0;
+
+        // Compatibility
         double _time;
         double _deltaTime;
-        std::list<double> deltaTime_history;
+        double _realDeltaTime;
     }
 
     double time()
@@ -26,35 +38,40 @@ namespace Time
         return _deltaTime;
     }
 
+    double realDeltaTime()
+    {
+        return _realDeltaTime;
+    }
+
     void update()
     {
-        std::chrono::duration<double> t = std::chrono::system_clock::now().time_since_epoch();
-        // fixed delta time
-        //_deltaTime = 1.0/60.0;
-        //_time = _time + _deltaTime;
+        high_resolution_clock::time_point t = high_resolution_clock::now();
 
-        _deltaTime = t.count() - _time;
-        _time = t.count();
+#ifdef FIXED_STEP
+        _deltaTime = FIXED_STEP;
+        _time += FIXED_STEP;
+#else
+        _deltaTime = duration<double>(t - _last).count();
+        _time = duration<double>(t - _start).count();
+#endif
+        _realDeltaTime = duration<double>(t - _last).count();
+        _last = t;
 
         if(_deltaTime > 10000)
             return;
 
-        if(deltaTime_history.size() < 100)
-            deltaTime_history.push_back(_deltaTime);
-        else {
-            deltaTime_history.push_back(_deltaTime);
-            deltaTime_history.pop_front();
+        _fpsCounter++;
+        if (t - _fpsStart > _fpsCountTime)
+        {
+            _lastFps = _fpsCounter / duration<double>(t - _fpsStart).count();
+            _fpsCounter = 0;
+            _fpsStart = t;
         }
-
     }
 
-    int fps() {
-        double sum = 0;
-        for (auto dt : deltaTime_history)
-            sum += dt;
-
-        if(sum == 0)
-            return 0;
-        return floor((double)deltaTime_history.size() / sum);
+    int fps()
+    {
+        // Cast is faster than floor and has the same behavior for positive numbers 
+        return static_cast<int>(_lastFps);
     }
 }
