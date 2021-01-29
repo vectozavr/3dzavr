@@ -35,7 +35,8 @@ private:
 
     std::map<sf::Keyboard::Key, double> tappedKey;
 
-    sf::Font font;
+    std::string font = "../tdzavrlib/fonts/Roboto-Thin.ttf";
+    std::string shader = "../tdzavrlib/shaders/texturing.frag";
 
     bool renderVideo = false; // performance heavy. I use this to make sequence of .jpg files of screen and then convert this to .mp4 file
     int frame = 0;

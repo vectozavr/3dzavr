@@ -5,7 +5,7 @@
 #ifndef INC_3DZAVR_INTERPOLATION_H
 #define INC_3DZAVR_INTERPOLATION_H
 
-#include "Point4D.h"
+#include "../utils/Point4D.h"
 #include <cmath>
 
 namespace Interpolation {
