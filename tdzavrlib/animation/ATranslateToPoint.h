@@ -21,7 +21,7 @@ public:
         point = p;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         if(!_started) {
             value = point - obj.position();
         }

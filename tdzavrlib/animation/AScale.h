@@ -23,7 +23,7 @@ public:
         value = s;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         if(!_started)
             triangles = obj.triangles();
 

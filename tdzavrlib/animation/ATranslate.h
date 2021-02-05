@@ -20,7 +20,7 @@ public:
         value = t;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         obj.translate(value * _dp);
         return updateState();
     }

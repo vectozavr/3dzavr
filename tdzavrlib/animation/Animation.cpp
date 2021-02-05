@@ -29,6 +29,10 @@ bool Animation::updateState() {
             _p = Interpolation::Bezier(_bezier[0], _bezier[1], _time);
             _dp = Interpolation::dBezier(_bezier[0], _bezier[1], _time, _dtime);
             break;
+        case bouncing:
+            _p = Interpolation::Bouncing(_time);
+            _dp = Interpolation::dBouncing(_time, _dtime);
+            break;
         case linear:
             _p = Interpolation::Linear(_time);
             _dp = Interpolation::dLinear(_time, _dtime);

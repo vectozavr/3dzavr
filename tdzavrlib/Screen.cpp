@@ -87,12 +87,13 @@ void Screen::triangle(const Triangle& triangle)
     convex.setPoint(2, sf::Vector2f(triangle[2].x, triangle[2].y));
 
     // Texturing
-    /*
-    sf::Shader* textureShader = ResourceManager::loadShader(shader, sf::Shader::Fragment);
-    (*textureShader).setUniform("texture", sf::Shader::CurrentTexture);
-    convex.setTexture(ResourceManager::loadTexture("../textures/stone_tiles.jpg"));
-    window.draw(convex, textureShader);
-     */
+
+    //sf::Shader* textureShader = ResourceManager::loadShader(shader, sf::Shader::Fragment);
+    //(*textureShader).setUniform("texture", sf::Shader::CurrentTexture);
+    ////(*textureShader).setUniform("G");
+    //convex.setTexture(ResourceManager::loadTexture("../textures/stone_tiles.jpg"));
+    //window.draw(convex, textureShader);
+
 
     window.draw(convex);
 }
@@ -109,6 +110,8 @@ bool Screen::isOpen() {
 void Screen::close() {
     window.close();
 }
+
+#include <iostream>
 
 bool Screen::isKeyPressed(sf::Keyboard::Key key) {
     return sf::Keyboard::isKeyPressed(key);

@@ -16,7 +16,8 @@ public:
     enum InterpolationType {
         linear,
         cos,
-        bezier
+        bezier,
+        bouncing
     };
     enum LoopOut {
         None,

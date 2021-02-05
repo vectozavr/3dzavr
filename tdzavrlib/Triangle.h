@@ -20,7 +20,8 @@ public:
     };
     ClipMode clip = None;
     sf::Color color;
-    Point4D p[3];
+    Point4D p[3]; // points in space
+    Point4D t[3]; // texture coordinates
 
     Triangle ();
     Triangle (const Triangle& triangle);

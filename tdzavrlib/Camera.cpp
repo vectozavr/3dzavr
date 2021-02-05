@@ -219,18 +219,21 @@ void Camera::record() {
 }
 
 void Camera::rotateX(double rx) {
+    p_angle.x += rx;
     p_left = Matrix4x4::RotationX(rx) * p_left;
     p_up = Matrix4x4::RotationX(rx) * p_up;
     p_lookAt = Matrix4x4::RotationX(rx) * p_lookAt;
 }
 
 void Camera::rotateY(double ry) {
+    p_angle.y += ry;
     p_left = Matrix4x4::RotationY(ry) * p_left;
     p_up = Matrix4x4::RotationY(ry) * p_up;
     p_lookAt = Matrix4x4::RotationY(ry) * p_lookAt;
 }
 
 void Camera::rotateZ(double rz) {
+    p_angle.z += rz;
     p_left = Matrix4x4::RotationZ(rz) * p_left;
     p_up = Matrix4x4::RotationZ(rz) * p_up;
     p_lookAt = Matrix4x4::RotationZ(rz) * p_lookAt;
@@ -254,17 +257,20 @@ void Camera::rotate(const Point4D& v, double rv) {
 }
 
 void Camera::rotateLeft(double rl) {
+    p_angleLeftUpLookAt.x += rl;
     rotate(p_left, rl);
 }
 
 void Camera::rotateUp(double ru) {
+    p_angleLeftUpLookAt.y += ru;
     rotate(p_up, ru);
 }
 
 void Camera::rotateLookAt(double rlAt) {
+    p_angleLeftUpLookAt.z += rlAt;
     rotate(p_lookAt, rlAt);
 }
-void Camera::rotateUpLeftLookAt(const Point4D &r) {
+void Camera::rotateLeftUpLookAt(const Point4D &r) {
     rotateLeft(r.x);
     rotateUp(r.y);
     rotateLookAt(r.z);
@@ -275,6 +281,8 @@ std::vector<Triangle> &Camera::tracedTriangles() {
 }
 
 void Camera::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
+    p_angle += Point4D{rx, ry, rz};
+
     // Translate XYZ by vector r1
     Point4D r1 = p_eye - s;
     // In translated coordinate system we rotate camera and position

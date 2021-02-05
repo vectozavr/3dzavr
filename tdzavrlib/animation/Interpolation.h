@@ -12,10 +12,12 @@ namespace Interpolation {
     static double Linear(double t);
     static double Cos(double t);
     static double Bezier(const Point4D& p1, const Point4D& p2, double t);
+    static double Bouncing(double t);
 
     static double dLinear(double t, double dt);
     static double dCos(double t, double dt);
     static double dBezier(const Point4D& p1, const Point4D& p2, double t, double dt);
+    static double dBouncing(double t, double dt);
 };
 
 double Interpolation::Linear(double t) {
@@ -61,6 +63,10 @@ double Interpolation::Bezier(const Point4D &p1, const Point4D &p2, double t) {
     return py(s1);
 }
 
+double Interpolation::Bouncing(double t) {
+    t = Interpolation::Linear(t);
+    return 0.5*(1.0/(1.0 + exp(10.0*(-4.0*t+0.8))) + (1.0 + 2.5*sin(50.0*(t - 1.0/3.0))*exp(-7.0*t))/(1.0+exp(10.0*(-15.0*t + 3.1))));
+}
 
 double Interpolation::dLinear(double t, double dt) {
     return ((int)trunc(t) % 2) ? -dt : dt;
@@ -72,6 +78,10 @@ double Interpolation::dCos(double t, double dt) {
 
 double Interpolation::dBezier(const Point4D &p1, const Point4D &p2, double t, double dt) {
     return Interpolation::Bezier(p1, p2, t + dt) - Interpolation::Bezier(p1, p2, t);
+}
+
+double Interpolation::dBouncing(double t, double dt) {
+    return Bouncing(t + dt) - Bouncing(t);
 }
 
 #endif //INC_3DZAVR_INTERPOLATION_H
