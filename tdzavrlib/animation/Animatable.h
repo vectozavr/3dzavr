@@ -26,8 +26,6 @@ public:
     void a_rotateLeftUpLookAt(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_scale(const Point4D& s, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_scale(double s, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
-    // TODO: implement a_rotateToAngle(const Point4D& r) - for camera and meshes
-    // TODO: implement a_rotateLeftUpLookAtToAngle(const Point4D& r) - for camera
     void a_rotateToAngle(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_rotateLeftUpLookAtToAngle(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
 
