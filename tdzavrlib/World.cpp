@@ -8,7 +8,7 @@
 
 using namespace std;
 
-World::World(const std::string &filename, double scale) {
+World::World(const std::string &filename, Point4D scale) {
     loadObj(filename, "map", scale);
     Log::log("World::World(): loaded map from " + filename + "' with " + std::to_string(objects["map"].triangles().size()) + " tris.");
 }
@@ -24,8 +24,10 @@ void World::addMesh(const Mesh& mesh, const string &name) {
     Log::log("World::addMesh(): inserted rvalue mesh '" + name + "' with " + std::to_string(objects[name].triangles().size()) + " tris.");
 }
 
-void World::loadObj(const string &filename, const string &name, double scale) {
-    objects.emplace(name, Mesh(filename)*Matrix4x4::Scale(scale, scale, scale));
+void World::loadObj(const string &filename, const string &name, Point4D scale) {
+    Mesh resMesh(filename);
+    resMesh.scale(scale);
+    objects.emplace(name, resMesh);
     Log::log("World::loadObj(): inserted mesh from " + filename + " with name '" + name + "' with " + std::to_string(objects[name].triangles().size()) + " tris.");
 }
 

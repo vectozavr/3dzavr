@@ -77,8 +77,8 @@ public:
 
     void debugText(const std::string& text);
 
-    [[deprecated]] void setRender(bool r);
-    [[deprecated]] bool isRender() const { return renderVideo; }
+    void setRender(bool r);
+    bool isRender() const { return renderVideo; }
 };
 
 

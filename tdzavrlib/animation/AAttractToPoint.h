@@ -22,7 +22,7 @@ public:
         value = v;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override{
         obj.attractToPoint(point, value * _dp);
         return updateState();
     }

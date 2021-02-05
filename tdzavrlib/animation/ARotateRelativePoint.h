@@ -22,7 +22,7 @@ public:
         value = r;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         obj.rotateRelativePoint(point, value * _dp);
         return updateState();
     }

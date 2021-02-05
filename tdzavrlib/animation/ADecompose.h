@@ -20,7 +20,7 @@ public:
         value = v;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         obj.decompose(value * _dp);
         return updateState();
     }

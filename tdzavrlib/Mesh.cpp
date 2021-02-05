@@ -106,10 +106,12 @@ void Mesh::translate(double dx, double dy, double dz) {
 }
 
 void Mesh::rotate(double rx, double ry, double rz) {
+    p_angle += Point4D{rx, ry, rz};
     *this *= Matrix4x4::Rotation(rx, ry, rz);
 }
 
 void Mesh::rotate(const Point4D &r) {
+    p_angle += r;
     *this *= Matrix4x4::Rotation(r);
 }
 
@@ -137,6 +139,8 @@ Mesh &Mesh::operator=(const Mesh &mesh) {
 }
 
 void Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz) {
+    p_angle += Point4D{rx, ry, rz};
+
     // Translate XYZ by vector r1
     Point4D r1 = p_position - s;
     *this *= Matrix4x4::Translation(r1);
@@ -152,6 +156,7 @@ void Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz
 }
 
 void Mesh::rotateRelativePoint(const Point4D &s, const Point4D &r) {
+    p_angle += r;
     rotateRelativePoint(s, r.x, r.y, r.z);
 }
 

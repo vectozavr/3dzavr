@@ -10,11 +10,13 @@
 #include "AAttractToPoint.h"
 #include "ARotate.h"
 #include "ARotateRelativePoint.h"
-#include "ARotateUpLeftLookAt.h"
+#include "ARotateLeftUpLookAt.h"
 #include "AScale.h"
 #include "ADecompose.h"
 #include "AShowCreation.h"
 #include "AWait.h"
+#include "ARotateToAngle.h"
+#include "ARotateLeftUpLookAtToAngle.h"
 
 void Animatable::a_translate(const Point4D &t, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
     animations.emplace_back(new ATranslate(t, duration, looped, interpolationType));
@@ -36,8 +38,8 @@ void Animatable::a_rotateRelativePoint(const Point4D &point, const Point4D &r, d
     animations.emplace_back(new ARotateRelativePoint(point, r, duration, looped, interpolationType));
 }
 
-void Animatable::a_rotateUpLeftLookAt(const Point4D &r, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
-    animations.emplace_back(new ARotateUpLeftLookAt(r, duration, looped, interpolationType));
+void Animatable::a_rotateLeftUpLookAt(const Point4D &r, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(new ARotateLeftUpLookAt(r, duration, looped, interpolationType));
 }
 
 void Animatable::a_scale(const Point4D &s, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
@@ -47,6 +49,15 @@ void Animatable::a_scale(const Point4D &s, double duration, Animation::LoopOut l
 void Animatable::a_scale(double s, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
     a_scale(Point4D{s, s, s}, duration, looped, interpolationType);
 }
+
+void Animatable::a_rotateToAngle(const Point4D &r, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(new ARotateToAngle(r, duration, looped, interpolationType));
+}
+
+void Animatable::a_rotateLeftUpLookAtToAngle(const Point4D &r, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
+    animations.emplace_back(new ARotateLeftUpLookAtToAngle(r, duration, looped, interpolationType));
+}
+
 
 void Animatable::a_decompose(double value, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
     animations.emplace_back(new ADecompose(value, duration, looped, interpolationType));

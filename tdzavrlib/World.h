@@ -13,7 +13,7 @@ public:
     std::map<std::string, Mesh> objects;
 
     World() = default;
-    explicit World(const std::string& filename, double scale = 1.0);
+    explicit World(const std::string& filename, Point4D scale = {1, 1, 1});
 
     [[nodiscard]] Mesh& operator[] (const std::string& name);
 
@@ -21,7 +21,7 @@ public:
     void copyMesh(const std::string& meshName, const std::string& copyName);
     void addMesh(const Mesh& mesh, const std::string& name = "");
     void removeMesh(const std::string& name);
-    void loadObj(const std::string& filename, const std::string& name = "", double scale = 1.0);
+    void loadObj(const std::string& filename, const std::string& name = "", Point4D scale = {1, 1, 1});
 };
 
 

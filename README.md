@@ -9,7 +9,7 @@ For this moment I already implemented:
 - Projections from 3D on 2D plane, movement and rotation of camera and meshes.
 - Triangles clipping
 - Advanced smooth animations by using Bézier curves for meshes and camera
-- External camera (You can see how 3D world projected on 2D plane and the procces pf clipping)
+- External camera (You can see how 3D world projected on 2D plane and the process of clipping)
 - You can render animated scene to .mp4 files or sequence of .png files (film/img/ & film/mp4). But it is extremely slow process due-to SFML waste a lot of time on saving .png files. It is still better to capture your screen by some additional software.
 
 TODO:

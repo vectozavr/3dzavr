@@ -8,15 +8,22 @@
 #include <vector>
 #include "Triangle.h"
 #include "animation/Animatable.h"
+#include "physics/RigidBody.h"
 #include <SFML/Graphics.hpp>
 
-class Mesh : public Animatable {
+class Mesh : public Animatable, RigidBody {
 protected:
     std::vector<Triangle> tris;
 
     Point4D p_position;
+    Point4D p_angle;
 
     sf::Color c_color;
+
+    // Operations with Matrix4x4
+    [[nodiscard]] Mesh operator*(const Matrix4x4& matrix4X4) const;
+    Mesh& operator*=(const Matrix4x4& matrix4X4);
+
 public:
     Mesh() = default;
     Mesh(const Mesh& mesh);
@@ -26,10 +33,6 @@ public:
     explicit Mesh(const std::string& filename);
 
     Mesh& loadObj(const std::string& filename);
-
-    // Operations with Matrix4x4
-    [[nodiscard]] Mesh operator*(const Matrix4x4& matrix4X4) const;
-    Mesh& operator*=(const Matrix4x4& matrix4X4);
 
     [[nodiscard]] std::vector<Triangle>const &triangles() const { return tris; }
     [[nodiscard]] std::vector<Triangle> triangles() override { return tris; }
@@ -54,7 +57,10 @@ public:
     void scale(double sx, double sy, double sz);
     void scale(const Point4D& s);
     void decompose(double value) override;
+
     [[nodiscard]] Point4D position() const override { return p_position; }
+    [[nodiscard]] Point4D angle() const override { return p_angle; }
+
     [[nodiscard]] sf::Color color() const { return c_color; }
     void setColor(sf::Color c) { c_color = c; }
 

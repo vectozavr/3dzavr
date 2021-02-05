@@ -19,7 +19,7 @@ public:
         _waitFor = true;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         if(!_started)
             triangles = obj.triangles();
 

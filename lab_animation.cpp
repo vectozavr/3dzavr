@@ -21,7 +21,7 @@ public:
     void switchCamera();
 };
 
-TestGame::TestGame() : cameraController(external_camera, screen)
+TestGame::TestGame() : cameraController(camera, screen)
 {
 
 }
@@ -56,7 +56,7 @@ void TestGame::start() {
 void TestGame::update(double elapsedTime) {
     // This code executed every time step:
 
-    //cameraController.update();
+    cameraController.update();
 
     if(screen.isKeyTapped(sf::Keyboard::Escape))
         exit();

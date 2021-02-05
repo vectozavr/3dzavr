@@ -18,7 +18,7 @@ public:
         _waitFor = true;
     }
 
-    bool update(Animatable& obj) {
+    bool update(Animatable& obj) override {
         return updateState();
     }
 };

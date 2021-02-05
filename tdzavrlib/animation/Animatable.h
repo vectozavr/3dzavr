@@ -23,11 +23,14 @@ public:
     void a_attractToPoint(const Point4D& point, double value, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_rotate(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_rotateRelativePoint(const Point4D& point, const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
-    void a_rotateUpLeftLookAt(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotateLeftUpLookAt(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_scale(const Point4D& s, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_scale(double s, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     // TODO: implement a_rotateToAngle(const Point4D& r) - for camera and meshes
-    // TODO: implement a_rotateUpLeftLookAtToAngle(const Point4D& r) - for camera
+    // TODO: implement a_rotateLeftUpLookAtToAngle(const Point4D& r) - for camera
+    void a_rotateToAngle(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+    void a_rotateLeftUpLookAtToAngle(const Point4D& r, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+
     void a_decompose(double value, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
 
     void a_showCreation(double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
@@ -35,7 +38,7 @@ public:
 
     void a_update();
 
-    void a_clearAnimations() { animations.clear(); }
+    void a_stopAnimations() { animations.clear(); }
 
     [[nodiscard]] bool isInAnim() const { return !animations.empty(); }
 
@@ -43,10 +46,12 @@ public:
     // If you want to create new animation you can either add new virtual function here
     // or override one of the following function:
     [[nodiscard]] virtual Point4D position() const { return Point4D{}; }
+    [[nodiscard]] virtual Point4D angle() const { return Point4D{}; }
+    [[nodiscard]] virtual Point4D angleLeftUpLookAt() const { return Point4D{}; }
     virtual void translate(const Point4D& dv) {}
     virtual void attractToPoint(const Point4D& point, double value) {}
     virtual void rotate(const Point4D& r) {}
-    virtual void rotateUpLeftLookAt(const Point4D& r) {}
+    virtual void rotateLeftUpLookAt(const Point4D& r) {}
     virtual void rotateRelativePoint(const Point4D& point, const Point4D& r) {}
     [[nodiscard]] virtual std::vector<Triangle> triangles() { return std::vector<Triangle>{}; }
     virtual void setTriangles(const std::vector<Triangle>& tris) {}

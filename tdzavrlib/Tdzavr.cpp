@@ -86,8 +86,11 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
 }
 
 void Tdzavr::exit() {
-    if(screen.isOpen())
+    if(screen.isOpen()) {
         screen.close();
+        if(screen.isRender())
+            screen.setRender(false);
+    }
     ResourceManager::unloadAllResources();
     Log::log("Tdzavr::exit(): exit 3dzavr (" + std::to_string(screen.width()) + " x " + std::to_string(screen.height()) + ") with name '" + screen.title() + "'.");
 }

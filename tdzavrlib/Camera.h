@@ -13,6 +13,8 @@
 class Camera : public Animatable{
 private:
     Point4D p_eye;
+    Point4D p_angle;
+    Point4D p_angleLeftUpLookAt;
 
     Point4D p_left =    {1, 0, 0, 0}; // internal X
     Point4D p_up =      {0, 1, 0, 0}; // internal Y
@@ -61,6 +63,9 @@ public:
     std::vector<Triangle>& sorted();
 
     [[nodiscard]] Point4D position() const override { return p_eye; }
+    [[nodiscard]] Point4D angle() const override { return p_angle; }
+    [[nodiscard]] Point4D angleLeftUpLookAt() const override { return p_angleLeftUpLookAt; }
+
     [[nodiscard]] Point4D eye() const { return p_eye; }
     [[nodiscard]] Point4D left() const { return p_left; }
     [[nodiscard]] Point4D right() const { return -p_left; }
@@ -84,7 +89,7 @@ public:
     void rotateLeft(double rl);
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
-    void rotateUpLeftLookAt(const Point4D& r) override;
+    void rotateLeftUpLookAt(const Point4D& r) override;
 
     // Rotate mesh around XYZ by (rx, ry, rz) radians relative val 'point4D'
     void rotateRelativePoint(const Point4D& s, double rl, double ru, double rlAt);
