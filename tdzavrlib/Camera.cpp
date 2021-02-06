@@ -161,7 +161,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
 
 void Camera::init(int width, int height, double fov, double ZNear, double ZFar) {
     // We need to init camera only after creation or changing width, height, fov, ZNear or ZFar.
-    // Because here we calculate matrix that does not change during the motion of objects or camera
+    // Because here we calculate matrix that does not change during the motion of _objects or camera
     w = width; h = height;
     Near = ZNear;
     Far = ZFar;

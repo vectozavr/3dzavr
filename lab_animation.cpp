@@ -31,9 +31,9 @@ void TestGame::start() {
 
     external_camera.translate(-4, -0.5, 10);
     external_camera.rotate({0, M_PI/2.2, 0});
-    external_camera.rotateUpLeftLookAt({M_PI/6, 0, 0});
+    external_camera.rotateLeftUpLookAt({M_PI/6, 0, 0});
 
-    world.loadObj("../obj/lab1.obj", "teapot", 1);
+    world.loadObj("../obj/mountains.obj", "teapot");
 
     world["teapot"].translate(0, -3, 10);
 
@@ -41,7 +41,7 @@ void TestGame::start() {
     screen.setMouseCursorVisible(false);
 
     camera.translate(0, 10,-20);
-    camera.rotateUpLeftLookAt({M_PI/6, 0, 0});
+    camera.rotateLeftUpLookAt({M_PI/6, 0, 0});
 
     // Animations:
     world["teapot"].a_showCreation(5);

@@ -11,7 +11,7 @@
 #include "physics/RigidBody.h"
 #include <SFML/Graphics.hpp>
 
-class Mesh : public Animatable, RigidBody {
+class Mesh : public Animatable, public RigidBody {
 protected:
     std::vector<Triangle> tris;
 
@@ -34,7 +34,7 @@ public:
 
     Mesh& loadObj(const std::string& filename);
 
-    [[nodiscard]] std::vector<Triangle>const &triangles() const { return tris; }
+    [[nodiscard]] std::vector<Triangle>const &triangles() const override { return tris; }
     [[nodiscard]] std::vector<Triangle> triangles() override { return tris; }
     void setTriangles(const std::vector<Triangle>& t) override { tris = t; }
 

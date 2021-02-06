@@ -25,6 +25,7 @@ public:
     [[nodiscard]] double distance(const Point4D& point4D) const;
     // Point4D in space where line ('start' to 'end') intersects plain with normal vector 'n' and val 'p' lays on the plane
     std::pair<Point4D, double> intersection(const Point4D& start, const Point4D& end);
+    std::pair<Point4D, double> overIntersection(const Point4D& start, const Point4D& end);
     int clip(Triangle& tri, Triangle& additional_tri);
 
     [[nodiscard]] Point4D N() const { return n; }

@@ -76,7 +76,7 @@ void TestGame::start() {
 void TestGame::update(double elapsedTime) {
     // This code executed every time step:
 
-    cameraController.update();
+    //cameraController.update();
 
     if(screen.isKeyTapped(sf::Keyboard::Escape))
         exit();
@@ -102,13 +102,4 @@ int main() {
     //game.create(3840, 2160);
 
     return 0;
-
-    /*
-    double amp = 0.06;
-    double freq = 2;
-    double decay = 5;
-
-    double v = velocityAtTime(time - frameDuration/10);
-    value += v * amp * Math.sin(freq * t * 2 * Math.PI) / Math.exp(decay * t);
-     */
 }
