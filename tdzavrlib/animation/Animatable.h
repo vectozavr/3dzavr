@@ -11,7 +11,7 @@
 //class Animation;
 #include "Animation.h"
 
-// All objects in 3dzavr that should be animated must inherit class Animatable:
+// All _objects in 3dzavr that should be animated must inherit class Animatable:
 class Animatable {
 protected:
     std::list<Animation*> animations;

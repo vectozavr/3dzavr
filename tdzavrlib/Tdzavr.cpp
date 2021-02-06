@@ -28,13 +28,20 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
         update(Time::deltaTime());
 
         /* Project all mesh
-         * Here we project all tris for each mesh from world.objects.
+         * Here we project all tris for each mesh from world._objects.
          * When we call camera.project(m.second),
          */
         camera.record();
-        for(auto& m : world.objects) {
+        for(auto& m : world.objects()) {
             m.second.a_update();
             camera.project(m.second, screen.mode());
+
+            // collision detection:
+            m.second.updatePhysicsState();
+            if(m.second.collision())
+                for(auto& obj : world.objects())
+                    if(obj.first != m.first)
+                        m.second.checkCollision(obj.second);
         }
 
         // draw projected mesh

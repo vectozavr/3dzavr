@@ -9,13 +9,15 @@
 #include "Mesh.h"
 
 class World {
+private:
+    std::map<std::string, Mesh> _objects;
 public:
-    std::map<std::string, Mesh> objects;
-
     World() = default;
     explicit World(const std::string& filename, Point4D scale = {1, 1, 1});
 
     [[nodiscard]] Mesh& operator[] (const std::string& name);
+
+    [[nodiscard]] std::map<std::string, Mesh>& objects() { return _objects; }
 
     void addMesh(Mesh& mesh, const std::string& name = "");
     void copyMesh(const std::string& meshName, const std::string& copyName);
