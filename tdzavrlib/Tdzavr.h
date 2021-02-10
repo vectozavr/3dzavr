@@ -29,6 +29,8 @@ protected:
 
     CameraMode cameraMode = LocalCamera;
 public:
+    virtual ~Tdzavr() = default;
+
     void create(int screenWidth = 1920, int screenHeight = 1080, const std::string& name = "3dzavr", bool verticalSync = true, sf::Color background = sf::Color(255, 255, 255));
 
     virtual void start() {};
