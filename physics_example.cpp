@@ -63,6 +63,10 @@ void TestGame::start() {
 void TestGame::update(double elapsedTime) {
     // This code executed every time step:
 
+    // Check all input after this condition please
+    if (!screen.window.hasFocus())
+        return;
+
     cameraController.update();
 
     if(screen.isKeyTapped(sf::Keyboard::Escape))
