@@ -23,6 +23,7 @@ private:
 
 public:
     RigidBody() = default;
+    virtual ~RigidBody() = default;
 
     bool checkCollision(const RigidBody& obj);
 
