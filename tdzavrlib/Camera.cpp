@@ -8,7 +8,7 @@
 #include <iostream>
 #include <list>
 
-std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
+std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) {
 
     if(!ready) {
         Log::log("Camera::project(): cannot project tris without camera initialization ( Camera::init() ) ");
