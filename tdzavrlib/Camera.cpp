@@ -6,7 +6,7 @@
 #include "utils/Log.h"
 #include "utils/Time.h"
 #include <iostream>
-#include <list>
+#include <execution>
 
 std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) {
 
@@ -197,7 +197,7 @@ std::vector<Triangle> &Camera::sorted() {
 
     // Sort tris from back to front
     // This is some replacement for Z-buffer
-    sort(triangles.begin(), triangles.end(), [](Triangle &t1, Triangle &t2)
+    std::sort(std::execution::par, triangles.begin(), triangles.end(), [](Triangle &t1, Triangle &t2)
     {
         double z1 = (t1[0].z + t1[1].z + t1[2].z) / 3.0;
         double z2 = (t2[0].z + t2[1].z + t2[2].z) / 3.0;
