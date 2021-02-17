@@ -25,7 +25,7 @@ For this moment I already implemented:
 
 <h4>Installation:</h4>
 
-1) Download and install OpenAl library for SFML sound support (in current version you can't setup this engine without this)
+1) Download and install OpenAL library for SFML sound support (in current version you can't setup this engine without OpenAL)
    
     openal: https://openal.org/downloads/
    
