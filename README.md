@@ -1,4 +1,7 @@
 # 3dzavr
+
+<h4>About:</h4>
+
 Simple 3d engine based on SFML library.
 I tried to make this engine powerful and easy to understand.
 
@@ -12,12 +15,12 @@ For this moment I already implemented:
 - External camera (You can see how 3D world projected on 2D plane and the process of clipping)
 - You can render animated scene to .mp4 files or sequence of .png files (film/img/ & film/mp4). But it is extremely slow process due-to SFML waste a lot of time on saving .png files. It is still better to capture your screen by some additional software.
 
-TODO:
+<h4>TODO:</h4>
 - Physics engine
 - Ray-tracing & recursive ray-tracing 
 - Textures
 
-Installation:
+<h4>Installation:</h4>
 
 1) Download and install OpenAl library for SFML sound support (in current version you can't setup this engine without this)
    
