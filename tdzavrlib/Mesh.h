@@ -18,7 +18,7 @@ protected:
     Point4D p_position;
     Point4D p_angle;
 
-    sf::Color c_color;
+    sf::Color c_color = sf::Color(255, 245, 194);
 
     // Operations with Matrix4x4
     [[nodiscard]] Mesh operator*(const Matrix4x4& matrix4X4) const;
@@ -34,8 +34,8 @@ public:
 
     Mesh& loadObj(const std::string& filename);
 
-    [[nodiscard]] std::vector<Triangle>const &triangles() const override { return tris; }
-    [[nodiscard]] std::vector<Triangle> triangles() override { return tris; }
+    [[nodiscard]] std::vector<Triangle>const &triangles() const { return tris; }
+    [[nodiscard]] std::vector<Triangle>& triangles() override { return tris; }
     void setTriangles(const std::vector<Triangle>& t) override { tris = t; }
 
     // Translate mesh

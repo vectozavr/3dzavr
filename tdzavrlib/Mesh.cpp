@@ -56,6 +56,7 @@ Mesh &Mesh::loadObj(const std::string& filename) {
             int f[3];
             s >> junk >> f[0] >> f[1] >> f[2];
             tris.emplace_back(verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1] );
+            tris.back().color = c_color;
         }
     }
 

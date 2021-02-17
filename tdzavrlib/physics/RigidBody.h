@@ -18,18 +18,19 @@ private:
     Point4D p_angularAcceleration;
 
     bool _collision = false;
+    bool _debugMode = false;
 
     static bool checkPointInsideTriangle(const Point4D& point, const Point4D& position, const Triangle& triangle);
 
 public:
     RigidBody() = default;
 
-    bool checkCollision(const RigidBody& obj);
+    bool checkCollision(RigidBody& obj);
 
     [[nodiscard]] bool collision() const { return _collision; }
     void setCollision(bool c) { _collision= c; }
 
-    [[nodiscard]] virtual std::vector<Triangle>const &triangles() const = 0;
+    [[nodiscard]] virtual std::vector<Triangle>& triangles() = 0;
     [[nodiscard]] virtual Point4D position() const = 0;
     virtual void translate(const Point4D& dv) = 0;
     virtual void rotate(const Point4D& r) = 0;
@@ -42,6 +43,7 @@ public:
     void applyAcceleration(const Point4D& acceleration);
     void applyAngularAcceleration(const Point4D& angularAcceleration);
 
+    void setDebugMode(bool mode) { _debugMode = mode; }
 };
 
 
