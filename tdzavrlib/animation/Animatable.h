@@ -51,7 +51,7 @@ public:
     virtual void rotate(const Point4D& r) {}
     virtual void rotateLeftUpLookAt(const Point4D& r) {}
     virtual void rotateRelativePoint(const Point4D& point, const Point4D& r) {}
-    [[nodiscard]] virtual std::vector<Triangle> triangles() { return std::vector<Triangle>{}; }
+    [[nodiscard]] virtual std::vector<Triangle>& triangles() { return *(std::vector<Triangle>*)(new std::vector<Triangle>()); }
     virtual void setTriangles(const std::vector<Triangle>& tris) {}
     virtual void decompose(double value) {}
 };

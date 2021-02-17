@@ -17,6 +17,25 @@ TODO:
 - Ray-tracing & recursive ray-tracing 
 - Textures
 
+Installation:
+
+1) Download and install OpenAl library for SFML sound support (in current version you can't setup this engine without this)
+   openal: https://openal.org/downloads/
+   
+2) Install SFML on your computer:
+   sfml: https://www.sfml-dev.org/download.php
+   
+2) Open CLion(recommended) or Visual Studio 
+   CLion(recommended): https://www.jetbrains.com/clion/
+   Visual Studio: https://visualstudio.microsoft.com/ru/
+   
+3) Clone this repository
+    rep url: https://github.com/vectozavr/3dzavr
+   
+4) Built project
+
+For any issues, please, create new issue in this repository.
+
 Demonstration of how does this engine work:
 ![hippo](gif/teapot.gif)
 ![hippo](gif/cube.gif)
