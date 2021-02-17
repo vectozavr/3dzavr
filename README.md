@@ -16,8 +16,11 @@ For this moment I already implemented:
 - You can render animated scene to .mp4 files or sequence of .png files (film/img/ & film/mp4). But it is extremely slow process due-to SFML waste a lot of time on saving .png files. It is still better to capture your screen by some additional software.
 
 <h4>TODO:</h4>
+
 - Physics engine
+  
 - Ray-tracing & recursive ray-tracing 
+  
 - Textures
 
 <h4>Installation:</h4>
@@ -40,6 +43,7 @@ For this moment I already implemented:
    
 
 3) Clone this repository
+   
     rep url: https://github.com/vectozavr/3dzavr
    
 
