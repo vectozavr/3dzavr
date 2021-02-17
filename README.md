@@ -35,7 +35,7 @@ For this moment I already implemented:
     sfml: https://www.sfml-dev.org/download.php
    
 
-2) Open CLion (recommended) or Visual Studio
+2) Open CLion or Visual Studio
    
    CLion (recommended): https://www.jetbrains.com/clion/
    
