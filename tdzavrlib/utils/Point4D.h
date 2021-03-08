@@ -19,7 +19,7 @@ public:
 
     Point4D () = default;
     Point4D (const Point4D& point4D);
-    Point4D (double x, double y, double z = 0.0, double w = 0.0);
+    Point4D (double x, double y = 0.0, double z = 0.0, double w = 0.0);
     Point4D& operator=(const Point4D& point4D);
 
     [[nodiscard]] double operator[] (int i) const;
@@ -61,7 +61,10 @@ public:
     [[nodiscard]] double sqrAbs() const; // Returns squared vector length
     [[nodiscard]] double abs() const; // Returns vector length
     Point4D& normalize(); // Returns normalized vector
-};
 
+    static Point4D unit_x() {return Point4D{1, 0, 0, 0}; }
+    static Point4D unit_y() {return Point4D{0, 1, 0, 0}; }
+    static Point4D unit_z() {return Point4D{0, 0, 1, 0}; }
+};
 
 #endif //INC_3DZAVR_POINT4D_H

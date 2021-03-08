@@ -139,7 +139,7 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
             // and transform it's coordinate to screen space (in pixels):
             clippedTriangle *= SP;
             /*
-             * Here is the quick explanation of all main applyed transformation matrix
+             * Here is the quick explanation of all main applied transformation matrix
              *
              * clippedTriangle - one clipped triangle from mesh
              *

@@ -189,3 +189,9 @@ void Mesh::decompose(double value) {
     for (auto& t : tris)
         t *= Matrix4x4::Translation((t.pos()).normalize()*value);
 }
+
+void Mesh::setColor(sf::Color c) {
+    c_color = c;
+    for (auto& t : tris)
+        t.color = c_color;
+}

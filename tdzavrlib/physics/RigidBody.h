@@ -8,6 +8,7 @@
 #include <vector>
 #include "../utils/Point4D.h"
 #include "../Triangle.h"
+#include "Simplex.h"
 
 class RigidBody {
 private:
@@ -17,20 +18,29 @@ private:
     Point4D p_angularVelocity;
     Point4D p_angularAcceleration;
 
+    double mass = 1.0;
+
     bool _collision = false;
     bool _debugMode = false;
 
-    static bool checkPointInsideTriangle(const Point4D& point, const Point4D& position, const Triangle& triangle);
+    Point4D _findFurthestPoint(const Point4D& direction);
+    Point4D _support(RigidBody& obj, const Point4D& direction);
+
+    static bool _nextSimplex(Simplex& points, Point4D& direction);
+    static bool _line(Simplex& points, Point4D& direction);
+    static bool _triangle(Simplex& points, Point4D& direction);
+    static bool _tetrahedron(Simplex& points, Point4D& direction);
 
 public:
     RigidBody() = default;
 
-    bool checkCollision(RigidBody& obj);
+    bool checkGJKCollision(RigidBody& obj);
 
-    [[nodiscard]] bool collision() const { return _collision; }
+    [[nodiscard]] bool isCollision() const { return _collision; }
     void setCollision(bool c) { _collision= c; }
 
     [[nodiscard]] virtual std::vector<Triangle>& triangles() = 0;
+
     [[nodiscard]] virtual Point4D position() const = 0;
     virtual void translate(const Point4D& dv) = 0;
     virtual void rotate(const Point4D& r) = 0;
