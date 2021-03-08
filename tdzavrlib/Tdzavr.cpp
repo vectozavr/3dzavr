@@ -36,12 +36,15 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
             m.second.a_update();
             camera.project(m.second, screen.mode());
 
-            // collision detection:
             m.second.updatePhysicsState();
-            if(m.second.collision())
+            // isCollision detection:
+            if(m.second.isCollision())
                 for(auto& obj : world.objects())
                     if(obj.first != m.first)
-                        m.second.checkCollision(obj.second);
+                        if(m.second.checkGJKCollision(obj.second))
+                            m.second.setColor({255, 0, 0});
+                        else
+                            m.second.setColor({0, 255, 0});
         }
 
         // draw projected mesh

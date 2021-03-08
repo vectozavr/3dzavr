@@ -62,7 +62,7 @@ public:
     [[nodiscard]] Point4D angle() const override { return p_angle; }
 
     [[nodiscard]] sf::Color color() const { return c_color; }
-    void setColor(sf::Color c) { c_color = c; }
+    void setColor(sf::Color c);
 
     Mesh static Cube(double size = 1.0);
     Mesh static Obj(const std::string& filename);
