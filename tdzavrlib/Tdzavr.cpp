@@ -43,15 +43,14 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
                     if (obj.first != m.first) {
                         std::pair<bool, Simplex> gjk = m.second.checkGJKCollision(obj.second);
                         if (gjk.first) {
-                            m.second.setColor({255, 0, 0});
+                            //m.second.setColor({255, 0, 0});
                             CollisionPoint epa = m.second.EPA(gjk.second, obj.second);
                             if(epa.hasCollision) {
                                 m.second.translate(-epa.normal * epa.depth);
                                 m.second.applyVelocity(-m.second.velocity()*0.5);
-
                             }
                         } else {
-                            m.second.setColor({0, 255, 0});
+                            //m.second.setColor({0, 255, 0});
                         }
                     }
                 }

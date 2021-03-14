@@ -44,6 +44,7 @@ private:
 
 public:
     RigidBody() = default;
+    virtual ~RigidBody() = default;
 
     std::pair<bool, Simplex> checkGJKCollision(RigidBody& obj);
     CollisionPoint EPA(const Simplex& simplex, RigidBody &obj);

@@ -47,6 +47,7 @@ protected:
     bool updateState();
 public:
     Animation() = default;
+    virtual ~Animation() = default;
 
     void setBezierParams(const Point4D& p1, const Point4D& p2) { _bezier[0] = p1; _bezier[1] = p2; }
     [[nodiscard]] bool waitFor() const { return _waitFor; }
