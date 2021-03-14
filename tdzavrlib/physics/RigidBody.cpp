@@ -8,56 +8,6 @@
 #include "../utils/Time.h"
 #include <iostream>
 
-bool RigidBody::checkGJKCollision(RigidBody &obj) {
-
-    // Get initial support point in any direction
-    Point4D support = _support(obj, Point4D::unit_x());
-
-    // Simplex is an array of points, max count is 4
-    Simplex points;
-    points.push_front(support);
-
-    // New direction is towards the origin
-    Point4D direction = -support;
-
-    while (true) {
-        support = _support(obj, direction);
-
-        if (support.dot(direction) <= 0) {
-            return false; // no collision
-        }
-
-        points.push_front(support);
-        if (_nextSimplex(points, direction)) {
-            return true;
-        }
-    }
-}
-
-void RigidBody::updatePhysicsState() {
-    translate(p_velocity * Time::deltaTime());
-    p_velocity += p_acceleration * Time::deltaTime();
-
-    rotate(p_angularVelocity * Time::deltaTime());
-    p_angularVelocity += p_angularAcceleration * Time::deltaTime();
-}
-
-void RigidBody::applyVelocity(const Point4D& velocity) {
-    p_velocity = velocity;
-}
-
-void RigidBody::applyAngularVelocity(const Point4D& angularVelocity) {
-    p_angularVelocity = angularVelocity;
-}
-
-void RigidBody::applyAcceleration(const Point4D& acceleration) {
-    p_acceleration = acceleration;
-}
-
-void RigidBody::applyAngularAcceleration(const Point4D& angularAcceleration) {
-    p_angularAcceleration = angularAcceleration;
-}
-
 Point4D RigidBody::_findFurthestPoint(const Point4D& direction) {
     std::vector<Point4D> visitedPoints = {};
 
@@ -191,3 +141,179 @@ bool RigidBody::_tetrahedron(Simplex &points, Point4D &direction) {
     return true;
 }
 
+std::pair<bool, Simplex> RigidBody::checkGJKCollision(RigidBody &obj) {
+
+    // Get initial support point in any direction
+    Point4D support = _support(obj, Point4D::unit_x());
+
+    // Simplex is an array of points, max count is 4
+    Simplex points;
+    points.push_front(support);
+
+    // New direction is towards the origin
+    Point4D direction = -support;
+
+    while (true) {
+        support = _support(obj, direction);
+
+        if (support.dot(direction) <= 0)
+            return std::make_pair(false, points); // no collision
+
+        points.push_front(support);
+
+        if (_nextSimplex(points, direction))
+            return std::make_pair(true, points);
+
+    }
+}
+
+CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
+
+    std::vector<Point4D> polytope(simplex.begin(), simplex.end());
+    std::vector<size_t>  faces = {
+            0, 1, 2,
+            0, 3, 1,
+            0, 2, 3,
+            1, 3, 2
+    };
+
+    // list: vector4(normal, distance), index: min distance
+    auto [normals, minFace] = GetFaceNormals(polytope, faces);
+
+    Point4D minNormal;
+    double minDistance = INFINITY;
+
+    while (minDistance == INFINITY) {
+        minNormal   = normals[minFace];
+        minDistance = normals[minFace].w;
+
+        Point4D support = _support(obj, minNormal);
+        double sDistance = minNormal.dot(support);
+
+        if (abs(sDistance - minDistance) > 0.001f) {
+            minDistance = INFINITY;
+            std::vector<std::pair<size_t, size_t>> uniqueEdges;
+
+            for (size_t i = 0; i < normals.size(); i++) {
+                if (normals[i].dot(support) > 0) {
+                    size_t f = i * 3;
+
+                    AddIfUniqueEdge(uniqueEdges, faces, f,     f + 1);
+                    AddIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
+                    AddIfUniqueEdge(uniqueEdges, faces, f + 2, f    );
+
+                    faces[f + 2] = faces.back(); faces.pop_back();
+                    faces[f + 1] = faces.back(); faces.pop_back();
+                    faces[f    ] = faces.back(); faces.pop_back();
+
+                    normals[i] = normals.back(); normals.pop_back();
+
+                    i--;
+                }
+            }
+            std::vector<size_t> newFaces;
+            for (auto [edgeIndex1, edgeIndex2] : uniqueEdges) {
+                newFaces.push_back(edgeIndex1);
+                newFaces.push_back(edgeIndex2);
+                newFaces.push_back(polytope.size());
+            }
+
+            polytope.push_back(support);
+
+            auto [newNormals, newMinFace] = GetFaceNormals(polytope, newFaces);
+
+            double oldMinDistance = INFINITY;
+            for (size_t i = 0; i < normals.size(); i++) {
+                if (normals[i].w < oldMinDistance) {
+                    oldMinDistance = normals[i].w;
+                    minFace = i;
+                }
+            }
+
+            if (newNormals[newMinFace].w < oldMinDistance) {
+                minFace = newMinFace + normals.size();
+            }
+
+            faces  .insert(faces  .end(), newFaces  .begin(), newFaces  .end());
+            normals.insert(normals.end(), newNormals.begin(), newNormals.end());
+        }
+    }
+    CollisionPoint points;
+
+    points.normal = minNormal;
+    points.depth = minDistance + 0.001;
+    points.hasCollision = true;
+
+    return points;
+}
+
+std::pair<std::vector<Point4D>, size_t> RigidBody::GetFaceNormals(const std::vector<Point4D>& polytope, const std::vector<size_t>&  faces) {
+    std::vector<Point4D> normals;
+    size_t minTriangle = 0;
+    double minDistance = INFINITY;
+
+    for (size_t i = 0; i < faces.size(); i += 3) {
+        Point4D a = polytope[faces[i    ]];
+        Point4D b = polytope[faces[i + 1]];
+        Point4D c = polytope[faces[i + 2]];
+
+        Point4D normal = (b - a).cross3D(c - a).normalize();
+        double distance = normal.dot(a);
+
+        if (distance < 0) {
+            normal   *= -1;
+            distance *= -1;
+        }
+
+        normal.w = distance;
+        normals.emplace_back(normal);
+
+        if (distance < minDistance) {
+            minTriangle = i / 3;
+            minDistance = distance;
+        }
+    }
+
+    return { normals, minTriangle };
+}
+
+void RigidBody::AddIfUniqueEdge(std::vector<std::pair<size_t, size_t>>& edges, const std::vector<size_t>& faces, size_t a, size_t b) {
+
+    auto reverse = std::find(                   //      0--<--3
+            edges.begin(),                      //     / \ B /   A: 2-0
+            edges.end(),                        //    / A \ /    B: 0-2
+            std::make_pair(faces[b], faces[a])  //   1-->--2
+    );
+
+    if (reverse != edges.end()) {
+        edges.erase(reverse);
+    }
+
+    else {
+        edges.emplace_back(faces[a], faces[b]);
+    }
+}
+
+void RigidBody::updatePhysicsState() {
+    translate(p_velocity * Time::deltaTime());
+    p_velocity += p_acceleration * Time::deltaTime();
+
+    rotate(p_angularVelocity * Time::deltaTime());
+    p_angularVelocity += p_angularAcceleration * Time::deltaTime();
+}
+
+void RigidBody::applyVelocity(const Point4D& velocity) {
+    p_velocity = velocity;
+}
+
+void RigidBody::applyAngularVelocity(const Point4D& angularVelocity) {
+    p_angularVelocity = angularVelocity;
+}
+
+void RigidBody::applyAcceleration(const Point4D& acceleration) {
+    p_acceleration = acceleration;
+}
+
+void RigidBody::applyAngularAcceleration(const Point4D& angularAcceleration) {
+    p_angularAcceleration = angularAcceleration;
+}

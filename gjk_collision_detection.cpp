@@ -31,24 +31,24 @@ void TestGame::start() {
 
     screen.setMode(Screen::ViewMode::Transparency);
     screen.setMouseCursorVisible(false);
-    camera.translate(0, 0, -5);
+    camera.translate(0, 0, -10);
 
     world.loadObj("../obj/cube.obj", "cube_1");
     world.loadObj("../obj/cube.obj", "cube_2");
 
-    world["cube_1"].translate(-1, -1, 0);
-    world["cube_2"].translate(0, 1.5, 0);
+    world["cube_1"].translate(-0.5, -1, 0.5);
+    world["cube_2"].translate(0, 5, 0);
 
     world["cube_2"].setCollision(true);
     world["cube_2"].setDebugMode(true);
 
-    //world["cube_2"].applyAcceleration({0, -9.81, 0});
+    world["cube_2"].applyAcceleration({0, -9.81, 0});
     //world["cube_2"].rotate({M_PI/4, 0, M_PI/4});
     //world["cube_2"].rotate({0, 0, 0.001});
 
-    //world["cube_1"].a_translate({0, 6, 0}, 5);
-    //world["cube_1"].a_wait(0);
-    //world["cube_1"].a_translate({0, -6, 0}, 5);
+    world["cube_1"].a_translate({0, 6, 0}, 5);
+    world["cube_1"].a_wait(0);
+    world["cube_1"].a_translate({0, -6, 0}, 5);
 
 
     //vector<Triangle>tris;
@@ -72,35 +72,7 @@ void TestGame::start() {
 void TestGame::update(double elapsedTime) {
     // This code executed every time step:
 
-    //cameraController.update();
-
-    // Left and right
-    if (Screen::isKeyPressed(sf::Keyboard::A))
-        world["cube_2"].translate(camera.left()*Time::deltaTime());
-
-    if (Screen::isKeyPressed(sf::Keyboard::D))
-        world["cube_2"].translate(-camera.left()*Time::deltaTime());
-
-    // Forward and backward
-    if (Screen::isKeyPressed(sf::Keyboard::W))
-        world["cube_2"].translate(camera.lookAt()*Time::deltaTime());
-
-    if (Screen::isKeyPressed(sf::Keyboard::S))
-        world["cube_2"].translate(-camera.lookAt()*Time::deltaTime());
-
-    if (Screen::isKeyPressed(sf::Keyboard::E))
-        world["cube_2"].rotate(0.0, 0.0, -Time::deltaTime());
-
-    if (Screen::isKeyPressed(sf::Keyboard::Q))
-        world["cube_2"].rotate(0.0, 0.0, Time::deltaTime());
-
-    if (Screen::isKeyPressed(sf::Keyboard::LShift))
-        world["cube_2"].translate(0.0, -Time::deltaTime(), 0);
-
-    if (Screen::isKeyPressed(sf::Keyboard::Space))
-        world["cube_2"].translate(0.0, Time::deltaTime(), 0);
-
-
+    cameraController.update();
 
     if(screen.isKeyTapped(sf::Keyboard::Escape))
         exit();

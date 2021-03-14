@@ -10,6 +10,14 @@
 #include "../Triangle.h"
 #include "Simplex.h"
 
+struct CollisionPoint {
+    Point4D a; // Furthest point of a into b
+    Point4D b; // Furthest point of b into a
+    Point4D normal; // b – a normalized
+    double depth;    // Length of b – a
+    bool hasCollision;
+};
+
 class RigidBody {
 private:
     Point4D p_velocity;
@@ -31,10 +39,14 @@ private:
     static bool _triangle(Simplex& points, Point4D& direction);
     static bool _tetrahedron(Simplex& points, Point4D& direction);
 
+    static std::pair<std::vector<Point4D>, size_t> GetFaceNormals(const std::vector<Point4D>& polytope, const std::vector<size_t>&  faces);
+    static void AddIfUniqueEdge(std::vector<std::pair<size_t, size_t>>& edges, const std::vector<size_t>& faces, size_t a, size_t b);
+
 public:
     RigidBody() = default;
 
-    bool checkGJKCollision(RigidBody& obj);
+    std::pair<bool, Simplex> checkGJKCollision(RigidBody& obj);
+    CollisionPoint EPA(const Simplex& simplex, RigidBody &obj);
 
     [[nodiscard]] bool isCollision() const { return _collision; }
     void setCollision(bool c) { _collision= c; }
@@ -52,6 +64,8 @@ public:
 
     void applyAcceleration(const Point4D& acceleration);
     void applyAngularAcceleration(const Point4D& angularAcceleration);
+
+    [[nodiscard]] Point4D velocity() const { return p_velocity; }
 
     void setDebugMode(bool mode) { _debugMode = mode; }
 };
