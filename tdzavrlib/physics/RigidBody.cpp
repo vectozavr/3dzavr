@@ -190,7 +190,7 @@ CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
         Point4D support = _support(obj, minNormal);
         double sDistance = minNormal.dot(support);
 
-        if (abs(sDistance - minDistance) > 0.001f) {
+        if (abs(sDistance - minDistance) > 0.0001) {
             minDistance = INFINITY;
             std::vector<std::pair<size_t, size_t>> uniqueEdges;
 
@@ -241,7 +241,7 @@ CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
     CollisionPoint points;
 
     points.normal = minNormal;
-    points.depth = minDistance + 0.001;
+    points.depth = minDistance + 0.0001;
     points.hasCollision = true;
 
     return points;
