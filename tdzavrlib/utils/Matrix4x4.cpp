@@ -130,11 +130,12 @@ Matrix4x4 &Matrix4x4::operator/=(double number) {
 }
 
 Point4D Matrix4x4::operator*(const Point4D &point4D) const {
-    Point4D result{};
-    for(int i = 0; i < 4; i++)
-        for(int j = 0; j < 4; j++)
-            result[i] += arr_matrix[i][j] * point4D[j];
-    return result;
+    return Point4D(
+        arr_matrix[0][0] * point4D.x + arr_matrix[0][1] * point4D.y + arr_matrix[0][2] * point4D.z + arr_matrix[0][3] * point4D.w,
+        arr_matrix[1][0] * point4D.x + arr_matrix[1][1] * point4D.y + arr_matrix[1][2] * point4D.z + arr_matrix[1][3] * point4D.w,
+        arr_matrix[2][0] * point4D.x + arr_matrix[2][1] * point4D.y + arr_matrix[2][2] * point4D.z + arr_matrix[2][3] * point4D.w,
+        arr_matrix[3][0] * point4D.x + arr_matrix[3][1] * point4D.y + arr_matrix[3][2] * point4D.z + arr_matrix[3][3] * point4D.w
+    );
 }
 
 double Matrix4x4::det3D() {

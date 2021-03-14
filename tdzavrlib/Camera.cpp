@@ -6,9 +6,9 @@
 #include "utils/Log.h"
 #include "utils/Time.h"
 #include <iostream>
-#include <list>
+#include <execution>
 
-std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
+std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) {
 
     if(!ready) {
         Log::log("Camera::project(): cannot project tris without camera initialization ( Camera::init() ) ");
@@ -21,33 +21,34 @@ std::vector<Triangle> &Camera::project(Mesh &mesh, Screen::ViewMode mode) {
     // transform our mesh to be in intermediate state of animation
     VM = V * M;
 
+    // We don't want to waste time re-allocating memory every time
+    std::vector<Triangle> clippedTriangles, tempBuffer;
     for(auto& t : mesh.triangles()) {
 
         double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
         if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !(mode == Screen::ViewMode::Transparency) && !(mode == Screen::ViewMode::Normals) && !isExternal )
             continue;
 
-        int newTriangles = 1;
-        std::list<Triangle> clippedTriangles;
         Triangle clipped[2];
+        // It needs to be cleared because it's reused through iterations. Usually it doesn't free memory.
+        clippedTriangles.clear();
 
         // In the beginning we need to to translate triangle from world coordinate to our camera system:
         // After that we apply clipping for all planes from clipPlanes
         clippedTriangles.emplace_back(t * VM);
         for(auto& plane : clipPlanes)
         {
-            while(newTriangles > 0)
+            while(!clippedTriangles.empty())
             {
-                clipped[0] = clippedTriangles.front();
+                clipped[0] = clippedTriangles.back();
                 clipped[1] = clipped[0];
-                clippedTriangles.pop_front();
-                newTriangles--;
+                clippedTriangles.pop_back();
                 int additional = plane.clip(clipped[0], clipped[1]);
 
                 for(int i = 0; i < additional; i++)
-                    clippedTriangles.emplace_back(clipped[i]);
+                    tempBuffer.emplace_back(clipped[i]);
             }
-            newTriangles = clippedTriangles.size();
+            clippedTriangles.swap(tempBuffer);
         }
 
         for(auto& clippedTriangle : clippedTriangles) {
@@ -197,7 +198,7 @@ std::vector<Triangle> &Camera::sorted() {
 
     // Sort tris from back to front
     // This is some replacement for Z-buffer
-    sort(triangles.begin(), triangles.end(), [](Triangle &t1, Triangle &t2)
+    std::sort(std::execution::par, triangles.begin(), triangles.end(), [](Triangle &t1, Triangle &t2)
     {
         double z1 = (t1[0].z + t1[1].z + t1[2].z) / 3.0;
         double z2 = (t2[0].z + t2[1].z + t2[2].z) / 3.0;

@@ -137,6 +137,10 @@ void Screen::setMouseCursorVisible(bool visible) {
 }
 
 void Screen::keyboardControl() {
+    // Check all input after this condition please
+    if (!window.hasFocus())
+        return;
+
     if(isKeyTapped(sf::Keyboard::Num1))
         setMode(ViewMode::Default);
     if(isKeyTapped(sf::Keyboard::Num2))
