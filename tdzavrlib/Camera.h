@@ -53,7 +53,7 @@ public:
 
     void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 500.0);
 
-    std::vector<Triangle>& project(Mesh &mesh, Screen::ViewMode mode);
+    std::vector<Triangle>& project(const Mesh &mesh, Screen::ViewMode mode);
 
     [[nodiscard]] std::vector<Triangle> const &data() const { return triangles; }
     [[nodiscard]] std::vector<Triangle>& data() { return triangles; }

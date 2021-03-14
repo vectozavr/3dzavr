@@ -17,6 +17,7 @@ protected:
     std::list<Animation*> animations;
 public:
     Animatable() = default;
+    virtual ~Animatable() = default;
     // All methods about animation begins with 'a_'
     void a_translate(const Point4D& t, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_translateToPoint(const Point4D& point, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
