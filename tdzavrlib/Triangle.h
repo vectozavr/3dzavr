@@ -37,6 +37,8 @@ public:
     [[nodiscard]] Triangle operator*(const Matrix4x4& matrix4X4) const;
     Triangle& operator*=(const Matrix4x4& matrix4X4);
     [[nodiscard]] Point4D pos() const;
+
+    bool isPointInside(const Point4D& point) const;
 };
 
 

@@ -55,3 +55,15 @@ Triangle::Triangle(const Triangle &triangle) {
     p[1] = triangle[1];
     p[2] = triangle[2];
 }
+
+bool Triangle::isPointInside(const Point4D &point) const {
+    Point4D triangleNorm = norm();
+
+    double dot1 = (point - p[0]).cross3D(p[1] - p[0]).dot(triangleNorm);
+    double dot2 = (point - p[1]).cross3D(p[2] - p[1]).dot(triangleNorm);
+    double dot3 = (point - p[2]).cross3D(p[0] - p[2]).dot(triangleNorm);
+
+    if((dot1 >= 0 && dot2 >= 0 && dot3 >= 0) || (dot1 <= 0 && dot2 <= 0 && dot3 <= 0))
+        return true;
+    return false;
+}

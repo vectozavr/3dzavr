@@ -161,9 +161,10 @@ std::pair<bool, Simplex> RigidBody::checkGJKCollision(RigidBody &obj) {
 
         points.push_front(support);
 
-        if (_nextSimplex(points, direction))
+        if (_nextSimplex(points, direction)) {
+            _inCollision = true;
             return std::make_pair(true, points);
-
+        }
     }
 }
 
@@ -183,7 +184,9 @@ CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
     Point4D minNormal;
     double minDistance = INFINITY;
 
-    while (minDistance == INFINITY) {
+    int iterations = 0;
+
+    while ((minDistance == INFINITY) && (iterations < 50)) {
         minNormal   = normals[minFace];
         minDistance = normals[minFace].w;
 
@@ -222,6 +225,9 @@ CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
 
             auto [newNormals, newMinFace] = GetFaceNormals(polytope, newFaces);
 
+            if(newNormals.empty())
+                break;
+
             double oldMinDistance = INFINITY;
             for (size_t i = 0; i < normals.size(); i++) {
                 if (normals[i].w < oldMinDistance) {
@@ -237,12 +243,13 @@ CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
             faces  .insert(faces  .end(), newFaces  .begin(), newFaces  .end());
             normals.insert(normals.end(), newNormals.begin(), newNormals.end());
         }
+        iterations++;
     }
     CollisionPoint points;
 
     points.normal = minNormal;
     points.depth = minDistance + 0.0001;
-    points.hasCollision = true;
+    points.hasCollision = minDistance < INFINITY;
 
     return points;
 }
@@ -302,18 +309,18 @@ void RigidBody::updatePhysicsState() {
     p_angularVelocity += p_angularAcceleration * Time::deltaTime();
 }
 
-void RigidBody::applyVelocity(const Point4D& velocity) {
+void RigidBody::setVelocity(const Point4D& velocity) {
     p_velocity = velocity;
 }
 
-void RigidBody::applyAngularVelocity(const Point4D& angularVelocity) {
+void RigidBody::setAngularVelocity(const Point4D& angularVelocity) {
     p_angularVelocity = angularVelocity;
 }
 
-void RigidBody::applyAcceleration(const Point4D& acceleration) {
+void RigidBody::setAcceleration(const Point4D& acceleration) {
     p_acceleration = acceleration;
 }
 
-void RigidBody::applyAngularAcceleration(const Point4D& angularAcceleration) {
+void RigidBody::setAngularAcceleration(const Point4D& angularAcceleration) {
     p_angularAcceleration = angularAcceleration;
 }

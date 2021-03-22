@@ -104,6 +104,11 @@ Mesh Mesh::Cube(double size) {
 
 void Mesh::translate(double dx, double dy, double dz) {
     p_position += Point4D(dx, dy, dz, 0);
+
+    if(v_attached.empty())
+        return;
+    for(auto attached : v_attached)
+        attached->translate({dx, dy, dz});
 }
 
 void Mesh::rotate(double rx, double ry, double rz) {
@@ -114,10 +119,20 @@ void Mesh::rotate(double rx, double ry, double rz) {
 void Mesh::rotate(const Point4D &r) {
     p_angle += r;
     *this *= Matrix4x4::Rotation(r);
+
+    if(v_attached.empty())
+        return;
+    for(auto attached : v_attached)
+        attached->rotateRelativePoint(position(), r);
 }
 
 void Mesh::rotate(const Point4D &v, double r) {
     *this *= Matrix4x4::Rotation(v, r);
+
+    if(v_attached.empty())
+        return;
+    for(auto& attached : v_attached)
+        attached->rotateRelativePoint(position(), v, r);
 }
 
 void Mesh::scale(double sx, double sy, double sz) {

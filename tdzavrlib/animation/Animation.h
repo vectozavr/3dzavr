@@ -55,6 +55,8 @@ public:
 
     // You should override this method for your particular animation
     virtual bool update(Animatable& obj) = 0;
+
+    [[nodiscard]] virtual int type() const{return 0;}
 };
 
 #endif //INC_3DZAVR_ANIMATION_H

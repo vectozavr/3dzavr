@@ -44,13 +44,13 @@ void TestGame::start() {
     camera.rotateLeftUpLookAt({M_PI/6, 0, 0});
 
     // Animations:
-    world["teapot"].a_showCreation(5);
-    camera.a_rotateRelativePoint(world["teapot"].position(), {0, M_PI/4.0, 0}, 10, Animation::Continue);
-    camera.a_attractToPoint(world["teapot"].position(), -10, 11);
+    world["teapot"].a_showCreation("a1", 5);
+    camera.a_rotateRelativePoint("a1",world["teapot"].position(), {0, M_PI/4.0, 0}, 10, Animation::Continue);
+    camera.a_attractToPoint("a1",world["teapot"].position(), -10, 11);
 
-    world["teapot"].a_decompose(10, 3);
-    world["teapot"].a_wait(0);
-    world["teapot"].a_decompose(-10, 3);
+    world["teapot"].a_decompose("a1",10, 3);
+    world["teapot"].a_wait("a1",0);
+    world["teapot"].a_decompose("a1",-10, 3);
 }
 
 void TestGame::update(double elapsedTime) {

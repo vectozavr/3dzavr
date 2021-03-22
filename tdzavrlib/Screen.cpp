@@ -161,15 +161,34 @@ bool Screen::isKeyTapped(sf::Keyboard::Key key) {
     if (!Screen::isKeyPressed(key))
         return false;
 
-    if(tappedKey.count(key) == 0) {
-        tappedKey.emplace(key, Time::time());
+    if(tappedKeys.count(key) == 0) {
+        tappedKeys.emplace(key, Time::time());
         return true;
-    } else if((Time::time() - tappedKey[key]) > 0.2) {
-        tappedKey[key] = Time::time();
+    } else if((Time::time() - tappedKeys[key]) > 0.2) {
+        tappedKeys[key] = Time::time();
         return true;
     }
     return false;
 }
+
+bool Screen::isButtonPressed(sf::Mouse::Button button) {
+    return sf::Mouse::isButtonPressed(button);
+}
+
+bool Screen::isButtonTapped(sf::Mouse::Button button) {
+    if (!Screen::isButtonPressed(button))
+        return false;
+
+    if(tappedButtons.count(button) == 0) {
+        tappedButtons.emplace(button, Time::time());
+        return true;
+    } else if((Time::time() - tappedButtons[button]) > 0.2) {
+        tappedButtons[button] = Time::time();
+        return true;
+    }
+    return false;
+}
+
 
 void Screen::debugText(const std::string& text) {
     sf::Text t;

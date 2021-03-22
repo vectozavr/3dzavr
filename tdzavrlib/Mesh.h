@@ -10,13 +10,13 @@
 #include "animation/Animatable.h"
 #include "physics/RigidBody.h"
 #include <SFML/Graphics.hpp>
+#include "Object.h"
 
-class Mesh : public Animatable, public RigidBody {
+class Mesh : public Object, public Animatable, public RigidBody {
 protected:
     std::vector<Triangle> tris;
 
-    Point4D p_position;
-    Point4D p_angle;
+    bool _visible = true;
 
     sf::Color c_color = sf::Color(255, 245, 194);
 
@@ -47,13 +47,13 @@ public:
     void rotate(double rx, double ry, double rz);
     void rotate(const Point4D& r) override;
     // Rotate mesh around normalised vector 'v' by 'r' radians
-    void rotate(const Point4D& v, double r);
+    void rotate(const Point4D& v, double r) override;
     // Rotate mesh around XYZ by (rx, ry, rz) radians relative val 'point4D'
     void rotateRelativePoint(const Point4D& point4D, double rx, double ry, double rz);
     // Rotate mesh around XYZ by (r.x, r.y, r.z) radians relative val 'point4D'
     void rotateRelativePoint(const Point4D& point4D, const Point4D& r) override;
     // Rotate mesh around normalised vector 'v' by 'r' radians relative val 'point4D'
-    void rotateRelativePoint(const Point4D& point4D, const Point4D& v, double r);
+    void rotateRelativePoint(const Point4D& point4D, const Point4D& v, double r) override;
     void scale(double sx, double sy, double sz);
     void scale(const Point4D& s);
     void decompose(double value) override;
@@ -66,6 +66,9 @@ public:
 
     Mesh static Cube(double size = 1.0);
     Mesh static Obj(const std::string& filename);
+
+    void setVisible(bool visibility) { _visible = visibility; }
+    [[nodiscard]] bool isVisible() const { return _visible; }
 };
 
 

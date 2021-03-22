@@ -24,6 +24,10 @@ public:
         obj.translate(value * _dp);
         return updateState();
     }
+
+    [[nodiscard]] int type() const override {
+        return 2;
+    }
 };
 
 #endif //INC_3DZAVR_ATRANSLATE_H

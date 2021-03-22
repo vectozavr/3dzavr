@@ -26,10 +26,12 @@ private:
     Point4D p_angularVelocity;
     Point4D p_angularAcceleration;
 
-    double mass = 1.0;
+    double _mass = 1.0;
 
     bool _collision = false;
-    bool _debugMode = false;
+    bool _isCollider = true;
+
+    bool _inCollision = false;
 
     Point4D _findFurthestPoint(const Point4D& direction);
     Point4D _support(RigidBody& obj, const Point4D& direction);
@@ -50,7 +52,11 @@ public:
     CollisionPoint EPA(const Simplex& simplex, RigidBody &obj);
 
     [[nodiscard]] bool isCollision() const { return _collision; }
+    [[nodiscard]] bool inCollision() const {return _inCollision; }
+    [[nodiscard]] bool isCollider() const {return _isCollider; }
+    void setInCollision(bool c) { _inCollision = c; }
     void setCollision(bool c) { _collision= c; }
+    void setCollider(bool c) { _isCollider = c; }
 
     [[nodiscard]] virtual std::vector<Triangle>& triangles() = 0;
 
@@ -60,15 +66,16 @@ public:
 
     void updatePhysicsState();
 
-    void applyVelocity(const Point4D& velocity);
-    void applyAngularVelocity(const Point4D& angularVelocity);
+    void setVelocity(const Point4D& velocity);
+    void setAngularVelocity(const Point4D& angularVelocity);
 
-    void applyAcceleration(const Point4D& acceleration);
-    void applyAngularAcceleration(const Point4D& angularAcceleration);
+    void setAcceleration(const Point4D& acceleration);
+    void setAngularAcceleration(const Point4D& angularAcceleration);
 
     [[nodiscard]] Point4D velocity() const { return p_velocity; }
 
-    void setDebugMode(bool mode) { _debugMode = mode; }
+    [[nodiscard]] double mass() const { return _mass; }
+    void setMass(double val) { _mass = val; }
 };
 
 

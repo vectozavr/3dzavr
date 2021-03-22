@@ -40,15 +40,13 @@ void TestGame::start() {
     world["cube_2"].translate(0, 5, 0);
 
     world["cube_2"].setCollision(true);
-    world["cube_2"].setDebugMode(true);
 
-    world["cube_2"].applyAcceleration({0, -9.81, 0});
     //world["cube_2"].rotate({M_PI/4, 0, M_PI/4});
     //world["cube_2"].rotate({0, 0, 0.001});
 
-    world["cube_1"].a_translate({0, 6, 0}, 5);
-    world["cube_1"].a_wait(0);
-    world["cube_1"].a_translate({0, -6, 0}, 5);
+    //world["cube_1"].a_translate("a", {0, 6, 0}, 5);
+    //world["cube_1"].a_wait("a",0);
+    //world["cube_1"].a_translate("a",{0, -6, 0}, 5);
 
 
     //vector<Triangle>tris;

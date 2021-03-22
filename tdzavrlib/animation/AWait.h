@@ -21,6 +21,10 @@ public:
     bool update(Animatable& obj) override {
         return updateState();
     }
+
+    [[nodiscard]] int type() const override {
+        return 1;
+    }
 };
 
 #endif //INC_3DZAVR_AWAIT_H

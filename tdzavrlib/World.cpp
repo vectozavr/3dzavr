@@ -5,6 +5,7 @@
 #include <fstream>
 #include "World.h"
 #include "utils/Log.h"
+#include "Plane.h"
 
 using namespace std;
 
@@ -46,4 +47,33 @@ Mesh &World::operator[](const string &name) {
 
 void World::copyMesh(const string &meshName, const string &copyName) {
     _objects.emplace(copyName, _objects[meshName]);
+}
+
+std::pair<Point4D, Triangle> World::rayCast(const Point4D& from, const Point4D& to) {
+
+    std::pair<Point4D, Triangle> result{Point4D{0, 0,0, -1}, Triangle{}};
+    double minDistance = 10000;
+
+    for(auto& object : _objects) {
+        if((object.first.find("player") != std::string::npos) || (object.first.find("point") != std::string::npos))
+            continue;
+
+        for(auto& tri : object.second.triangles()) {
+            Triangle tri_translated(tri[0] + object.second.position(), tri[1] + object.second.position(), tri[2] + object.second.position());
+            tri_translated[0].w = 0; tri_translated[1].w = 0; tri_translated[2].w = 0;
+
+            Plane plane(tri_translated);
+            auto intersection = plane.intersection(from, to);
+            //cout << intersection.second << endl;
+            double distance = (intersection.first - from).sqrAbs();
+            if(intersection.second > 0 && distance < minDistance && tri_translated.isPointInside(intersection.first)) {
+                minDistance = distance;
+                result = {intersection.first, tri_translated};
+                //tri.color = {255, 0, 0};
+            } else {
+                //tri.color = {0, 255, 0};
+            }
+        }
+    }
+    return result;
 }

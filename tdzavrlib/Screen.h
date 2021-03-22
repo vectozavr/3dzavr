@@ -33,7 +33,8 @@ private:
 
     Screen::ViewMode vm = Screen::ViewMode::Default;
 
-    std::map<sf::Keyboard::Key, double> tappedKey;
+    std::map<sf::Keyboard::Key, double> tappedKeys;
+    std::map<sf::Mouse::Button, double> tappedButtons;
 
     std::string font = "../tdzavrlib/fonts/Roboto-Thin.ttf";
     std::string shader = "../tdzavrlib/shaders/texturing.frag";
@@ -64,6 +65,9 @@ public:
 
     static bool isKeyPressed(sf::Keyboard::Key key); // returns true if this key is pressed
     bool isKeyTapped(sf::Keyboard::Key key); // returns true if this key is tapped and 1/5 sec passed (button bouncing problem solved)
+
+    static bool isButtonPressed(sf::Mouse::Button button); // returns true if this button is pressed
+    bool isButtonTapped(sf::Mouse::Button button); // returns true if this button is tapped and 1/5 sec passed (button bouncing problem solved)
 
     Point4D getMousePosition() const;
     Point4D getMouseDisplacement() const;
