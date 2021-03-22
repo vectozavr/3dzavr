@@ -10,7 +10,7 @@
 #include "Plane.h"
 #include "Mesh.h"
 
-class Camera : public Animatable{
+class Camera : public Object, public Animatable{
 private:
     Point4D p_eye;
     Point4D p_angle;
@@ -51,7 +51,7 @@ public:
     Camera(const Camera& camera) = delete;
 
 
-    void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 500.0);
+    void init(int width, int height, double fov = 110.0, double ZNear = 0.1, double ZFar = 5000.0);
 
     std::vector<Triangle>& project(const Mesh &mesh, Screen::ViewMode mode);
 
@@ -73,8 +73,17 @@ public:
     [[nodiscard]] Point4D down() const { return -p_up; }
     [[nodiscard]] Point4D lookAt() const { return p_lookAt; }
 
-    void translate(const Point4D& dv) override { p_eye += dv; }
-    void translate(double dx, double dy, double dz) { p_eye += Point4D(dx, dy, dz, 0); }
+    void translate(const Point4D& dv) override {
+        p_eye += dv;
+
+        if(v_attached.empty())
+            return;
+        for(auto attached : v_attached)
+            attached->translate(dv);
+    }
+    void translate(double dx, double dy, double dz) {
+        translate({dx, dy, dz});
+    }
     void attractToPoint(const Point4D& point, double r) override;
     void translateToPoint(const Point4D& point);
 
@@ -84,7 +93,7 @@ public:
     void rotate(double rx, double ry, double rz);
     void rotate(const Point4D& r) override;
 
-    void rotate(const Point4D& v, double rv);
+    void rotate(const Point4D& v, double rv) override;
 
     void rotateLeft(double rl);
     void rotateUp(double ru);
@@ -96,7 +105,7 @@ public:
     // Rotate mesh around XYZ by (r.x, r.y, r.z) radians relative val 'point4D'
     void rotateRelativePoint(const Point4D& s, const Point4D& r) override;
     // Rotate mesh around normalised vector 'v' by 'r' radians relative val 'point4D'
-    void rotateRelativePoint(const Point4D& s, const Point4D& v, double r);
+    void rotateRelativePoint(const Point4D& s, const Point4D& v, double r) override;
 
     void setTrace(bool t) { trace = t; } // Performance heavy (to observe what see camera from external camera)
 

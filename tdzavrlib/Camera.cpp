@@ -15,6 +15,9 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
         return this->triangles;
     }
 
+    if(!mesh.isVisible())
+        return this->triangles;
+
     // Model transform matrix: translate tris in the origin of mesh.
     Matrix4x4 M = Matrix4x4::Translation(mesh.position());
     // mesh.animationMatrix() apply one step to the animation and returns how should we
@@ -26,7 +29,10 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
     for(auto& t : mesh.triangles()) {
 
         double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
-        if(dot > 0 && !(mode == Screen::ViewMode::Xray) && !(mode == Screen::ViewMode::Transparency) && !(mode == Screen::ViewMode::Normals) && !isExternal )
+        //double dot = t.norm().dot(p_lookAt);
+
+        if(dot > 0 && mode != Screen::ViewMode::Xray && mode != Screen::ViewMode::Transparency &&
+           mode != Screen::ViewMode::Normals && !isExternal )
             continue;
 
         Triangle clipped[2];
@@ -59,14 +65,14 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
             if(!isExternal) {
                 //sf::Color color = clippedTriangle.
                 if(mode != Screen::ViewMode::Clipped)
-                    clippedTriangle.color = sf::Color(clippedTriangle.color.r * (0.3 * std::abs(dot) + 0.7), clippedTriangle.color.g * (0.3 * std::abs(dot) + 0.7), clippedTriangle.color.b * (0.3 * std::abs(dot) + 0.7), (mode == Screen::ViewMode::Transparency || mode == Screen::ViewMode::Normals) ? 100 : 255);
+                    clippedTriangle.color = sf::Color(clippedTriangle.color.r * (0.3 * std::abs(dot) + 0.7), clippedTriangle.color.g * (0.3 * std::abs(dot) + 0.7), clippedTriangle.color.b * (0.3 * std::abs(dot) + 0.7), (mode == Screen::ViewMode::Transparency || mode == Screen::ViewMode::Normals) ? 100 : clippedTriangle.color.a);
                 // This is for clipping demonstration.
                 // If you want to debug clipping just comment previous line and uncomment this block of code.
                 else {
                     if (clippedTriangle.clip == Triangle::None)
-                        clippedTriangle.color = sf::Color(clippedTriangle.color.r * (0.3 * std::abs(dot) + 0.7),
-                                                          clippedTriangle.color.g * (0.3 * std::abs(dot) + 0.7),
-                                                          clippedTriangle.color.b * (0.3 * std::abs(dot) + 0.7), 255);
+                        clippedTriangle.color = sf::Color(clippedTriangle.color.r * (0.1 * std::abs(dot) + 0.9),
+                                                          clippedTriangle.color.g * (0.1 * std::abs(dot) + 0.9),
+                                                          clippedTriangle.color.b * (0.1 * std::abs(dot) + 0.9), clippedTriangle.color.a);
                     else if (clippedTriangle.clip == Triangle::Cropped)
                         clippedTriangle.color = sf::Color(0, 0, 194 * (0.3 * std::abs(dot) + 0.7), 255);
                     else if (clippedTriangle.clip == Triangle::Doubled)
@@ -74,7 +80,9 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
                 }
             }
 
-            double z = (clippedTriangle[0].z + clippedTriangle[1].z + clippedTriangle[2].z) / 3.0;
+            double distance1 = clippedTriangle[0].abs();
+            double distance2 = clippedTriangle[1].abs();
+            double distance3 = clippedTriangle[2].abs();
 
             // Before we projected aur clipped colored triangle, we need to save it's state
             // If we want to observe them from external camera. When we call Tdzavr::setCameraMode(CameraMode::ExternalObserver);
@@ -145,7 +153,7 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
              * clippedTriangle - one clipped triangle from mesh
              *
              * M - translation from mesh coordinate to world coordinate
-             * A - animation matrix (to express transitional state of the mesh)
+             * A - animation matrix (to express transitional state of the mesh) (deprecated)
              * V - transform from world coordinate to camera' coordinate
              * P - project tris from camera' coordinate to camera 2d plane
              * S - transform 2d plane' coordinate to screen coordinate (in pixels)
@@ -153,6 +161,11 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
             clippedTriangle[0] /= clippedTriangle[0].w;
             clippedTriangle[1] /= clippedTriangle[1].w;
             clippedTriangle[2] /= clippedTriangle[2].w;
+
+            // Trying to solve incorrect triangle Z buffering
+            clippedTriangle[0].z = distance1;
+            clippedTriangle[1].z = distance2;
+            clippedTriangle[2].z = distance3;
 
             triangles.emplace_back(clippedTriangle);
         }
@@ -200,8 +213,22 @@ std::vector<Triangle> &Camera::sorted() {
     // This is some replacement for Z-buffer
     std::sort(triangles.begin(), triangles.end(), [](Triangle &t1, Triangle &t2)
     {
-        double z1 = (t1[0].z + t1[1].z + t1[2].z) / 3.0;
-        double z2 = (t2[0].z + t2[1].z + t2[2].z) / 3.0;
+        std::vector<double> v_z1({t1[0].z, t1[1].z, t1[2].z});
+        std::vector<double> v_z2({t2[0].z, t2[1].z, t2[2].z});
+
+        std::sort(v_z1.begin(), v_z1.end());
+        std::sort(v_z2.begin(), v_z2.end());
+
+        //double z1 = (t1[0].z + t1[1].z + t1[2].z);
+        //double z2 = (t2[0].z + t2[1].z + t2[2].z);
+
+        double a = 1;
+        double b = 1;
+        double c = 1;
+
+        double z1 = (a*v_z1[0] + b*v_z1[1] + c*v_z1[2]);
+        double z2 = (a*v_z2[0] + b*v_z2[1] + c*v_z2[2]);
+
         return z1 > z2;
     });
 
@@ -245,6 +272,12 @@ void Camera::rotate(double rx, double ry, double rz) {
     rotateX(rx);
     rotateY(ry);
     rotateZ(rz);
+
+    if(v_attached.empty())
+        return;
+    for(auto attached : v_attached)
+        attached->rotateRelativePoint(position(), {rx, ry, rz});
+
 }
 
 void Camera::rotate(const Point4D& r) {
@@ -256,6 +289,11 @@ void Camera::rotate(const Point4D& v, double rv) {
     p_left = Matrix4x4::Rotation(v, rv) * p_left;
     p_up = Matrix4x4::Rotation(v, rv) * p_up;
     p_lookAt = Matrix4x4::Rotation(v, rv) * p_lookAt;
+
+    if(v_attached.empty())
+        return;
+    for(auto& attached : v_attached)
+        attached->rotateRelativePoint(position(), v, rv);
 }
 
 void Camera::rotateLeft(double rl) {

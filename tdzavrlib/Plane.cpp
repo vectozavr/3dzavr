@@ -32,13 +32,6 @@ std::pair<Point4D, double> Plane::intersection(const Point4D &start, const Point
     return std::make_pair(res, k);
 }
 
-std::pair<Point4D, double> Plane::overIntersection(const Point4D &start, const Point4D &end) {
-    double s_dot_n = start.dot(n);
-    double k = (s_dot_n - p.dot(n))/(s_dot_n - end.dot(n));
-    Point4D res = start + (end - start)*k;
-    return std::make_pair(res, (start-end).abs()*(1.0-k));
-}
-
 int Plane::clip(Triangle &tri, Triangle &additional_tri) {
     n.normalize();
 

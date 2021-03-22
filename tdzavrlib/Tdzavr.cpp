@@ -7,6 +7,7 @@
 #include <iostream>
 #include "CameraMesh.h"
 #include "utils/ResourceManager.h"
+#include "physics/Solver.h"
 
 void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background) {
     screen.open(screenWidth, screenHeight, name, verticalSync, background);
@@ -39,18 +40,13 @@ void Tdzavr::create(int screenWidth, int screenHeight, const std::string &name, 
             m.second.updatePhysicsState();
             // isCollision detection:
             if(m.second.isCollision()) {
+                m.second.setInCollision(false);
                 for (auto &obj : world.objects()) {
-                    if (obj.first != m.first) {
+                    if (obj.first != m.first && obj.second.isCollider()) {
                         std::pair<bool, Simplex> gjk = m.second.checkGJKCollision(obj.second);
                         if (gjk.first) {
-                            //m.second.setColor({255, 0, 0});
                             CollisionPoint epa = m.second.EPA(gjk.second, obj.second);
-                            if(epa.hasCollision) {
-                                m.second.translate(-epa.normal * epa.depth);
-                                m.second.applyVelocity(-m.second.velocity()*0.5);
-                            }
-                        } else {
-                            //m.second.setColor({0, 255, 0});
+                            Solver::solveCollision(m.second, obj.second, epa);
                         }
                     }
                 }

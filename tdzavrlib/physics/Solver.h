@@ -5,9 +5,11 @@
 #ifndef INC_3DZAVR_SOLVER_H
 #define INC_3DZAVR_SOLVER_H
 
+#include "RigidBody.h"
 
 class Solver {
-
+public:
+    static void solveCollision(RigidBody& obj1, RigidBody& obj2, const CollisionPoint& collision);
 };
 
 
