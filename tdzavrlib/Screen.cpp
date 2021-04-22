@@ -70,21 +70,42 @@ void Screen::triangle(const Triangle& triangle)
         //convex.setOutlineThickness(1);
         //convex.setOutlineColor({255, 0, 0});
         // We draw 3 lines instead:
-        line(triangle[0], triangle[1]);
-        line(triangle[1], triangle[2]);
-        line(triangle[2], triangle[0]);
+        //line(triangle[0], triangle[1]);
+        //line(triangle[1], triangle[2]);
+        //line(triangle[2], triangle[0]);
+        
+        // Direct draw to make less draw calls
+        sf::Vertex lines[4] =
+        {
+            sf::Vertex(sf::Vector2f(triangle[0].x, triangle[0].y), sf::Color(0, 0, 0, 255)),
+            sf::Vertex(sf::Vector2f(triangle[1].x, triangle[1].y), sf::Color(0, 0, 0, 255)),
+            sf::Vertex(sf::Vector2f(triangle[2].x, triangle[2].y), sf::Color(0, 0, 0, 255)),
+            sf::Vertex(sf::Vector2f(triangle[0].x, triangle[0].y), sf::Color(0, 0, 0, 255))
+        };
+        window.draw(lines, 4, sf::LineStrip);
     }
     if(vm == Frame || vm == Xray)
         return; // no texture when we turn on Frame or Xray mode
 
-    sf::ConvexShape convex;
+    // Direct draw, ConvexShape.setPoint updates all data instead of just point
+    sf::Vertex tris[3] =
+    {
+        sf::Vertex(sf::Vector2f(triangle[0].x, triangle[0].y), triangle.color),
+        sf::Vertex(sf::Vector2f(triangle[1].x, triangle[1].y), triangle.color),
+        sf::Vertex(sf::Vector2f(triangle[2].x, triangle[2].y), triangle.color)
+    };
+    window.draw(tris, 3, sf::Triangles);
 
-    convex.setFillColor(triangle.color);
-    convex.setPointCount(3);
-
-    convex.setPoint(0, sf::Vector2f(triangle[0].x, triangle[0].y));
-    convex.setPoint(1, sf::Vector2f(triangle[1].x, triangle[1].y));
-    convex.setPoint(2, sf::Vector2f(triangle[2].x, triangle[2].y));
+    //sf::ConvexShape convex;
+    //
+    //convex.setFillColor(triangle.color);
+    //convex.setPointCount(3);
+    //
+    //convex.setPoint(0, sf::Vector2f(triangle[0].x, triangle[0].y));
+    //convex.setPoint(1, sf::Vector2f(triangle[1].x, triangle[1].y));
+    //convex.setPoint(2, sf::Vector2f(triangle[2].x, triangle[2].y));
+    //
+    //window.draw(convex);
 
     // Texturing
 
@@ -93,9 +114,6 @@ void Screen::triangle(const Triangle& triangle)
     ////(*textureShader).setUniform("G");
     //convex.setTexture(ResourceManager::loadTexture("../textures/stone_tiles.jpg"));
     //window.draw(convex, textureShader);
-
-
-    window.draw(convex);
 }
 
 void Screen::title(const std::string& title)
