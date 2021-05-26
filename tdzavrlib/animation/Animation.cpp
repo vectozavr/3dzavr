@@ -21,8 +21,10 @@ bool Animation::updateState() {
 
     if(_looped != Continue || _time < 0.5)
         _dtime = _time - _timeOld;
-    else
+    else {
         _time = _timeOld;
+        //_intType = linear;
+    }
 
     switch (_intType) {
         case bezier:
@@ -43,5 +45,5 @@ bool Animation::updateState() {
             break;
     }
 
-    return (_time < 0.999) || _looped == Cycle;
+    return (_time < 1) || _looped == Cycle;
 }

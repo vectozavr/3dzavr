@@ -5,7 +5,7 @@
 #include "Solver.h"
 #include <iostream>
 
-void Solver::solveCollision(RigidBody& obj1, RigidBody& obj2, const CollisionPoint& collision) {
+void Solver::solveCollision(const std::shared_ptr<RigidBody>& obj1, const std::shared_ptr<RigidBody>& obj2, const CollisionPoint& collision) {
     if(!collision.hasCollision)
         return;
 
@@ -29,17 +29,17 @@ void Solver::solveCollision(RigidBody& obj1, RigidBody& obj2, const CollisionPoi
     }
     */
 
-    if(obj1.isCollision())
-        obj1.setVelocity(0);
-    if(obj2.isCollision())
-        obj2.setVelocity(0);
+    if(obj1->isCollision())
+        obj1->setVelocity(0);
+    if(obj2->isCollision())
+        obj2->setVelocity(0);
 
-    if(obj1.isCollision() && obj2.isCollision()) {
-        obj1.translate(-collision.normal * collision.depth/2.0);
-        obj2.translate(collision.normal * collision.depth/2.0);
-    } else if(obj1.isCollision())
-        obj1.translate(-collision.normal * collision.depth);
+    if(obj1->isCollision() && obj2->isCollision()) {
+        obj1->translate(-collision.normal * collision.depth/2.0);
+        obj2->translate(collision.normal * collision.depth/2.0);
+    } else if(obj1->isCollision())
+        obj1->translate(-collision.normal * collision.depth);
     else
-        obj2.translate(collision.normal * collision.depth);
+        obj2->translate(collision.normal * collision.depth);
 }
 

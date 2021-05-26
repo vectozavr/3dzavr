@@ -4,6 +4,7 @@
 
 #include "Animatable.h"
 #include <iostream>
+#include <utility>
 
 #include "ATranslate.h"
 #include "ATranslateToPoint.h"
@@ -17,6 +18,7 @@
 #include "AWait.h"
 #include "ARotateToAngle.h"
 #include "ARotateLeftUpLookAtToAngle.h"
+#include "AFunction.h"
 
 void Animatable::a_translate(const std::string& listName, const Point4D &t, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
     animations[listName].emplace_back(new ATranslate(t, duration, looped, interpolationType));
@@ -69,6 +71,10 @@ void Animatable::a_showCreation(const std::string& listName, double duration, An
 
 void Animatable::a_wait(const std::string& listName, double duration) {
     animations[listName].emplace_back(new AWait(duration));
+}
+
+void Animatable::a_function(const std::string &listName, std::function<void()> function, int calls, double duration, Animation::LoopOut looped, Animation::InterpolationType interpolationType) {
+    animations[listName].emplace_back(new AFunction(std::move(function), calls, duration, looped, interpolationType));
 }
 
 void Animatable::a_update() {

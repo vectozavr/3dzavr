@@ -33,6 +33,7 @@ public:
                 newTriangles.emplace_back(t[0], t[0], t[0] + (t[1] - t[0])*a/d1);
             else
                 newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1])*(a-d1)/d2);
+            newTriangles.back().color = t.color;
         }
         obj.setTriangles(newTriangles);
         return updateState();

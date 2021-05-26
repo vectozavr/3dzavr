@@ -14,14 +14,8 @@ For this moment I already implemented:
 - Advanced smooth animations by using Bézier curves for meshes and camera
 - External camera (You can see how 3D world projected on 2D plane and the process of clipping)
 - You can render animated scene to .mp4 files or sequence of .png files (film/img/ & film/mp4). But it is extremely slow process due-to SFML waste a lot of time on saving .png files. It is still better to capture your screen by some additional software.
-
-<h4>TODO:</h4>
-
 - Physics engine
-  
-- Ray-tracing & recursive ray-tracing 
-  
-- Textures
+- Network system
 
 <h4>Installation:</h4>
 
@@ -30,7 +24,7 @@ For this moment I already implemented:
     openal: https://openal.org/downloads/
    
 
-2) Install SFML on your computer:
+2) Install SFML on your computer (<b>The compiler versions have to match 100%</b>):
    
     sfml: https://www.sfml-dev.org/download.php
    

@@ -67,3 +67,13 @@ bool Triangle::isPointInside(const Point4D &point) const {
         return true;
     return false;
 }
+
+Triangle &Triangle::operator=(const Triangle &triangle) {
+    clip = triangle.clip;
+    color = triangle.color;
+    p[0] = triangle[0];
+    p[1] = triangle[1];
+    p[2] = triangle[2];
+
+    return *this;
+}

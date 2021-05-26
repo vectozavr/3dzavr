@@ -10,7 +10,7 @@
 
 class Object {
 protected:
-    std::vector<Object*> v_attached;
+    std::vector<std::shared_ptr<Object>> v_attached;
 
     Point4D p_position;
     Point4D p_angle;
@@ -25,7 +25,7 @@ public:
 
     [[nodiscard]] virtual Point4D position() const { return p_position; }
 
-    void attach(Object* object) {
+    void attach(const std::shared_ptr<Object>& object) {
         v_attached.push_back(object);
     }
 };

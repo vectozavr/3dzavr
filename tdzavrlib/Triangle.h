@@ -26,7 +26,7 @@ public:
     Triangle ();
     Triangle (const Triangle& triangle);
     Triangle (const Point4D& p1, const Point4D& p2, const Point4D& p3);
-    Triangle& operator=(const Triangle& triangle) = default;
+    Triangle& operator=(const Triangle& triangle);
 
     [[nodiscard]] Point4D operator[] (int i) const;
     [[nodiscard]] Point4D& operator[] (int i);
@@ -38,7 +38,7 @@ public:
     Triangle& operator*=(const Matrix4x4& matrix4X4);
     [[nodiscard]] Point4D pos() const;
 
-    bool isPointInside(const Point4D& point) const;
+    [[nodiscard]] bool isPointInside(const Point4D& point) const;
 };
 
 

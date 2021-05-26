@@ -29,42 +29,42 @@ TestGame::TestGame() : cameraController(camera, screen)
 void TestGame::start() {
     // This code executed once in the beginning:
 
-    external_camera.translate(-4, -0.5, 10);
-    external_camera.rotate({0, M_PI/2.2, 0});
-    external_camera.rotateLeftUpLookAt({M_PI/6, 0, 0});
+    external_camera->translate(-4, -0.5, 10);
+    external_camera->rotate({0, M_PI/2.2, 0});
+    external_camera->rotateLeftUpLookAt({M_PI/6, 0, 0});
 
-    world.loadObj("../obj/mountains.obj", "teapot");
+    world->loadObj("../obj/mountains.obj", "mountains");
 
-    world["teapot"].translate(0, -3, 10);
+    (*world)["mountains"]->translate(0, -3, 10);
 
-    screen.setMode(Screen::ViewMode::Transparency);
-    screen.setMouseCursorVisible(false);
+    screen->setMode(Screen::ViewMode::Transparency);
+    screen->setMouseCursorVisible(false);
 
-    camera.translate(0, 10,-20);
-    camera.rotateLeftUpLookAt({M_PI/6, 0, 0});
+    camera->translate(0, 10,-20);
+    camera->rotateLeftUpLookAt({M_PI/6, 0, 0});
 
     // Animations:
-    world["teapot"].a_showCreation("a1", 5);
-    camera.a_rotateRelativePoint("a1",world["teapot"].position(), {0, M_PI/4.0, 0}, 10, Animation::Continue);
-    camera.a_attractToPoint("a1",world["teapot"].position(), -10, 11);
+    (*world)["mountains"]->a_showCreation("a1", 5);
+    camera->a_rotateRelativePoint("a1",(*world)["mountains"]->position(), {0, M_PI/4.0, 0}, 10, Animation::Continue);
+    camera->a_attractToPoint("a1",(*world)["mountains"]->position(), -10, 11);
 
-    world["teapot"].a_decompose("a1",10, 3);
-    world["teapot"].a_wait("a1",0);
-    world["teapot"].a_decompose("a1",-10, 3);
+    (*world)["mountains"]->a_decompose("a1",10, 3);
+    (*world)["mountains"]->a_wait("a1",0);
+    (*world)["mountains"]->a_decompose("a1",-10, 3);
 }
 
 void TestGame::update(double elapsedTime) {
     // This code executed every time step:
 
     // Check all input after this condition please
-    if (!screen.window.hasFocus())
+    if (!screen->window.hasFocus())
         return;
 
     cameraController.update();
 
-    if(screen.isKeyTapped(sf::Keyboard::Escape))
+    if(screen->isKeyTapped(sf::Keyboard::Escape))
         exit();
-    if(screen.isKeyTapped(sf::Keyboard::E))
+    if(screen->isKeyTapped(sf::Keyboard::E))
         switchCamera();
 }
 

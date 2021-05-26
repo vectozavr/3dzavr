@@ -8,7 +8,7 @@
 #include <iostream>
 #include <execution>
 
-std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) {
+std::vector<Triangle> &Camera::project(Mesh& mesh, Screen::ViewMode mode) {
 
     if(!ready) {
         Log::log("Camera::project(): cannot project tris without camera initialization ( Camera::init() ) ");
@@ -28,7 +28,7 @@ std::vector<Triangle> &Camera::project(const Mesh &mesh, Screen::ViewMode mode) 
     std::vector<Triangle> clippedTriangles, tempBuffer;
     for(auto& t : mesh.triangles()) {
 
-        double dot = t.norm().dot((mesh.position() + t[0] - p_eye).normalize());
+        double dot = t.norm().dot((mesh.position() + t[0] - p_position).normalize());
         //double dot = t.norm().dot(p_lookAt);
 
         if(dot > 0 && mode != Screen::ViewMode::Xray && mode != Screen::ViewMode::Transparency &&
@@ -242,9 +242,9 @@ void Camera::record() {
     triangles.clear();
     traced.clear();
 
-    V = Matrix4x4::View(p_left, p_up, p_lookAt, p_eye);
+    V = Matrix4x4::View(p_left, p_up, p_lookAt, p_position);
     if(trace)
-        Vint = Matrix4x4::ViewInverse(p_left, p_up, p_lookAt, p_eye);
+        Vint = Matrix4x4::ViewInverse(p_left, p_up, p_lookAt, p_position);
 }
 
 void Camera::rotateX(double rx) {
@@ -324,13 +324,18 @@ void Camera::rotateRelativePoint(const Point4D &s, double rx, double ry, double 
     p_angle += Point4D{rx, ry, rz};
 
     // Translate XYZ by vector r1
-    Point4D r1 = p_eye - s;
+    Point4D r1 = p_position - s;
     // In translated coordinate system we rotate camera and position
     Point4D r2 = Matrix4x4::Rotation(rx, ry, rz)*r1;
     rotate(rx, ry, rz);
 
     // After rotation we translate XYZ by vector -r2 and recalculate position
-    p_eye = s + r2;
+    p_position = s + r2;
+
+    if(v_attached.empty())
+        return;
+    for(auto& attached : v_attached)
+        attached->rotateRelativePoint(s, {rx, ry, rz});
 }
 
 void Camera::rotateRelativePoint(const Point4D &s, const Point4D &r) {
@@ -339,20 +344,26 @@ void Camera::rotateRelativePoint(const Point4D &s, const Point4D &r) {
 
 void Camera::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
     // Translate XYZ by vector r1
-    Point4D r1 = p_eye - s;
+    Point4D r1 = p_position - s;
     // In translated coordinate system we rotate camera and position
     Point4D r2 = Matrix4x4::Rotation(v, r)*r1;
     rotate(v, r);
 
     // After rotation we translate XYZ by vector -r2 and recalculate position
-    p_eye = s + r2;
+    p_position = s + r2;
+
+    if(v_attached.empty())
+        return;
+    for(auto& attached : v_attached)
+        attached->rotateRelativePoint(s, v, r);
 }
 
 void Camera::attractToPoint(const Point4D &point, double r) {
-    Point4D v = (point - p_eye).normalize();
+    Point4D v = (point - p_position).normalize();
     translate(v*r);
 }
 
 void Camera::translateToPoint(const Point4D &point) {
-    p_eye = point;
+    //p_position = point;
+    translate(point - p_position);
 }

@@ -9,27 +9,23 @@
 
 using namespace std;
 
-World::World(const std::string &filename, Point4D scale) {
+World::World(const std::string &filename, const Point4D& scale) {
     loadObj(filename, "map", scale);
-    Log::log("World::World(): loaded map from " + filename + "' with " + std::to_string(_objects["map"].triangles().size()) + " tris.");
+    Log::log("World::World(): loaded map from " + filename + "' with " + std::to_string(_objects["map"]->triangles().size()) + " tris.");
 }
 
-void World::addMesh(Mesh &mesh, const string &name) {
-    _objects.emplace(name, std::move(mesh));
-    Log::log("World::addMesh(): inserted lvalue mesh '" + name + "' with " + std::to_string(_objects[name].triangles().size()) + " tris.");
-
-}
-
-void World::addMesh(const Mesh& mesh, const string &name) {
+void World::addMesh(const std::shared_ptr<Mesh>& mesh, const string &name) {
     _objects.emplace(name, mesh);
-    Log::log("World::addMesh(): inserted rvalue mesh '" + name + "' with " + std::to_string(_objects[name].triangles().size()) + " tris.");
+    Log::log("World::addMesh(): inserted mesh '" + name + "' with " + std::to_string(_objects[name]->triangles().size()) + " tris.");
+
 }
 
-void World::loadObj(const string &filename, const string &name, Point4D scale) {
-    Mesh resMesh(filename);
-    resMesh.scale(scale);
+void World::loadObj(const string &filename, const string &name, const Point4D& scale) {
+    std::shared_ptr<Mesh> resMesh = std::make_shared<Mesh>(filename);
+
+    resMesh->scale(scale);
     _objects.emplace(name, resMesh);
-    Log::log("World::loadObj(): inserted mesh from " + filename + " with name '" + name + "' with " + std::to_string(_objects[name].triangles().size()) + " tris.");
+    Log::log("World::loadObj(): inserted mesh from " + filename + " with name '" + name + "' with " + std::to_string(_objects[name]->triangles().size()) + " tris.");
 }
 
 void World::removeMesh(const string &name) {
@@ -39,14 +35,10 @@ void World::removeMesh(const string &name) {
         Log::log("World::removeMesh(): cannot remove mesh '" + name + "': mesh does not exist.");
 }
 
-Mesh &World::operator[](const string &name) {
+std::shared_ptr<Mesh> World::operator[](const string &name) {
     if(_objects.count(name) == 0)
         Log::log("World::operator[]: mesh '" + name + "' does not exist.");
     return _objects.find(name)->second;
-}
-
-void World::copyMesh(const string &meshName, const string &copyName) {
-    _objects.emplace(copyName, _objects[meshName]);
 }
 
 std::pair<Point4D, Triangle> World::rayCast(const Point4D& from, const Point4D& to) {
@@ -55,11 +47,11 @@ std::pair<Point4D, Triangle> World::rayCast(const Point4D& from, const Point4D& 
     double minDistance = 10000;
 
     for(auto& object : _objects) {
-        if((object.first.find("player") != std::string::npos) || (object.first.find("point") != std::string::npos))
+        if((object.first.find("Player") != std::string::npos) || (object.first.find("point") != std::string::npos))
             continue;
 
-        for(auto& tri : object.second.triangles()) {
-            Triangle tri_translated(tri[0] + object.second.position(), tri[1] + object.second.position(), tri[2] + object.second.position());
+        for(auto& tri : object.second->triangles()) {
+            Triangle tri_translated(tri[0] + object.second->position(), tri[1] + object.second->position(), tri[2] + object.second->position());
             tri_translated[0].w = 0; tri_translated[1].w = 0; tri_translated[2].w = 0;
 
             Plane plane(tri_translated);

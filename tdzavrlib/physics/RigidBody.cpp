@@ -7,6 +7,7 @@
 #include "../utils/Log.h"
 #include "../utils/Time.h"
 #include <iostream>
+#include <cmath>
 
 Point4D RigidBody::_findFurthestPoint(const Point4D& direction) {
     std::vector<Point4D> visitedPoints = {};
@@ -36,9 +37,9 @@ Point4D RigidBody::_findFurthestPoint(const Point4D& direction) {
     return maxPoint;
 }
 
-Point4D RigidBody::_support(RigidBody &obj, const Point4D& direction) {
+Point4D RigidBody::_support(const std::shared_ptr<RigidBody>& obj, const Point4D& direction) {
     Point4D p1 = _findFurthestPoint(direction);
-    Point4D p2 = obj._findFurthestPoint(-direction);
+    Point4D p2 = obj->_findFurthestPoint(-direction);
 
     return p1 - p2;
 }
@@ -141,7 +142,7 @@ bool RigidBody::_tetrahedron(Simplex &points, Point4D &direction) {
     return true;
 }
 
-std::pair<bool, Simplex> RigidBody::checkGJKCollision(RigidBody &obj) {
+std::pair<bool, Simplex> RigidBody::checkGJKCollision(const std::shared_ptr<RigidBody>& obj) {
 
     // Get initial support point in any direction
     Point4D support = _support(obj, Point4D::unit_x());
@@ -168,7 +169,7 @@ std::pair<bool, Simplex> RigidBody::checkGJKCollision(RigidBody &obj) {
     }
 }
 
-CollisionPoint RigidBody::EPA(const Simplex& simplex, RigidBody &obj) {
+CollisionPoint RigidBody::EPA(const Simplex& simplex, const std::shared_ptr<RigidBody>& obj) {
 
     std::vector<Point4D> polytope(simplex.begin(), simplex.end());
     std::vector<size_t>  faces = {
