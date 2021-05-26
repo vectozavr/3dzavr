@@ -5,7 +5,6 @@
 #ifndef INC_3DZAVR_TIME_H
 #define INC_3DZAVR_TIME_H
 
-
 namespace Time
 {
     int fps();

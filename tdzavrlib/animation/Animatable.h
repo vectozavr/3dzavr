@@ -38,6 +38,8 @@ public:
     void a_showCreation(const std::string& listName, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
     void a_wait(const std::string& listName, double duration = 1);
 
+    void a_function(const std::string& listName, std::function<void()> function, int calls = 1, double duration = 1, Animation::LoopOut looped = Animation::None, Animation::InterpolationType interpolationType = Animation::bezier);
+
     void a_update();
 
     void a_stopAllAnimations() { animations.clear(); }

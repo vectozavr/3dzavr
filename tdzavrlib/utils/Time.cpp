@@ -5,6 +5,7 @@
 #include "Time.h"
 #include <chrono>
 //#define FIXED_STEP (1.0/60.0)
+#define BIG_STEP (1.0/15.0)
 
 using namespace std::chrono;
 
@@ -53,6 +54,9 @@ namespace Time
 #else
         _deltaTime = duration<double>(t - _last).count();
         _time = duration<double>(t - _start).count();
+        // in case when fps < 10 it is useful to decrease _deltaTime (to avoid collision problems)
+        if(_deltaTime > BIG_STEP)
+            _deltaTime = BIG_STEP;
 #endif
         _realDeltaTime = duration<double>(t - _last).count();
         _last = t;

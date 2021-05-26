@@ -29,7 +29,7 @@ public:
 
         std::vector<Triangle> newTriangles;
         for(auto &t : triangles) {
-            newTriangles.emplace_back(t * Matrix4x4::Scale(value * _p));
+            newTriangles.emplace_back(t * Matrix4x4::Scale(Point4D{1, 1, 1} + (value - Point4D{1, 1, 1}) * _p));
         }
         obj.setTriangles(newTriangles);
         return updateState();

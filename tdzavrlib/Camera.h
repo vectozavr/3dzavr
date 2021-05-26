@@ -12,8 +12,6 @@
 
 class Camera : public Object, public Animatable{
 private:
-    Point4D p_eye;
-    Point4D p_angle;
     Point4D p_angleLeftUpLookAt;
 
     Point4D p_left =    {1, 0, 0, 0}; // internal X
@@ -53,7 +51,7 @@ public:
 
     void init(int width, int height, double fov = 110.0, double ZNear = 0.1, double ZFar = 5000.0);
 
-    std::vector<Triangle>& project(const Mesh &mesh, Screen::ViewMode mode);
+    std::vector<Triangle>& project(Mesh& mesh, Screen::ViewMode mode);
 
     [[nodiscard]] std::vector<Triangle> const &data() const { return triangles; }
     [[nodiscard]] std::vector<Triangle>& data() { return triangles; }
@@ -62,11 +60,11 @@ public:
     [[nodiscard]] int buffSize() const { return triangles.size(); }
     std::vector<Triangle>& sorted();
 
-    [[nodiscard]] Point4D position() const override { return p_eye; }
+    [[nodiscard]] Point4D position() const override { return p_position; }
     [[nodiscard]] Point4D angle() const override { return p_angle; }
     [[nodiscard]] Point4D angleLeftUpLookAt() const override { return p_angleLeftUpLookAt; }
 
-    [[nodiscard]] Point4D eye() const { return p_eye; }
+    [[nodiscard]] Point4D eye() const { return p_position; }
     [[nodiscard]] Point4D left() const { return p_left; }
     [[nodiscard]] Point4D right() const { return -p_left; }
     [[nodiscard]] Point4D up() const { return p_up; }
@@ -74,11 +72,11 @@ public:
     [[nodiscard]] Point4D lookAt() const { return p_lookAt; }
 
     void translate(const Point4D& dv) override {
-        p_eye += dv;
+        p_position += dv;
 
         if(v_attached.empty())
             return;
-        for(auto attached : v_attached)
+        for(const auto& attached : v_attached)
             attached->translate(dv);
     }
     void translate(double dx, double dy, double dz) {

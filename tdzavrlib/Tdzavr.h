@@ -18,17 +18,20 @@ public:
         ExternalObserver
     };
 protected:
-    Screen screen;
-    World world;
-    Camera camera;
-    Camera external_camera;
+    std::shared_ptr<Screen> screen;
+    std::shared_ptr<World> world;
+    std::shared_ptr<Camera> camera;
+    std::shared_ptr<Camera> external_camera;
 
     double triPerSec = 0;
 
     bool b_debugText = true;
+    bool b_updateWorld = true;
 
     CameraMode cameraMode = LocalCamera;
 public:
+    Tdzavr();
+
     virtual ~Tdzavr() = default;
 
     void create(int screenWidth = 1920, int screenHeight = 1080, const std::string& name = "3dzavr", bool verticalSync = true, sf::Color background = sf::Color(255, 255, 255));
@@ -38,6 +41,9 @@ public:
     void exit();
     void setCameraMode(CameraMode mode);
     void debugText(bool value) { b_debugText = value; }
+    void setUpdateWorld(bool value) { b_updateWorld = value; }
+
+    virtual void gui(){}
 };
 
 

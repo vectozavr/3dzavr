@@ -23,7 +23,7 @@ Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
     return *this;
 }
 
-Mesh &Mesh::loadObj(const std::string& filename) {
+Mesh &Mesh::loadObj(const std::string& filename, Point4D scale) {
 
     ifstream file(filename);
 
@@ -61,6 +61,8 @@ Mesh &Mesh::loadObj(const std::string& filename) {
     }
 
     file.close();
+
+    this->scale(scale);
 
     return *this;
 }
@@ -169,6 +171,11 @@ void Mesh::rotateRelativePoint(const Point4D &s, double rx, double ry, double rz
     // After rotation we translate XYZ by vector -r2 and recalculate position
     *this *= Matrix4x4::Translation(-r2);
     p_position = s + r2;
+
+    if(v_attached.empty())
+        return;
+    for(auto& attached : v_attached)
+        attached->rotateRelativePoint(s, {rx, ry, rz});
 }
 
 void Mesh::rotateRelativePoint(const Point4D &s, const Point4D &r) {
@@ -189,6 +196,11 @@ void Mesh::rotateRelativePoint(const Point4D &s, const Point4D &v, double r) {
     // After rotation we translate XYZ by vector -r2 and recalculate position
     *this *= Matrix4x4::Translation(-r2);
     p_position = s + r2;
+
+    if(v_attached.empty())
+        return;
+    for(auto& attached : v_attached)
+        attached->rotateRelativePoint(s, v, r);
 }
 
 void Mesh::attractToPoint(const Point4D &point, double r) {
@@ -197,7 +209,8 @@ void Mesh::attractToPoint(const Point4D &point, double r) {
 }
 
 void Mesh::translateToPoint(const Point4D &point) {
-    p_position = point;
+    //p_position = point;
+    translate(point - p_position);
 }
 
 void Mesh::decompose(double value) {

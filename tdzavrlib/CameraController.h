@@ -10,10 +10,10 @@
 
 class CameraController {
 private:
-    Camera& camera;
-    Screen& screen;
+    std::shared_ptr<Camera> camera;
+    std::shared_ptr<Screen> screen;
 public:
-    CameraController(Camera& camera, Screen& screen);
+    CameraController(std::shared_ptr<Camera>  camera, std::shared_ptr<Screen>  screen);
     void update();
 };
 

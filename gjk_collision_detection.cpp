@@ -29,24 +29,24 @@ TestGame::TestGame() : cameraController(camera, screen)
 void TestGame::start() {
     // This code executed once in the beginning:
 
-    screen.setMode(Screen::ViewMode::Transparency);
-    screen.setMouseCursorVisible(false);
-    camera.translate(0, 0, -10);
+    screen->setMode(Screen::ViewMode::Transparency);
+    screen->setMouseCursorVisible(false);
+    camera->translate(0, 0, -10);
 
-    world.loadObj("../obj/cube.obj", "cube_1");
-    world.loadObj("../obj/cube.obj", "cube_2");
+    world->loadObj("../obj/cube.obj", "cube_1");
+    world->loadObj("../obj/cube.obj", "cube_2");
 
-    world["cube_1"].translate(-0.5, -1, 0.5);
-    world["cube_2"].translate(0, 5, 0);
+    (*world)["cube_1"]->translate(-0.5, -1, 0.5);
+    (*world)["cube_2"]->translate(0, 5, 0);
 
-    world["cube_2"].setCollision(true);
+    (*world)["cube_2"]->setCollision(true);
 
     //world["cube_2"].rotate({M_PI/4, 0, M_PI/4});
     //world["cube_2"].rotate({0, 0, 0.001});
 
-    //world["cube_1"].a_translate("a", {0, 6, 0}, 5);
-    //world["cube_1"].a_wait("a",0);
-    //world["cube_1"].a_translate("a",{0, -6, 0}, 5);
+    (*world)["cube_1"]->a_translate("a", {0, 6, 0}, 5);
+    (*world)["cube_1"]->a_wait("a",0);
+    (*world)["cube_1"]->a_translate("a",{0, -6, 0}, 5);
 
 
     //vector<Triangle>tris;
@@ -71,12 +71,12 @@ void TestGame::update(double elapsedTime) {
     // This code executed every time step:
 
     // Check all input after this condition please
-    if (!screen.window.hasFocus())
+    if (!screen->window.hasFocus())
         return;
 
     cameraController.update();
 
-    if(screen.isKeyTapped(sf::Keyboard::Escape))
+    if(screen->isKeyTapped(sf::Keyboard::Escape))
         exit();
 }
 

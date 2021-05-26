@@ -37,11 +37,12 @@ private:
     std::map<sf::Mouse::Button, double> tappedButtons;
 
     std::string font = "../tdzavrlib/fonts/Roboto-Thin.ttf";
-    std::string shader = "../tdzavrlib/shaders/texturing.frag";
 
     bool renderVideo = false; // performance heavy. I use this to make sequence of .jpg files of screen and then convert this to .mp4 file
     int frame = 0;
     int scene = 0; // the number of scene
+
+    bool makeScreenShoot = false;
 public:
     sf::RenderWindow window;
 
@@ -83,6 +84,8 @@ public:
 
     void setRender(bool r);
     bool isRender() const { return renderVideo; }
+
+    void makeScreen() { makeScreenShoot = true; }
 };
 
 

@@ -34,7 +34,7 @@ private:
     bool _inCollision = false;
 
     Point4D _findFurthestPoint(const Point4D& direction);
-    Point4D _support(RigidBody& obj, const Point4D& direction);
+    Point4D _support(const std::shared_ptr<RigidBody>& obj, const Point4D& direction);
 
     static bool _nextSimplex(Simplex& points, Point4D& direction);
     static bool _line(Simplex& points, Point4D& direction);
@@ -48,8 +48,8 @@ public:
     RigidBody() = default;
     virtual ~RigidBody() = default;
 
-    std::pair<bool, Simplex> checkGJKCollision(RigidBody& obj);
-    CollisionPoint EPA(const Simplex& simplex, RigidBody &obj);
+    std::pair<bool, Simplex> checkGJKCollision(const std::shared_ptr<RigidBody>& obj);
+    CollisionPoint EPA(const Simplex& simplex, const std::shared_ptr<RigidBody>& obj);
 
     [[nodiscard]] bool isCollision() const { return _collision; }
     [[nodiscard]] bool inCollision() const {return _inCollision; }

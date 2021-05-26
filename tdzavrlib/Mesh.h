@@ -32,7 +32,7 @@ public:
     Mesh& operator=(const Mesh& mesh);
     explicit Mesh(const std::string& filename);
 
-    Mesh& loadObj(const std::string& filename);
+    Mesh& loadObj(const std::string& filename, Point4D scale = {1, 1, 1});
 
     [[nodiscard]] std::vector<Triangle>const &triangles() const { return tris; }
     [[nodiscard]] std::vector<Triangle>& triangles() override { return tris; }
