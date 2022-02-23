@@ -17,7 +17,7 @@ namespace Consts {
     const bool USE_LOG_FILE = true;
     const bool USE_OPEN_GL = true;
     const bool SHOW_DEBUG_INFO = false;
-    const bool SHOW_FPS_COUNTER = true;
+    const bool SHOW_FPS_COUNTER = false;
 
     const double PI = 3.14159265358979323846264338327950288;
     const double EPS = 0.000001;
