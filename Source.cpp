@@ -13,7 +13,6 @@ public:
 
     void start() override {
         // this code executes once in the beginning:
-
         auto monkey = world->loadBody(ObjectNameTag("monkey"),"obj/monkey.obj");
         monkey->translate(Vec3D{0,0,3});
 
