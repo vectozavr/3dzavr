@@ -58,7 +58,7 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
             Time::startTimer("d projections");
             if (_useOpenGL) {
                 GLfloat *view = camera->glInvModel();
-                screen->pushGLStates();
+                screen->popGLStates();
                 screen->prepareToGlDrawMesh();
                 for (auto &it : *world) {
                     if (it.second->isVisible()) {
@@ -68,7 +68,7 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
                         delete[] model;
                     }
                 }
-                screen->popGLStates();
+                screen->pushGLStates();
                 delete[] view;
             } else {
                 // clear triangles from previous frame
@@ -119,7 +119,7 @@ void Engine::printDebugInfo() const {
     if (_showDebugInfo) {
         // coordinates & fps:
 
-        std::string text = _name + "\n\n X: " +
+        std::string text = _name + "\n\n camera location: \n X: " +
                            std::to_string((camera->position().x())) + "\n Y: " +
                            std::to_string((camera->position().y())) + "\n Z: " +
                            std::to_string((camera->position().z())) + "\n RY:" +
