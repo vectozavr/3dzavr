@@ -1,8 +1,6 @@
 //
 // Created by Иван Ильин on 23.02.2022.
 //
-#include <iostream>
-
 #include "engine/Engine.h"
 #include "engine/animation/Timeline.h"
 #include "engine/animation/Animations.h"
