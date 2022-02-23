@@ -3,88 +3,98 @@ project(3dzavr)
 
 set(CMAKE_CXX_STANDARD 20)
 
-include_directories(tdzavrlib)
-add_library(tdzavrlib STATIC
-        tdzavrlib/utils/Time.h
-        tdzavrlib/utils/Time.cpp
-        tdzavrlib/utils/Point4D.h
-        tdzavrlib/utils/Point4D.cpp
-        tdzavrlib/utils/Matrix4x4.h
-        tdzavrlib/utils/Matrix4x4.cpp
-        tdzavrlib/Triangle.h
-        tdzavrlib/Triangle.cpp
-        tdzavrlib/Mesh.h
-        tdzavrlib/Mesh.cpp
-        tdzavrlib/utils/Log.h
-        tdzavrlib/utils/Log.cpp
-        tdzavrlib/ResourceManager.h
-        tdzavrlib/ResourceManager.cpp
-        tdzavrlib/World.h
-        tdzavrlib/World.cpp
-        tdzavrlib/Camera.h
-        tdzavrlib/Camera.cpp
-        tdzavrlib/Screen.h
-        tdzavrlib/Screen.cpp
-        tdzavrlib/Tdzavr.h
-        tdzavrlib/Tdzavr.cpp
-        tdzavrlib/Plane.h
-        tdzavrlib/Plane.cpp
-        tdzavrlib/CameraMesh.h
-        tdzavrlib/CameraMesh.cpp
-        tdzavrlib/CameraController.h
-        tdzavrlib/CameraController.cpp
-        tdzavrlib/animation/Animatable.h
-        tdzavrlib/animation/Animation.h
-        tdzavrlib/animation/Interpolation.h
-        tdzavrlib/animation/Animatable.cpp
-        tdzavrlib/animation/Animation.cpp
-        tdzavrlib/animation/ATranslate.h
-        tdzavrlib/animation/ATranslateToPoint.h
-        tdzavrlib/animation/AAttractToPoint.h
-        tdzavrlib/animation/AScale.h
-        tdzavrlib/animation/ADecompose.h
-        tdzavrlib/animation/ARotate.h
-        tdzavrlib/animation/ARotateRelativePoint.h
-        tdzavrlib/animation/ARotateLeftUpLookAt.h
-        tdzavrlib/animation/AShowCreation.h
-        tdzavrlib/animation/AWait.h
-        tdzavrlib/physics/RigidBody.cpp
-        tdzavrlib/physics/RigidBody.h
-        tdzavrlib/animation/ARotateToAngle.h
-        tdzavrlib/animation/ARotateLeftUpLookAtToAngle.h
-        tdzavrlib/physics/Simplex.h
-        tdzavrlib/physics/Solver.cpp
-        tdzavrlib/physics/Solver.h
-        tdzavrlib/Object.cpp
-        tdzavrlib/Object.h
-        tdzavrlib/gui/Button.cpp
-        tdzavrlib/gui/Button.h
-        tdzavrlib/gui/Window.cpp
-        tdzavrlib/gui/Window.h
-        tdzavrlib/network/ClientUDP.cpp
-        tdzavrlib/network/ClientUDP.h
-        tdzavrlib/network/MsgType.cpp
-        tdzavrlib/network/MsgType.h
-        tdzavrlib/network/ReliableMsg.cpp
-        tdzavrlib/network/ReliableMsg.h
-        tdzavrlib/network/ServerUDP.cpp
-        tdzavrlib/network/ServerUDP.h
-        tdzavrlib/network/UDPConnection.cpp
-        tdzavrlib/network/UDPConnection.h
-        tdzavrlib/network/UDPSocket.cpp
-        tdzavrlib/network/UDPSocket.h
-        tdzavrlib/network/config.h
-        tdzavrlib/animation/AFunction.h)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(3dzavr mountains_animation.cpp)
+add_executable(${CMAKE_PROJECT_NAME}
+        # custom files:
+        Source.cpp
+        # 3d engine:
+        engine/Consts.h
+        engine/Vec4D.h
+        engine/Vec4D.cpp
+        engine/Vec3D.cpp
+        engine/Vec3D.h
+        engine/Vec2D.cpp
+        engine/Vec2D.h
+        engine/Matrix4x4.h
+        engine/Matrix4x4.cpp
+        engine/Triangle.h
+        engine/Triangle.cpp
+        engine/Plane.h
+        engine/Plane.cpp
+        engine/Mesh.h
+        engine/Mesh.cpp
+        engine/utils/Log.h
+        engine/utils/Log.cpp
+        engine/utils/Time.h
+        engine/utils/Time.cpp
+        engine/utils/Timer.cpp
+        engine/utils/Timer.h
+        engine/ResourceManager.h
+        engine/ResourceManager.cpp
+        engine/World.h
+        engine/World.cpp
+        engine/Camera.h
+        engine/Camera.cpp
+        engine/Screen.h
+        engine/Screen.cpp
+        engine/Engine.h
+        engine/Engine.cpp
+        engine/Keyboard.cpp
+        engine/Keyboard.h
+        engine/Mouse.cpp
+        engine/Mouse.h
+        engine/SoundController.cpp
+        engine/SoundController.h
+        engine/CameraController.cpp
+        engine/CameraController.h
+        engine/animation/Animation.h
+        engine/animation/Timeline.cpp
+        engine/animation/Timeline.h
+        engine/animation/Interpolation.h
+        engine/animation/Animation.cpp
+        engine/animation/ATranslate.h
+        engine/animation/AScale.h
+        engine/animation/ARotate.h
+        engine/animation/AWait.h
+        engine/animation/AFunction.h
+        engine/animation/AAttractToPoint.h
+        engine/animation/ARotateRelativePoint.h
+        engine/animation/ARotateLeft.h
+        engine/animation/Interpolation.cpp
+        engine/animation/Animations.h
+        engine/animation/AShowCreation.h
+        engine/animation/AShowUncreation.h
+        engine/physics/RigidBody.cpp
+        engine/physics/RigidBody.h
+        engine/physics/Simplex.h
+        engine/physics/HitBox.cpp
+        engine/physics/HitBox.h
+        engine/Object.cpp
+        engine/Object.h
+        engine/gui/Button.cpp
+        engine/gui/Button.h
+        engine/gui/Window.cpp
+        engine/gui/Window.h
+        engine/network/ClientUDP.cpp
+        engine/network/ClientUDP.h
+        engine/network/MsgType.cpp
+        engine/network/MsgType.h
+        engine/network/ReliableMsg.cpp
+        engine/network/ReliableMsg.h
+        engine/network/ServerUDP.cpp
+        engine/network/ServerUDP.h
+        engine/network/UDPConnection.cpp
+        engine/network/UDPConnection.h
+        engine/network/UDPSocket.cpp
+        engine/network/UDPSocket.h
+        )
 
-if(${APPLE})
+if(APPLE OR UNIX)
     include_directories(/usr/local/include)
 else()
-
-    set(SFML_DIR "D:/Libraries/SFML/lib/cmake/SFML")
+    set(SFML_DIR "C:/Libraries/SFML/lib/cmake/SFML")
     set(SFML_STATIC_LIBRARIES TRUE)
-
 endif()
 
 find_package(SFML 2.5.1 COMPONENTS graphics audio REQUIRED)
@@ -92,7 +102,25 @@ find_package(SFML 2.5.1 COMPONENTS graphics audio REQUIRED)
 if (SFML_FOUND)
     include_directories(${SFML_INCLUDE_DIR})
 endif()
-##
 
-#find_library(3DZAVR 3dzavr lib)
-target_link_libraries(3dzavr tdzavrlib sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
+target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
+
+# OpenGL part
+if (APPLE)
+    set(GLEW_H /usr/local/Cellar/glew/2.1.0/include/GL)
+    set(GLFW_H /usr/local/Cellar/glfw/3.2.1/include/GLFW)
+    include_directories(${GLEW_H} ${GLFW_H})
+
+    set(GLEW_LINK /usr/local/Cellar/glew/2.1.0/lib/libGLEW.2.1.dylib)
+    set(GLFW_LINK /usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.dylib)
+    link_libraries(${OPENGL} ${GLEW_LINK} ${GLFW_LINK})
+
+    target_link_libraries(${CMAKE_PROJECT_NAME} "-framework OpenGL")
+    target_link_libraries(${CMAKE_PROJECT_NAME} "-framework GLUT")
+elseif(UNIX)
+    find_package(OpenGL REQUIRED)
+    find_package(GLUT REQUIRED)
+
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${OPENGL_LIBRARIES})
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${GLUT_LIBRARY})
+endif()
