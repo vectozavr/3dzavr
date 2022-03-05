@@ -5,18 +5,18 @@
 #ifndef SHOOTER_CAMERACONTROLLER_H
 #define SHOOTER_CAMERACONTROLLER_H
 
-#include "Camera.h"
+#include "Object.h"
 #include "Keyboard.h"
 #include "Mouse.h"
 
-class CameraController {
+class ObjectController {
 private:
-    std::shared_ptr<Camera> _camera;
+    std::shared_ptr<Object> _object;
     std::shared_ptr<Keyboard> _keyboard;
     std::shared_ptr<Mouse> _mouse;
 
 public:
-    CameraController(std::shared_ptr<Camera> camera,
+    ObjectController(std::shared_ptr<Object> object,
                      std::shared_ptr<Keyboard> keyboard,
                      std::shared_ptr<Mouse> mouse);
 
