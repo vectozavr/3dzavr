@@ -6,7 +6,7 @@
 #define ENGINE_PLANE_H
 
 #include "Vec4D.h"
-#include "Triangle.h"
+#include "../Triangle.h"
 
 class Plane final {
 private:

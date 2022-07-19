@@ -7,14 +7,11 @@
 
 #include "Animation.h"
 #include "../Mesh.h"
-#include "../Consts.h"
 
 class AShowCreation final : public Animation {
 private:
     const std::weak_ptr<Mesh> _mesh;
-    std::vector<Triangle> _triangles;
-
-    bool _started = false;
+    const std::vector<Triangle> _triangles;
 
     void update() override {
         auto mesh = _mesh.lock();
@@ -24,15 +21,10 @@ private:
             return;
         }
 
-        if (!_started) {
-            _started = true;
-            _triangles = _mesh.lock()->triangles();
-        }
-
         std::vector<Triangle> newTriangles;
         newTriangles.reserve(_triangles.size());
 
-        double shift = 0.7/_triangles.size();
+        double shift = 0.95/_triangles.size();
         double oneTriangleTime = 1.0 - shift*_triangles.size();
 
         double k = 0.0;
@@ -41,7 +33,8 @@ private:
 
                 if(progress() <= shift*k + oneTriangleTime) {
                     double triProgressLinear = (progress() - shift*k) / oneTriangleTime;
-                    newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1]) * triProgressLinear, sf::Color(t.color().r, t.color().g, t.color().b, t.color().a));
+                    double triProgressBezier = Interpolation::Bezier(Consts::BEZIER[0], Consts::BEZIER[1], triProgressLinear);
+                    newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1]) * triProgressBezier, sf::Color(t.color().r, t.color().g, t.color().b, t.color().a*triProgressBezier));
                 } else {
                     newTriangles.emplace_back(t[0], t[1], t[2], t.color());
                 }
@@ -60,7 +53,7 @@ public:
     AShowCreation(std::weak_ptr<Mesh> mesh, double duration = 1, LoopOut looped = LoopOut::None,
            InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                         interpolationType),
-                                                                              _mesh(mesh) {}
+                                                                              _mesh(mesh), _triangles(mesh.lock()->triangles()) {}
 };
 
 #endif //SHOOTER_ASHOWCREATION_H

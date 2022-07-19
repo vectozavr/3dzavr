@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include "Matrix4x4.h"
-#include "Consts.h"
+#include "../Consts.h"
 
 Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
     Matrix4x4 result = Matrix4x4::Zero();
@@ -191,23 +191,32 @@ Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
     return s;
 }
 
-Matrix4x4 Matrix4x4::View(const Vec3D &left, const Vec3D &up, const Vec3D &lookAt, const Vec3D &eye) {
+Matrix4x4 Matrix4x4::View(const Matrix4x4 &transformMatrix) {
     Matrix4x4 V = Zero();
 
-    V._arr[0][0] = left.x();
-    V._arr[0][1] = left.y();
-    V._arr[0][2] = left.z();
-    V._arr[0][3] = -eye.dot(left);
+    Vec3D left      = transformMatrix.x();
+    Vec3D up        = transformMatrix.y();
+    Vec3D lookAt    = transformMatrix.z();
+    Vec3D eye       = transformMatrix.w();
 
-    V._arr[1][0] = up.x();
-    V._arr[1][1] = up.y();
-    V._arr[1][2] = up.z();
-    V._arr[1][3] = -eye.dot(up);
+    double left_sqrAbs      = left.sqrAbs();
+    double up_sqrAbs        = up.sqrAbs();
+    double lookAt_sqrAbs    = lookAt.sqrAbs();
 
-    V._arr[2][0] = lookAt.x();
-    V._arr[2][1] = lookAt.y();
-    V._arr[2][2] = lookAt.z();
-    V._arr[2][3] = -eye.dot(lookAt);
+    V._arr[0][0] = left.x()/left_sqrAbs;
+    V._arr[0][1] = left.y()/left_sqrAbs;
+    V._arr[0][2] = left.z()/left_sqrAbs;
+    V._arr[0][3] = -eye.dot(left)/left_sqrAbs;
+
+    V._arr[1][0] = up.x()/up_sqrAbs;
+    V._arr[1][1] = up.y()/up_sqrAbs;
+    V._arr[1][2] = up.z()/up_sqrAbs;
+    V._arr[1][3] = -eye.dot(up)/up_sqrAbs;
+
+    V._arr[2][0] = lookAt.x()/lookAt_sqrAbs;
+    V._arr[2][1] = lookAt.y()/lookAt_sqrAbs;
+    V._arr[2][2] = lookAt.z()/lookAt_sqrAbs;
+    V._arr[2][3] = -eye.dot(lookAt)/lookAt_sqrAbs;
 
     V._arr[3][3] = 1.0;
 

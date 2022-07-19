@@ -16,15 +16,26 @@ public:
         auto monkey = world->loadBody(ObjectNameTag("monkey"),"obj/monkey.obj");
         monkey->translate(Vec3D{0,0,3});
 
-        Timeline::addAnimation<AShowCreation>(monkey, 5);
-        Timeline::addAnimation<AScale>(monkey, Vec3D(1.3, 1.3, 1.3), 5);
-        Timeline::addAnimation<ARotate>(monkey, Vec3D{0, M_PI/4, 0}, 6, Animation::LoopOut::Continue);
-        Timeline::addAnimation<AColor>(monkey, sf::Color(255, 215, 253), 10);
+        Timeline::addAnimation<AShowCreation>(monkey, 3); // add creation animation
+        Timeline::addAnimation<AWait>(0); // wait before start next animation
+        Timeline::addAnimation<ADecompose>(monkey, 1); // add expansion animation
+        Timeline::addAnimation<AWait>(0); // wait before start next animation
+        Timeline::addAnimation<ADecompose>(monkey, -1); // reverse expansion
+        Timeline::addAnimation<AScale>(monkey, Vec3D(1.3, 1.3, 1.3), 5); // add scale expansion
+        Timeline::addAnimation<ARotate>(monkey, Vec3D{0, M_PI/4, 0}, 6, Animation::LoopOut::Continue); // add rotation
+        Timeline::addAnimation<AColor>(monkey, sf::Color(255, 215, 253), 10); // add color animation
     }
 
     void update() override {
         // this code executes every frame:
         // ...
+
+        if(keyboard->isKeyTapped(sf::Keyboard::Tab)) {
+            setDebugInfo(!showDebugInfo());
+        }
+        if(keyboard->isKeyTapped(sf::Keyboard::O)) {
+            setGlEnable(!glEnable());
+        }
     }
 };
 

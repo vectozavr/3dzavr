@@ -6,9 +6,9 @@
 
 #include "Engine.h"
 #include "utils/Time.h"
-#include "ResourceManager.h"
+#include "utils/ResourceManager.h"
 #include "animation/Timeline.h"
-#include "SoundController.h"
+#include "io/SoundController.h"
 
 Engine::Engine() {
     Time::init();
@@ -119,7 +119,7 @@ void Engine::printDebugInfo() const {
     if (_showDebugInfo) {
         // coordinates & fps:
 
-        std::string text = _name + "\n\n camera location: \n X: " +
+        std::string text = _name + "\n\n X: " +
                            std::to_string((camera->position().x())) + "\n Y: " +
                            std::to_string((camera->position().y())) + "\n Z: " +
                            std::to_string((camera->position().z())) + "\n RY:" +
@@ -169,10 +169,15 @@ void Engine::printDebugInfo() const {
                                   static_cast<sf::Uint8>(255.0 * (1.0 - static_cast<double>(width) / timerWidth)),
                                   0, 100});
 
+            std::string fps;
+            if(timer.elapsedSeconds() > 0) {
+                fps = std::to_string((int) (1.0 / timer.elapsedSeconds()));
+            } else {
+                fps = "inf";
+            }
 
             screen->drawText(
-                    timerName.substr(2, timerName.size()) + ":\t" +
-                    std::to_string((int) (1.0 / timer.elapsedSeconds())) + " / s \t (" +
+                    timerName.substr(2, timerName.size()) + ":\t" + fps + " / s \t (" +
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
                     Vec2D{xPos + 10, yPos + height * i + 5}, 30,
                     sf::Color(0, 0, 0, 150));
@@ -190,8 +195,14 @@ void Engine::printDebugInfo() const {
                               static_cast<sf::Uint8>(255.0 * (1.0 - static_cast<double>(width) / timerWidth)),
                               0, 100});
 
+        std::string fps;
+        if(totalTime - timeSum > 0) {
+            fps = std::to_string((int) (1.0 / (totalTime - timeSum)));
+        } else {
+            fps = "inf";
+        }
 
-        screen->drawText("other:\t" + std::to_string((int) (1.0 / (totalTime - timeSum))) + " / s \t (" +
+        screen->drawText("other:\t" + fps + " / s \t (" +
                          std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
                          Vec2D{xPos + 10, yPos + height * i + 5}, 30,
                          sf::Color(0, 0, 0, 150));

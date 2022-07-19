@@ -3,8 +3,8 @@
 //
 
 #include "Keyboard.h"
-#include "utils/Time.h"
-#include "Consts.h"
+#include "../utils/Time.h"
+#include "../Consts.h"
 
 bool Keyboard::isKeyPressed(sf::Keyboard::Key key) {
     return sf::Keyboard::isKeyPressed(key);

@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "Vec4D.h"
-#include "Consts.h"
+#include "../Consts.h"
 
 Vec4D::Vec4D(double x, double y, double z, double w) {
     _arr_point[0] = x;
@@ -57,7 +57,7 @@ Vec4D Vec4D::operator/(double number) const {
 
 // Other useful methods
 double Vec4D::sqrAbs() const {
-    return x() * x() + y() * y() + z() * z();
+    return x() * x() + y() * y() + z() * z() + w() * w();
 }
 
 double Vec4D::abs() const {

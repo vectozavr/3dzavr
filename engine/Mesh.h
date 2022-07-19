@@ -54,6 +54,8 @@ public:
 
     ~Mesh() override;
 
+    Mesh static Cube(ObjectNameTag tag, double size = 1.0, sf::Color color = sf::Color(0,0,0));
+
     Mesh static LineTo(ObjectNameTag nameTag, const Vec3D &from, const Vec3D &to, double line_width = 0.1,
                        const sf::Color &color = {150, 150, 150, 100});
 

@@ -18,10 +18,6 @@ RigidBody::RigidBody(ObjectNameTag nameTag, const std::string &filename, const V
 RigidBody::RigidBody(const Mesh &mesh, bool useSimpleBox) : Mesh(mesh), _hitBox(mesh, useSimpleBox) {
 }
 
-void RigidBody::regenerateHitBox(bool useSimpleBox) {
-    _hitBox = HitBox(*this, useSimpleBox);
-}
-
 Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
     Vec3D maxPoint{0, 0, 0};
 
@@ -325,12 +321,10 @@ RigidBody::_addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges,
 
 void RigidBody::solveCollision(const CollisionPoint &collision) {
 
-    Vec3D velocity_parallel = collision.normal * velocity().dot(collision.normal);
-    Vec3D velocity_perpendicular = velocity() - velocity_parallel;
+    Vec3D velocity_perpendicular = collision.normal * velocity().dot(collision.normal);
+    Vec3D velocity_parallel = velocity() - velocity_perpendicular;
 
-    if (velocity().dot(collision.normal) > 0) {
-        setVelocity(velocity_perpendicular);
-    }
+    setVelocity(velocity_parallel);
 
     translate(-collision.normal * collision.depth);
 }

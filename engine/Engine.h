@@ -5,9 +5,9 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
-#include "Screen.h"
-#include "Keyboard.h"
-#include "Mouse.h"
+#include "io/Screen.h"
+#include "io/Keyboard.h"
+#include "io/Mouse.h"
 #include "World.h"
 #include "Camera.h"
 #include "utils/Log.h"

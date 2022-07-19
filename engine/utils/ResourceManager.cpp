@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "ResourceManager.h"
-#include "utils/Log.h"
+#include "Log.h"
 
 ResourceManager *ResourceManager::_instance = nullptr;
 
@@ -135,8 +135,7 @@ std::vector<std::shared_ptr<Mesh>> ResourceManager::loadObjects(const std::strin
         if (line[0] == 'o') {
             if (!tris.empty())
                 objects.push_back(
-                        std::make_shared<Mesh>(ObjectNameTag(filename + "_temp_obj_" + std::to_string(objects.size())),
-                                               tris));
+                        std::make_shared<Mesh>(ObjectNameTag(filename + "_temp_obj_" + std::to_string(objects.size())), tris));
             tris.clear();
         }
         if (line[0] == 'v') {

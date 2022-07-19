@@ -8,7 +8,7 @@
 #include <map>
 
 #include "Camera.h"
-#include "Screen.h"
+#include "io/Screen.h"
 #include "physics/RigidBody.h"
 
 struct IntersectionInformation final {

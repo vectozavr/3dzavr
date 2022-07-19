@@ -21,7 +21,7 @@ std::vector<std::shared_ptr<Triangle>> Camera::project(std::shared_ptr<Mesh> mes
 
     // Model transform matrix: translate _tris in the origin of body.
     Matrix4x4 M = mesh->model();
-    Matrix4x4 V = Matrix4x4::View(left(), up(), lookAt(), position());
+    Matrix4x4 V = invModel();
 
     // We don't want to waste time re-allocating memory every time
     std::vector<Triangle> clippedTriangles, tempBuffer;
