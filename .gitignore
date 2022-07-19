@@ -1,4 +1,6 @@
 # Project exclude paths
+/.idea
 /cmake-build-debug/
 /tdzavrlib/
 /old_animations/
+/minecraft/
