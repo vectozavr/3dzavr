@@ -7,7 +7,7 @@
 
 #include <list>
 
-#include "../Vec3D.h"
+#include "../math/Vec3D.h"
 
 enum class SimplexType {
     Zero,

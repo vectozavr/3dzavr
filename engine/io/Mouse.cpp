@@ -3,8 +3,8 @@
 //
 
 #include "Mouse.h"
-#include "utils/Time.h"
-#include "Consts.h"
+#include "../utils/Time.h"
+#include "../Consts.h"
 
 Vec2D Mouse::getMousePosition() const {
     sf::Vector2<int> pos = sf::Mouse::getPosition(*_screen->renderWindow());

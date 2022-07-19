@@ -3,14 +3,12 @@
 //
 
 #include "ObjectController.h"
-#include "utils/Time.h"
-#include "Vec2D.h"
+#include "Time.h"
+#include "../math/Vec2D.h"
 
 ObjectController::ObjectController(std::shared_ptr<Object> object,
-                                   std::shared_ptr<Keyboard> keyboard,
                                    std::shared_ptr<Mouse> mouse) :
                                    _object(std::move(object)),
-                                   _keyboard(std::move(keyboard)),
                                    _mouse(std::move(mouse)){
 }
 

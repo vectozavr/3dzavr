@@ -3,8 +3,8 @@
 //
 
 #include "SoundController.h"
-#include "ResourceManager.h"
-#include "utils/Log.h"
+#include "../utils/ResourceManager.h"
+#include "../utils/Log.h"
 
 SoundController *SoundController::_instance = nullptr;
 

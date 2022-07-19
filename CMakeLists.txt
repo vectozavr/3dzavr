@@ -10,18 +10,18 @@ add_executable(${CMAKE_PROJECT_NAME}
         Source.cpp
         # 3d engine:
         engine/Consts.h
-        engine/Vec4D.h
-        engine/Vec4D.cpp
-        engine/Vec3D.cpp
-        engine/Vec3D.h
-        engine/Vec2D.cpp
-        engine/Vec2D.h
-        engine/Matrix4x4.h
-        engine/Matrix4x4.cpp
+        engine/math/Vec4D.h
+        engine/math/Vec4D.cpp
+        engine/math/Vec3D.cpp
+        engine/math/Vec3D.h
+        engine/math/Vec2D.cpp
+        engine/math/Vec2D.h
+        engine/math/Matrix4x4.h
+        engine/math/Matrix4x4.cpp
         engine/Triangle.h
         engine/Triangle.cpp
-        engine/Plane.h
-        engine/Plane.cpp
+        engine/math/Plane.h
+        engine/math/Plane.cpp
         engine/Mesh.h
         engine/Mesh.cpp
         engine/utils/Log.h
@@ -30,24 +30,24 @@ add_executable(${CMAKE_PROJECT_NAME}
         engine/utils/Time.cpp
         engine/utils/Timer.cpp
         engine/utils/Timer.h
-        engine/ResourceManager.h
-        engine/ResourceManager.cpp
+        engine/utils/ResourceManager.h
+        engine/utils/ResourceManager.cpp
         engine/World.h
         engine/World.cpp
         engine/Camera.h
         engine/Camera.cpp
-        engine/Screen.h
-        engine/Screen.cpp
+        engine/io/Screen.h
+        engine/io/Screen.cpp
         engine/Engine.h
         engine/Engine.cpp
-        engine/Keyboard.cpp
-        engine/Keyboard.h
-        engine/Mouse.cpp
-        engine/Mouse.h
-        engine/SoundController.cpp
-        engine/SoundController.h
-        engine/ObjectController.cpp
-        engine/ObjectController.h
+        engine/io/Keyboard.cpp
+        engine/io/Keyboard.h
+        engine/io/Mouse.cpp
+        engine/io/Mouse.h
+        engine/io/SoundController.cpp
+        engine/io/SoundController.h
+        engine/utils/ObjectController.cpp
+        engine/utils/ObjectController.h
         engine/animation/Animation.h
         engine/animation/Timeline.cpp
         engine/animation/Timeline.h
@@ -65,6 +65,7 @@ add_executable(${CMAKE_PROJECT_NAME}
         engine/animation/Animations.h
         engine/animation/AShowCreation.h
         engine/animation/AShowUncreation.h
+        engine/animation/ARotateLeftUpLookAt.h
         engine/animation/ADecompose.h
         engine/physics/RigidBody.cpp
         engine/physics/RigidBody.h

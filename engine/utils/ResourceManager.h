@@ -10,7 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-#include "Mesh.h"
+#include "../Mesh.h"
 
 class ResourceManager final {
 private:

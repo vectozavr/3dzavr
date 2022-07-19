@@ -8,9 +8,9 @@
 #include <SFML/OpenGL.hpp>
 
 #include "Screen.h"
-#include "utils/Time.h"
-#include "utils/Log.h"
-#include "ResourceManager.h"
+#include "../utils/Time.h"
+#include "../utils/Log.h"
+#include "../utils/ResourceManager.h"
 
 void Screen::open(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background,
                   sf::Uint32 style) {
@@ -81,7 +81,7 @@ void Screen::stopRender() {
 
 void Screen::clear() {
     // Clear the depth buffer
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _window->clear(_background);
 }
@@ -161,16 +161,17 @@ void Screen::prepareToGlDrawMesh() {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glClearDepth(1.f);
+    glDepthFunc(GL_LESS);
 
     // Disable lighting
     glDisable(GL_LIGHTING);
 
     // enable alpha channel:
-    glEnable( GL_ALPHA_TEST );
-    glAlphaFunc(GL_NOTEQUAL, 0.0);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable( GL_ALPHA_TEST );
+    //glAlphaFunc(GL_NOTEQUAL, 0.0);
+//
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Configure the viewport (the same size as the window)
     glViewport(0, 0, _window->getSize().x, _window->getSize().y);

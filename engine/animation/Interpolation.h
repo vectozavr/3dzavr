@@ -5,7 +5,7 @@
 #ifndef ENGINE_INTERPOLATION_H
 #define ENGINE_INTERPOLATION_H
 
-#include "../Vec2D.h"
+#include "../math/Vec2D.h"
 
 namespace Interpolation {
     double Linear(double t);

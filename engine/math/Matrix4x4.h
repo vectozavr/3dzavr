@@ -55,7 +55,7 @@ public:
 
     Matrix4x4 static Rotation(const Vec3D &v, double rv);
 
-    Matrix4x4 static View(const Vec3D &left, const Vec3D &up, const Vec3D &lookAt, const Vec3D &eye);
+    Matrix4x4 static View(const Matrix4x4 &transformMatrix);
 
     Matrix4x4 static Projection(double fov = 90.0, double aspect = 1.0, double ZNear = 1.0, double ZFar = 10.0);
 

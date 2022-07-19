@@ -10,8 +10,8 @@
 #include <utility>
 #include <memory>
 
-#include "Vec3D.h"
-#include "Matrix4x4.h"
+#include "math/Vec3D.h"
+#include "math/Matrix4x4.h"
 #include <SFML/OpenGL.hpp>
 
 class ObjectNameTag final {
@@ -87,7 +87,7 @@ public:
     [[nodiscard]] ObjectNameTag name() const { return _nameTag; }
 
     [[nodiscard]] Matrix4x4 model() const { return Matrix4x4::Translation(_position) * _transformMatrix; }
-    [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(left(), up(), lookAt(), position()); }
+    [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(model()); }
 
     // OpenGL function
     [[nodiscard]] GLfloat *glModel() const;

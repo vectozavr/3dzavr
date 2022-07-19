@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "Object.h"
-#include "Matrix4x4.h"
+#include "math/Matrix4x4.h"
 
 bool ObjectNameTag::contains(const ObjectNameTag &nameTag) const {
     if(_name.find(nameTag.str()) != std::string::npos) {

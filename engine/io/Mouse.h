@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "Screen.h"
-#include "Vec2D.h"
+#include "../math/Vec2D.h"
 
 class Mouse final {
 private:
