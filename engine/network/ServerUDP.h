@@ -11,6 +11,7 @@
 #include "UDPSocket.h"
 #include <memory>
 #include <set>
+#include <limits>
 
 class ServerUDP {
 protected:
