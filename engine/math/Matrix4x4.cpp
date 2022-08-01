@@ -11,8 +11,8 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
     Matrix4x4 result = Matrix4x4::Zero();
 
     for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            for (int k = 0; k < 4; k++)
+        for (int k = 0; k < 4; k++)
+            for (int j = 0; j < 4; j++)
                 result._arr[i][j] += _arr[i][k] * matrix4X4._arr[k][j];
     return result;
 }
@@ -48,8 +48,8 @@ Matrix4x4 Matrix4x4::Identity() {
 Matrix4x4 Matrix4x4::Constant(double value) {
     Matrix4x4 result;
 
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < 4; i++) {
             result._arr[j][i] = value;
         }
     }
