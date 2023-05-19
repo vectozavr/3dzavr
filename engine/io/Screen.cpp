@@ -97,7 +97,21 @@ void Screen::drawTriangle(const Triangle &triangle) {
                                triangle.color())
             };
 
-    _window->draw(tris, 3, sf::Triangles);
+    sf::Vertex lines[4] =
+            {
+                    sf::Vertex(sf::Vector2f(triangle[0].x(), triangle[0].y()), sf::Color(0, 0, 0, 255)),
+                    sf::Vertex(sf::Vector2f(triangle[1].x(), triangle[1].y()), sf::Color(0, 0, 0, 255)),
+                    sf::Vertex(sf::Vector2f(triangle[2].x(), triangle[2].y()), sf::Color(0, 0, 0, 255)),
+                    sf::Vertex(sf::Vector2f(triangle[0].x(), triangle[0].y()), sf::Color(0, 0, 0, 255))
+            };
+
+    // Uncomment this line to show boundaries of triangles
+    // Раскомментируйте эту строку для отображения границ треугольников
+    //           |
+    //          \/
+    _window->draw(lines, 4, sf::LineStrip);
+
+    //_window->draw(tris, 3, sf::Triangles);
 }
 
 void Screen::setTitle(const std::string &title) {
@@ -167,11 +181,11 @@ void Screen::prepareToGlDrawMesh() {
     glDisable(GL_LIGHTING);
 
     // enable alpha channel:
-    //glEnable( GL_ALPHA_TEST );
-    //glAlphaFunc(GL_NOTEQUAL, 0.0);
-//
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_ALPHA_TEST );
+    glAlphaFunc(GL_NOTEQUAL, 0.0);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Configure the viewport (the same size as the window)
     glViewport(0, 0, _window->getSize().x, _window->getSize().y);

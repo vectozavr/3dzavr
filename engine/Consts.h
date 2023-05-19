@@ -26,8 +26,9 @@ namespace Consts {
 
     const double RAY_CAST_MAX_DISTANCE = 10000;
 
-    const std::string THIN_FONT = "engine/fonts/Roboto-Thin.ttf";
-    const std::string MEDIUM_FONT = "engine/fonts/Roboto-Medium.ttf";
+    // TODO: relative and absolute path needs to be well handled:
+    const std::string THIN_FONT = "3dzavr/engine/fonts/Roboto-Thin.ttf";
+    const std::string MEDIUM_FONT = "3dzavr/engine/fonts/Roboto-Medium.ttf";
 
     const double LARGEST_TIME_STEP = 1.0 / 15.0;
     const double TAP_DELAY = 0.2;
