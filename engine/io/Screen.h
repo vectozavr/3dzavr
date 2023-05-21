@@ -27,6 +27,8 @@ private:
 
     sf::Color _background;
 
+    std::string inputSymbols;
+
     const std::shared_ptr<sf::RenderWindow> _window = std::make_shared<sf::RenderWindow>();
 public:
     void open(int screenWidth = Consts::STANDARD_SCREEN_WIDTH, int screenHeight = Consts::STANDARD_SCREEN_HEIGHT,
@@ -75,6 +77,8 @@ public:
 
     void startRender();
     void stopRender();
+
+    std::string getInputSymbols() { return inputSymbols; };
 };
 
 
