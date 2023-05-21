@@ -27,9 +27,15 @@ void Screen::open(int screenWidth, int screenHeight, const std::string &name, bo
 
 void Screen::display() {
     sf::Event event{};
+    inputSymbols = "";
     while (_window->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             _window->close();
+        }
+        else if (event.type == sf::Event::TextEntered) {
+            if (event.text.unicode < 128) {
+                inputSymbols += static_cast<char>(event.text.unicode);
+            }
         }
     }
 
