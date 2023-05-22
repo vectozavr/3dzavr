@@ -1,6 +1,7 @@
 //
 // Created by Иван Ильин on 23.02.2022.
 //
+#define _USE_MATH_DEFINES
 #include "engine/Engine.h"
 #include "engine/animation/Timeline.h"
 #include "engine/animation/Animations.h"

@@ -12,6 +12,10 @@
 #include "../utils/Log.h"
 #include "../utils/ResourceManager.h"
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#define popen _popen
+#endif
+
 void Screen::open(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background,
                   sf::Uint32 style) {
     _title = name;
