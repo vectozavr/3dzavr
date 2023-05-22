@@ -10,8 +10,6 @@
 #include "math/Plane.h"
 #include "utils/ResourceManager.h"
 
-using namespace std;
-
 std::shared_ptr<RigidBody> World::addBody(std::shared_ptr<RigidBody> body) {
     _objects.emplace(body->name(), body);
     Log::log("World::addBody(): inserted body '" + body->name().str() + "' with " +
@@ -19,7 +17,7 @@ std::shared_ptr<RigidBody> World::addBody(std::shared_ptr<RigidBody> body) {
     return _objects[body->name()];
 }
 
-std::shared_ptr<RigidBody> World::loadBody(const ObjectNameTag &tag, const string &filename, const Vec3D &scale) {
+std::shared_ptr<RigidBody> World::loadBody(const ObjectNameTag &tag, const std::string &filename, const Vec3D &scale) {
     _objects.emplace(tag, std::make_shared<RigidBody>(tag, filename, scale));
     Log::log("World::loadBody(): inserted body from " + filename + " with title '" + tag.str() + "' with " +
              std::to_string(_objects[tag]->triangles().size()) + " tris.");
@@ -29,8 +27,8 @@ std::shared_ptr<RigidBody> World::loadBody(const ObjectNameTag &tag, const strin
 IntersectionInformation World::rayCast(const Vec3D &from, const Vec3D &to, const std::string &skipTags) {
 
     // make vector of tags, that we are going to escape
-    vector<std::string> tagsToSkip;
-    stringstream s(skipTags);
+    std::vector<std::string> tagsToSkip;
+    std::stringstream s(skipTags);
     std::string t;
     while (s >> t) {
         tagsToSkip.push_back(t);

@@ -2,8 +2,6 @@
 // Created by Иван Ильин on 14.01.2021.
 //
 
-#include <iostream>
-
 #include "Engine.h"
 #include "utils/Time.h"
 #include "utils/ResourceManager.h"

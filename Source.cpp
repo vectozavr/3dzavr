@@ -6,8 +6,6 @@
 #include "engine/animation/Timeline.h"
 #include "engine/animation/Animations.h"
 
-using namespace std;
-
 class ExampleScene : public Engine {
 public:
     ExampleScene() = default;

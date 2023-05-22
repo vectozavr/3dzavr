@@ -8,8 +8,6 @@
 #include "utils/ResourceManager.h"
 #include "io/Screen.h"
 
-using namespace std;
-
 Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
     std::vector<Triangle> newTriangles;
     newTriangles.reserve(_tris.size());
@@ -36,7 +34,7 @@ Mesh::Mesh(ObjectNameTag nameTag, const std::string &filename, const Vec3D &scal
     loadObj(filename, scale);
 }
 
-Mesh::Mesh(ObjectNameTag nameTag, const vector<Triangle> &tries) : Object(std::move(nameTag)), _tris(tries) {}
+Mesh::Mesh(ObjectNameTag nameTag, const std::vector<Triangle> &tries) : Object(std::move(nameTag)), _tris(tries) {}
 
 void Mesh::setColor(const sf::Color &c) {
     _color = c;
@@ -149,7 +147,7 @@ void Mesh::setOpacity(double t) {
     setColor(sf::Color(_color.r, _color.g, _color.b, t*255));
 }
 
-void Mesh::setTriangles(vector<Triangle>&& t) {
+void Mesh::setTriangles(std::vector<Triangle>&& t) {
     _tris = std::move(t);
 }
 
