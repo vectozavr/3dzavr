@@ -12,6 +12,10 @@
 #include "../utils/Log.h"
 #include "../utils/ResourceManager.h"
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#define popen _popen
+#endif
+
 void Screen::open(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background,
                   sf::Uint32 style) {
     _title = name;
@@ -137,15 +141,14 @@ void Screen::setMouseCursorVisible(bool visible) {
 }
 
 void Screen::drawTetragon(const Vec2D &p1, const Vec2D &p2, const Vec2D &p3, const Vec2D &p4, sf::Color color) {
-    sf::ConvexShape polygon;
-    polygon.setPointCount(4);
-    polygon.setPoint(0, sf::Vector2f(static_cast<float>(p1.x()), static_cast<float>(p1.y())));
-    polygon.setPoint(1, sf::Vector2f(static_cast<float>(p2.x()), static_cast<float>(p2.y())));
-    polygon.setPoint(2, sf::Vector2f(static_cast<float>(p3.x()), static_cast<float>(p3.y())));
-    polygon.setPoint(3, sf::Vector2f(static_cast<float>(p4.x()), static_cast<float>(p4.y())));
-    polygon.setFillColor(color);
+    sf::Vertex polygon[4] = {
+        sf::Vertex(sf::Vector2f(static_cast<float>(p1.x()), static_cast<float>(p1.y())), color),
+        sf::Vertex(sf::Vector2f(static_cast<float>(p2.x()), static_cast<float>(p2.y())), color),
+        sf::Vertex(sf::Vector2f(static_cast<float>(p3.x()), static_cast<float>(p3.y())), color),
+        sf::Vertex(sf::Vector2f(static_cast<float>(p4.x()), static_cast<float>(p4.y())), color)
+    };
 
-    _window->draw(polygon);
+    _window->draw(polygon, 4, sf::PrimitiveType::TriangleFan);
 }
 
 void Screen::drawText(const std::string &string, const Vec2D &position, int size, sf::Color color) {

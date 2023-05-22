@@ -5,10 +5,7 @@
 #ifndef SHOOTER_TIMER_H
 #define SHOOTER_TIMER_H
 
-#include <iostream>
 #include <chrono>
-#include <ctime>
-#include <cmath>
 
 class Timer {
 private:
