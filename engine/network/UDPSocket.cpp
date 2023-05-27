@@ -161,6 +161,7 @@ MsgType UDPSocket::receive(sf::Packet &packet, sf::Uint16 &senderId) {
 
     if (!_connections.count(senderId) || !_connections.at(senderId).same(ip, port) ||
         reply && confirmed(msgId, senderId)) {
+        // That might be the case when you did not connect yet, but tried to send some custom packets.
         return MsgType::Error;
     }
     return type;

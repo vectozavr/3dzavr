@@ -159,9 +159,8 @@ void Screen::drawText(const std::string &string, const Vec2D &position, int size
     text.setCharacterSize(size);
     text.setFillColor(color);
     text.setStyle(sf::Text::Italic);
-    text.setPosition(static_cast<float>(position.x()), static_cast<float>(position.y()));
-
     text.setString(string);
+    text.setPosition(static_cast<float>(position.x()), static_cast<float>(position.y()));
 
     _window->draw(text);
 }

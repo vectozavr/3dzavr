@@ -45,7 +45,7 @@ public:
 
     // Try to load texture from file.
     // If success returns pointer to texture.
-    // Otherwise returns nullptr.
+    // Otherwise, returns nullptr.
     static std::vector<std::shared_ptr<Mesh>> loadObjects(const std::string &filename);
 
     static std::shared_ptr<sf::Texture> loadTexture(const std::string &filename);

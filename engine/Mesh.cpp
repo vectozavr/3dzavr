@@ -6,7 +6,6 @@
 
 #include "Mesh.h"
 #include "utils/ResourceManager.h"
-#include "io/Screen.h"
 
 Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
     std::vector<Triangle> newTriangles;
@@ -178,9 +177,9 @@ GLfloat *Mesh::glFloatArray() const {
         for (int k = 0; k < 3; k++) {
             sf::Color color = triangle.color();
             GLfloat ambientColor[4] = {
-                    static_cast<float>(color.r) * (0.3f * std::fabs(dot) + 0.7f) / 255.0f,
-                    static_cast<float>(color.g) * (0.3f * std::fabs(dot) + 0.7f) / 255.0f,
-                    static_cast<float>(color.b) * (0.3f * std::fabs(dot) + 0.7f) / 255.0f,
+                    static_cast<float>(color.r) * (0.3f * std::abs(dot) + 0.7f) / 255.0f,
+                    static_cast<float>(color.g) * (0.3f * std::abs(dot) + 0.7f) / 255.0f,
+                    static_cast<float>(color.b) * (0.3f * std::abs(dot) + 0.7f) / 255.0f,
                     static_cast<float>(color.a) / 255.0f
             };
 
