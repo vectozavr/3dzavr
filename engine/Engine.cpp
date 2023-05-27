@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "utils/Time.h"
 #include "utils/ResourceManager.h"
+#include "utils/EventHandler.h"
 #include "animation/Timeline.h"
 #include "io/SoundController.h"
 
@@ -13,6 +14,7 @@ Engine::Engine() {
     Timeline::init();
     ResourceManager::init();
     SoundController::init();
+    EventHandler::init();
 }
 
 void Engine::create(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background,
