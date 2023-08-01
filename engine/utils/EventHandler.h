@@ -11,6 +11,8 @@
 #include <utility>
 #include <map>
 #include <list>
+#include <functional>
+#include <memory>
 
 class Event final {
 private:
