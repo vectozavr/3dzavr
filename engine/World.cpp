@@ -5,10 +5,10 @@
 #include <sstream>
 #include <cmath>
 
-#include "World.h"
-#include "utils/Log.h"
-#include "math/Plane.h"
-#include "utils/ResourceManager.h"
+#include <World.h>
+#include <utils/Log.h>
+#include <geometry/Plane.h>
+#include <utils/ResourceManager.h>
 
 std::shared_ptr<RigidBody> World::addBody(std::shared_ptr<RigidBody> body) {
     _objects.emplace(body->name(), body);

@@ -5,14 +5,14 @@
 #ifndef SHOOTER_EVENTHANDLER_H
 #define SHOOTER_EVENTHANDLER_H
 
-#include "Log.h"
-
-#include <string>
-#include <utility>
-#include <map>
-#include <list>
 #include <functional>
+#include <utility>
 #include <memory>
+#include <string>
+#include <list>
+#include <map>
+
+#include <utils/Log.h>
 
 class Event final {
 private:

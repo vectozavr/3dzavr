@@ -4,8 +4,8 @@
 
 #include <utility>
 
-#include "Window.h"
-#include "../utils/ResourceManager.h"
+#include <gui/Window.h>
+#include <utils/ResourceManager.h>
 
 void Window::addButton(int x, int y, int w, int h, std::function<void()> click, const std::string &text, double sx,
                        double sy,

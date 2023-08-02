@@ -4,8 +4,8 @@
 
 #include <stdexcept>
 
-#include "Object.h"
-#include "math/Matrix4x4.h"
+#include <linalg/Matrix4x4.h>
+#include <Object.h>
 
 bool ObjectNameTag::contains(const ObjectNameTag &nameTag) const {
     if(_name.find(nameTag.str()) != std::string::npos) {

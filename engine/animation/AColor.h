@@ -5,8 +5,8 @@
 #ifndef ENGINE_ACOLOR_H
 #define ENGINE_ACOLOR_H
 
-#include "Animation.h"
-#include "../Mesh.h"
+#include <animation/Animation.h>
+#include <geometry/Mesh.h>
 
 class AColor final : public Animation {
 private:

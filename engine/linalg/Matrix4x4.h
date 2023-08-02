@@ -7,8 +7,8 @@
 
 #include <array>
 
-#include "Vec4D.h"
-#include "Vec3D.h"
+#include <linalg/Vec4D.h>
+#include <linalg/Vec3D.h>
 
 class Matrix4x4 final {
 private:

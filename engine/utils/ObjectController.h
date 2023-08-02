@@ -5,9 +5,9 @@
 #ifndef SHOOTER_OBJECTCONTROLLER_H
 #define SHOOTER_OBJECTCONTROLLER_H
 
-#include "../Object.h"
-#include "../io/Keyboard.h"
-#include "../io/Mouse.h"
+#include <Object.h>
+#include <io/Keyboard.h>
+#include <io/Mouse.h>
 
 class ObjectController {
 private:

@@ -5,10 +5,11 @@
 #ifndef ENGINE_CLIENTUDP_H
 #define ENGINE_CLIENTUDP_H
 
-#include "ReliableMsg.h"
-#include "UDPSocket.h"
 #include <memory>
 #include <limits>
+
+#include <network/ReliableMsg.h>
+#include <network/UDPSocket.h>
 
 class ClientUDP {
 protected:

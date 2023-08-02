@@ -7,10 +7,10 @@
 
 #include <SFML/OpenGL.hpp>
 
-#include "Screen.h"
-#include "../utils/Time.h"
-#include "../utils/Log.h"
-#include "../utils/ResourceManager.h"
+#include <io/Screen.h>
+#include <utils/Time.h>
+#include <utils/Log.h>
+#include <utils/ResourceManager.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define popen _popen

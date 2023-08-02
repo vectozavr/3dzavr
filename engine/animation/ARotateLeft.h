@@ -5,8 +5,8 @@
 #ifndef SHOOTER_AROTATELEFT_H
 #define SHOOTER_AROTATELEFT_H
 
-#include "Animation.h"
-#include "../Object.h"
+#include <animation/Animation.h>
+#include <Object.h>
 
 class ARotateLeft final : public Animation {
 private:

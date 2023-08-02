@@ -2,9 +2,9 @@
 // Created by Иван Ильин on 17.10.2021.
 //
 
-#include "SoundController.h"
-#include "../utils/ResourceManager.h"
-#include "../utils/Log.h"
+#include <io/SoundController.h>
+#include <utils/ResourceManager.h>
+#include <utils/Log.h>
 
 SoundController *SoundController::_instance = nullptr;
 

@@ -5,8 +5,8 @@
 #ifndef ENGINE_ASCALE_H
 #define ENGINE_ASCALE_H
 
-#include "Animation.h"
-#include "../Object.h"
+#include <animation/Animation.h>
+#include <Object.h>
 
 class AScale final : public Animation {
 private:

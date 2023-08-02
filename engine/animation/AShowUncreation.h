@@ -5,8 +5,8 @@
 #ifndef SHOOTER_ASHOWUNCREATION_H
 #define SHOOTER_ASHOWUNCREATION_H
 
-#include "Animation.h"
-#include "../Mesh.h"
+#include <animation/Animation.h>
+#include <geometry/Mesh.h>
 
 class AShowUncreation final : public Animation {
 private:

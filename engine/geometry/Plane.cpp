@@ -2,7 +2,7 @@
 // Created by Иван Ильин on 19.01.2021.
 //
 
-#include "Plane.h"
+#include <geometry/Plane.h>
 
 Plane::Plane(const Triangle &tri) : _normal(tri.norm()), _point(tri[0]) {
 }

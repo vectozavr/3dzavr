@@ -4,9 +4,9 @@
 
 #include <algorithm>
 
-#include "UDPSocket.h"
-#include "../utils/Time.h"
-#include "../Consts.h"
+#include <network/UDPSocket.h>
+#include <utils/Time.h>
+#include <Consts.h>
 
 UDPSocket::UDPSocket() : _ownId(0), _nextRelyMsgId(0) {
     _socket.setBlocking(false);

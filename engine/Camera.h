@@ -9,8 +9,8 @@
 
 #include <SFML/OpenGL.hpp>
 
-#include "math/Plane.h"
-#include "Mesh.h"
+#include <geometry/Plane.h>
+#include <geometry/Mesh.h>
 
 class Camera final : public Object {
 private:

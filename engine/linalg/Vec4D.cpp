@@ -5,8 +5,8 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "Vec4D.h"
-#include "../Consts.h"
+#include <linalg/Vec4D.h>
+#include <Consts.h>
 
 Vec4D::Vec4D(double x, double y, double z, double w) {
     _arr_point[0] = x;

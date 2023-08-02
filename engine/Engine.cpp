@@ -2,12 +2,12 @@
 // Created by Иван Ильин on 14.01.2021.
 //
 
-#include "Engine.h"
-#include "utils/Time.h"
-#include "utils/ResourceManager.h"
-#include "utils/EventHandler.h"
-#include "animation/Timeline.h"
-#include "io/SoundController.h"
+#include <utils/ResourceManager.h>
+#include <utils/EventHandler.h>
+#include <animation/Timeline.h>
+#include <io/SoundController.h>
+#include <utils/Time.h>
+#include <Engine.h>
 
 Engine::Engine() {
     Time::init();

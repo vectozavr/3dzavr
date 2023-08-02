@@ -4,8 +4,8 @@
 
 #include <utility>
 
-#include "Button.h"
-#include "../utils/ResourceManager.h"
+#include <gui/Button.h>
+#include <utils/ResourceManager.h>
 
 void Button::select() {
     if (!_selected && !_pressed) {

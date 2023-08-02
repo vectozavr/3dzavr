@@ -11,11 +11,11 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../Triangle.h"
-#include "../utils/Time.h"
-#include "../Consts.h"
-#include "../Mesh.h"
-#include "../Camera.h"
+#include <geometry/Triangle.h>
+#include <utils/Time.h>
+#include <Consts.h>
+#include <geometry/Mesh.h>
+#include <Camera.h>
 
 class Screen final {
 private:

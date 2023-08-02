@@ -2,13 +2,13 @@
 // Created by Neirokan on 09.05.2020
 //
 
-#include <map>
-#include <memory>
 #include <sstream>
 #include <fstream>
+#include <memory>
+#include <map>
 
-#include "ResourceManager.h"
-#include "Log.h"
+#include <utils/ResourceManager.h>
+#include <utils/Log.h>
 
 ResourceManager *ResourceManager::_instance = nullptr;
 

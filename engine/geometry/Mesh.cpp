@@ -4,8 +4,8 @@
 
 #include <utility>
 
-#include "Mesh.h"
-#include "utils/ResourceManager.h"
+#include <geometry/Mesh.h>
+#include <utils/ResourceManager.h>
 
 Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
     std::vector<Triangle> newTriangles;

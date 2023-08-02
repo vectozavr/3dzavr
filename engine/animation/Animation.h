@@ -5,7 +5,7 @@
 #ifndef ENGINE_ANIMATION_H
 #define ENGINE_ANIMATION_H
 
-#include "Interpolation.h"
+#include <animation/Interpolation.h>
 
 class Animation {
 public:

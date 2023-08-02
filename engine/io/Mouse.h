@@ -8,8 +8,8 @@
 #include <memory>
 #include <utility>
 
-#include "Screen.h"
-#include "../math/Vec2D.h"
+#include <io/Screen.h>
+#include <linalg/Vec2D.h>
 
 class Mouse final {
 private:

@@ -1,10 +1,10 @@
 //
 // Created by Иван Ильин on 23.02.2022.
 //
-#define _USE_MATH_DEFINES
-#include "engine/Engine.h"
-#include "engine/animation/Timeline.h"
-#include "engine/animation/Animations.h"
+
+#include <Engine.h>
+#include <animation/Timeline.h>
+#include <animation/Animations.h>
 
 class ExampleScene : public Engine {
 public:
@@ -21,7 +21,7 @@ public:
         Timeline::addAnimation<AWait>(0); // wait before start next animation
         Timeline::addAnimation<ADecompose>(monkey, -1); // reverse expansion
         Timeline::addAnimation<AScale>(monkey, Vec3D(1.3, 1.3, 1.3), 5); // add scale expansion
-        Timeline::addAnimation<ARotate>(monkey, Vec3D{0, M_PI/4, 0}, 6, Animation::LoopOut::Continue); // add rotation
+        Timeline::addAnimation<ARotate>(monkey, Vec3D{0, Consts::PI/4, 0}, 6, Animation::LoopOut::Continue); // add rotation
         Timeline::addAnimation<AColor>(monkey, sf::Color(255, 215, 253), 10); // add color animation
     }
 
