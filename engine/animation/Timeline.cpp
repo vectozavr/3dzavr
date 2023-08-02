@@ -4,8 +4,8 @@
 
 #include <list>
 
-#include "Timeline.h"
-#include "../utils/Log.h"
+#include <animation/Timeline.h>
+#include <utils/Log.h>
 
 Timeline *Timeline::_instance = nullptr;
 

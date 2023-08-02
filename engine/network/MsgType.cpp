@@ -2,7 +2,7 @@
 // Created by Neirokan on 30.04.2020
 //
 
-#include "MsgType.h"
+#include <network/MsgType.h>
 
 sf::Packet &operator<<(sf::Packet &packet, MsgType type) {
     return packet << (sf::Uint16) type;

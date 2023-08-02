@@ -5,8 +5,8 @@
 #ifndef SHOOTER_AROTATELEFTUPLOOKAT_H
 #define SHOOTER_AROTATELEFTUPLOOKAT_H
 
-#include "Animation.h"
-#include "../Object.h"
+#include <animation/Animation.h>
+#include <Object.h>
 
 
 class ARotateLeftUpLookAt final : public Animation {

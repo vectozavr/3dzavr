@@ -9,9 +9,9 @@
 #include <map>
 #include <functional>
 
-#include "ReliableMsg.h"
-#include "UDPConnection.h"
-#include "MsgType.h"
+#include <network/UDPConnection.h>
+#include <network/ReliableMsg.h>
+#include <network/MsgType.h>
 
 class UDPSocket final {
 private:

@@ -5,9 +5,9 @@
 #ifndef INC_3DZAVR_ADECOMPOSE_H
 #define INC_3DZAVR_ADECOMPOSE_H
 
-#include "Animation.h"
-#include "../Mesh.h"
-#include "../Consts.h"
+#include <animation/Animation.h>
+#include <geometry/Mesh.h>
+#include <Consts.h>
 
 class ADecompose final : public Animation {
 private:

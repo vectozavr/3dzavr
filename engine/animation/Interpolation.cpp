@@ -3,8 +3,8 @@
 //
 #include <cmath>
 
-#include "Interpolation.h"
-#include "../Consts.h"
+#include <animation/Interpolation.h>
+#include <Consts.h>
 
 double Interpolation::Linear(double t) {
     if (t < 0) {

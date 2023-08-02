@@ -7,9 +7,10 @@
 
 #include <memory>
 #include <string>
+#include <list>
 #include <map>
 
-#include "Animation.h"
+#include <animation/Animation.h>
 
 class AnimationListTag final {
 private:

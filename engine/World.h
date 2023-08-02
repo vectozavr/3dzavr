@@ -7,9 +7,9 @@
 
 #include <map>
 
-#include "Camera.h"
-#include "io/Screen.h"
-#include "physics/RigidBody.h"
+#include <Camera.h>
+#include <io/Screen.h>
+#include <physics/RigidBody.h>
 
 struct IntersectionInformation final {
     const Vec3D pointOfIntersection;

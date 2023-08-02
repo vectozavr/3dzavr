@@ -2,9 +2,9 @@
 // Created by Иван Ильин on 22.01.2022.
 //
 
-#include "ObjectController.h"
-#include "Time.h"
-#include "../math/Vec2D.h"
+#include <utils/ObjectController.h>
+#include <linalg/Vec2D.h>
+#include <utils/Time.h>
 
 ObjectController::ObjectController(std::shared_ptr<Object> object,
                                    std::shared_ptr<Mouse> mouse) :

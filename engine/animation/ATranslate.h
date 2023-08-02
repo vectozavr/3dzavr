@@ -5,8 +5,8 @@
 #ifndef ENGINE_ATRANSLATE_H
 #define ENGINE_ATRANSLATE_H
 
-#include "Animation.h"
-#include "../Object.h"
+#include <animation/Animation.h>
+#include <Object.h>
 
 class ATranslate final : public Animation {
 private:

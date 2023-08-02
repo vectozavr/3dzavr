@@ -9,9 +9,9 @@
 #include <fstream>
 #include <iostream>
 
-#include "Log.h"
-#include "Time.h"
-#include "../Consts.h"
+#include <utils/Time.h>
+#include <utils/Log.h>
+#include <Consts.h>
 
 namespace Log {
     void log(const std::string &message) {

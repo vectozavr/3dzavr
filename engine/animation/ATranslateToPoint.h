@@ -5,8 +5,8 @@
 #ifndef ENGINE_ATRANSLATETOPOINT_H
 #define ENGINE_ATRANSLATETOPOINT_H
 
-#include "Animation.h"
-#include "../Object.h"
+#include <animation/Animation.h>
+#include <Object.h>
 
 class ATranslateToPoint final : public Animation {
 private:

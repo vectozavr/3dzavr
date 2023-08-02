@@ -7,7 +7,7 @@
 
 #include <array>
 
-#include "Vec4D.h"
+#include <linalg/Vec4D.h>
 
 class Vec3D final {
 private:

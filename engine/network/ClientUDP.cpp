@@ -2,11 +2,11 @@
 // Created by Neirokan on 30.04.2020
 //
 
-#include "ClientUDP.h"
-#include "MsgType.h"
-#include "../utils/Time.h"
-#include "../utils/Log.h"
-#include "../Consts.h"
+#include <network/ClientUDP.h>
+#include <network/MsgType.h>
+#include <utils/Time.h>
+#include <utils/Log.h>
+#include <Consts.h>
 
 ClientUDP::ClientUDP() {
     _socket.setTimeoutCallback([this](sf::Uint16 id) { return ClientUDP::timeout(id); });

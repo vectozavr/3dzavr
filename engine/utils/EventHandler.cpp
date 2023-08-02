@@ -2,7 +2,7 @@
 // Created by Ivan Ilin on 26/05/2023.
 //
 
-#include "EventHandler.h"
+#include <utils/EventHandler.h>
 
 EventHandler *EventHandler::_instance = nullptr;
 

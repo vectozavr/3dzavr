@@ -2,9 +2,9 @@
 // Created by Иван Ильин on 11.01.2021.
 //
 
-#include "Time.h"
-#include "Log.h"
-#include "../Consts.h"
+#include <utils/Time.h>
+#include <utils/Log.h>
+#include <Consts.h>
 
 using namespace std::chrono;
 

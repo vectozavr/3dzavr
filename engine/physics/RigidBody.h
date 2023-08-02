@@ -5,15 +5,15 @@
 #ifndef ENGINE_RIGIDBODY_H
 #define ENGINE_RIGIDBODY_H
 
+#include <functional>
 #include <utility>
 #include <vector>
 #include <memory>
-#include <functional>
 
-#include "../Triangle.h"
-#include "Simplex.h"
-#include "../Mesh.h"
-#include "HitBox.h"
+#include <geometry/Triangle.h>
+#include <geometry/Mesh.h>
+#include <physics/Simplex.h>
+#include <physics/HitBox.h>
 
 struct CollisionPoint final {
     const Vec3D normal;

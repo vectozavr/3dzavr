@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 13.01.2021.
 //
 
-#include "Triangle.h"
-#include "Consts.h"
+#include <geometry/Triangle.h>
+#include <Consts.h>
 
 Triangle::Triangle(const Vec4D &p1, const Vec4D &p2, const Vec4D &p3, sf::Color color) : _color(color),
                                                                                          _points{p1, p2, p3} {

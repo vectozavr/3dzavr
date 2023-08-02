@@ -10,9 +10,10 @@
 #include <utility>
 #include <memory>
 
-#include "math/Vec3D.h"
-#include "math/Matrix4x4.h"
 #include <SFML/OpenGL.hpp>
+
+#include <linalg/Matrix4x4.h>
+#include <linalg/Vec3D.h>
 
 class ObjectNameTag final {
 private:

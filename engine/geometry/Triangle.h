@@ -7,9 +7,9 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "math/Vec4D.h"
-#include "math/Vec3D.h"
-#include "math/Matrix4x4.h"
+#include <linalg/Vec4D.h>
+#include <linalg/Vec3D.h>
+#include <linalg/Matrix4x4.h>
 
 class Triangle final {
 private:

@@ -8,9 +8,9 @@
 #include <utility>
 #include <memory>
 
-#include "Button.h"
-#include "../io/Screen.h"
-#include "../io/Mouse.h"
+#include <gui/Button.h>
+#include <io/Screen.h>
+#include <io/Mouse.h>
 
 class Window final {
 private:

@@ -2,9 +2,9 @@
 // Created by Иван Ильин on 19.09.2021.
 //
 
-#include "Keyboard.h"
-#include "../utils/Time.h"
-#include "../Consts.h"
+#include <io/Keyboard.h>
+#include <utils/Time.h>
+#include <Consts.h>
 
 bool Keyboard::isKeyPressed(sf::Keyboard::Key key) {
     return sf::Keyboard::isKeyPressed(key);
