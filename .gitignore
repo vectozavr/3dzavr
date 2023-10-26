@@ -1,7 +1,20 @@
-# Project exclude paths
-/cmake-build-debug/
-/cmake-build-release/
+# Build folders
+out/
+build/
+cmake-build-*/
+
+# IDE
+.vscode/
 .idea/
-*.DS_Store
+.vs/
+CMakeSettings.json
+
+# CMake
+CMakeUserPresets.json
+
+# MacOS
+.DS_Store
+
+# Project exclude paths
 engine_log.txt
 engine_test
