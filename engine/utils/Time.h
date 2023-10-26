@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <map>
+#include <string>
 
 #include <utils/Timer.h>
 
