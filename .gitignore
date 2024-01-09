@@ -1,6 +1,10 @@
-# Project exclude paths
-/cmake-build-debug/
-/cmake-build-release/
+# Build folders
+out/
+build/
+cmake-build-*/
+
+# IDE
+.vscode/
 .idea/
 engine_test
 
@@ -37,3 +41,16 @@ engine_test
 .Trashes
 ehthumbs.db
 Thumbs.db
+=======
+.vs/
+CMakeSettings.json
+
+# CMake
+CMakeUserPresets.json
+
+# MacOS
+.DS_Store
+
+# Project exclude paths
+engine.log
+engine_test
