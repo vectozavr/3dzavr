@@ -6,7 +6,7 @@
 #define ENGINE_ATRANSLATE_H
 
 #include <animation/Animation.h>
-#include <Object.h>
+#include "objects/Object.h"
 
 class ATranslate final : public Animation {
 private:

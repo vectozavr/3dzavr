@@ -6,7 +6,7 @@
 #define ENGINE_ASCALE_H
 
 #include <animation/Animation.h>
-#include <Object.h>
+#include "objects/Object.h"
 
 class AScale final : public Animation {
 private:

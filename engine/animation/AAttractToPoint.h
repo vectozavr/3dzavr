@@ -6,7 +6,7 @@
 #define SHOOTER_AATTRACTTOPOINT_H
 
 #include <animation/Animation.h>
-#include <Object.h>
+#include "objects/Object.h"
 
 class AAttractToPoint : public Animation {
 private:

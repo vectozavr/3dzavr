@@ -7,27 +7,42 @@
 using namespace std::chrono;
 
 void Timer::start() {
-    _startTime = high_resolution_clock::now();
-    _isRunning = true;
+    if(!_isTicking) {
+        _startTime = high_resolution_clock::now();
+    }
+    if(_isStopped) {
+        _elapsedSeconds = 0;
+    }
+    _isStopped = false;
+    _isTicking = true;
+}
+
+void Timer::pause() {
+
+    _endTime = high_resolution_clock::now();
+    _elapsedSeconds += duration<double>(_endTime - _startTime).count();
+
+    _isTicking = false;
 }
 
 void Timer::stop() {
-    _endTime = high_resolution_clock::now();
-    _isRunning = false;
+    if(_isTicking) {
+        _endTime = high_resolution_clock::now();
+        _elapsedSeconds += duration<double>(_endTime - _startTime).count();
+    }
+
+    _isTicking = false;
+    _isStopped = true;
+}
+
+double Timer::elapsedSeconds() const {
+    if(_isTicking) {
+        return _elapsedSeconds + duration<double>(high_resolution_clock::now() - _startTime).count();
+    }
+
+    return _elapsedSeconds;
 }
 
 double Timer::elapsedMilliseconds() const {
     return elapsedSeconds()*1000;
-}
-
-double Timer::elapsedSeconds() const {
-    high_resolution_clock::time_point endTime;
-
-    if(_isRunning) {
-        endTime = high_resolution_clock::now();
-    } else {
-        endTime = _endTime;
-    }
-
-    return duration<double>(endTime - _startTime).count();
 }

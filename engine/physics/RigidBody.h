@@ -10,8 +10,8 @@
 #include <vector>
 #include <memory>
 
-#include <geometry/Triangle.h>
-#include <geometry/Mesh.h>
+#include "objects/geometry/Triangle.h"
+#include "objects/geometry/Mesh.h"
 #include <physics/Simplex.h>
 #include <physics/HitBox.h>
 
@@ -64,7 +64,11 @@ public:
     explicit RigidBody(ObjectNameTag nameTag) : Mesh(std::move(nameTag)) {};
     RigidBody(const RigidBody &rigidBody) = default;
     explicit RigidBody(const Mesh &mesh, bool useSimpleBox = true);
-    RigidBody(ObjectNameTag nameTag, const std::string &filename, const Vec3D &scale = Vec3D{1, 1, 1}, bool useSimpleBox = true);
+    RigidBody(ObjectNameTag nameTag,
+              const std::string &mesh_file,
+              const std::string &texture_file = "",
+              const Vec3D &scale = Vec3D{1, 1, 1},
+              bool useSimpleBox = true);
 
     [[nodiscard]] std::pair<bool, Simplex> checkGJKCollision(std::shared_ptr<RigidBody> obj);
     [[nodiscard]] CollisionPoint EPA(const Simplex &simplex, std::shared_ptr<RigidBody> obj);

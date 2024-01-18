@@ -73,15 +73,27 @@ void Time::startTimer(const std::string &timerName) {
     if (_instance == nullptr) {
         return;
     }
-    _instance->_timers.insert({timerName, Timer()});
+
+    if(!_instance->_timers.contains(timerName)) {
+        _instance->_timers.insert({timerName, Timer()});
+    }
     _instance->_timers[timerName].start();
+}
+
+void Time::pauseTimer(const std::string &timerName) {
+    if (_instance == nullptr) {
+        return;
+    }
+    if(_instance->_timers.contains(timerName)) {
+        _instance->_timers[timerName].pause();
+    }
 }
 
 void Time::stopTimer(const std::string &timerName) {
     if (_instance == nullptr) {
         return;
     }
-    if(_instance->_timers.count(timerName) > 0) {
+    if(_instance->_timers.contains(timerName)) {
         _instance->_timers[timerName].stop();
     }
 }
@@ -112,4 +124,12 @@ void Time::free() {
     _instance = nullptr;
 
     Log::log("Time::free(): pointer to 'Time' was freed");
+}
+
+std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> Time::timers() {
+    if (_instance == nullptr) {
+        return {};
+    }
+
+    return {_instance->_timers};
 }

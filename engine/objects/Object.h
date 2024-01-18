@@ -10,10 +10,11 @@
 #include <utility>
 #include <memory>
 
-#include <SFML/OpenGL.hpp>
-
-#include <linalg/Matrix4x4.h>
-#include <linalg/Vec3D.h>
+#include "linalg/Matrix4x4.h"
+#include "linalg/Vec3D.h"
+#include "linalg/Color.h"
+#include "Consts.h"
+#include "objects/geometry/Triangle.h"
 
 class ObjectNameTag final {
 private:
@@ -30,19 +31,32 @@ public:
     [[nodiscard]] bool contains(const ObjectNameTag& nameTag) const;
 };
 
+
 class Object {
+public:
+    // TODO: maybe this structure should not be there
+    struct IntersectionInformation final {
+        const Vec3D pointOfIntersection;
+        const Vec3D normal;
+        const double distanceToObject;
+        const ObjectNameTag objectName;
+        const std::shared_ptr<Object> obj;
+        const bool intersected;
+        const double k;
+        const Color color = Consts::BLACK;
+        const Triangle triangle{};
+    };
 private:
     bool checkIfAttached(Object *obj);
 
     const ObjectNameTag _nameTag;
 
     Matrix4x4 _transformMatrix = Matrix4x4::Identity();
-    Vec3D _position{0, 0, 0};
     /*
      * Take into account when you rotate body,
      * you change '_angle' & '_angleLeftUpLookAt' only for this particular body,
      * but not for attached objects! This way during rotation
-     * '_angle' & '_angleLeftUpLookAt' stays constant all attached objects.
+     * '_angle' & '_angleLeftUpLookAt' stays constant for all attached objects.
      */
     Vec3D _angle{0, 0, 0};
     Vec3D _angleLeftUpLookAt{0, 0, 0};
@@ -54,7 +68,6 @@ public:
 
     Object(const Object &object) :  _nameTag(object._nameTag),
                                     _transformMatrix(object._transformMatrix),
-                                    _position(object._position),
                                     _angle(object._angle),
                                     _angleLeftUpLookAt(object._angleLeftUpLookAt) {};
 
@@ -65,6 +78,7 @@ public:
     void translateToPoint(const Vec3D &point);
     void attractToPoint(const Vec3D &point, double value);
     void scale(const Vec3D &s);
+    void scaleInside(const Vec3D &s);
     void rotate(const Vec3D &r);
     void rotate(const Vec3D &v, double rv);
     void rotateToAngle(const Vec3D &v);
@@ -74,10 +88,13 @@ public:
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
 
+    // This function depends on Object_Type: each Object should define how does the intersection work.
+    [[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const;
+
     [[nodiscard]] Vec3D left() const { return _transformMatrix.x().normalized(); }
     [[nodiscard]] Vec3D up() const { return _transformMatrix.y().normalized(); }
     [[nodiscard]] Vec3D lookAt() const { return _transformMatrix.z().normalized(); }
-    [[nodiscard]] Vec3D position() const { return _position; }
+    [[nodiscard]] Vec3D position() const { return _transformMatrix.w(); }
     [[nodiscard]] Vec3D angle() const { return _angle; }
     [[nodiscard]] Vec3D angleLeftUpLookAt() const { return _angleLeftUpLookAt; }
 
@@ -87,12 +104,14 @@ public:
 
     [[nodiscard]] ObjectNameTag name() const { return _nameTag; }
 
-    [[nodiscard]] Matrix4x4 model() const { return Matrix4x4::Translation(_position) * _transformMatrix; }
+    [[nodiscard]] Matrix4x4 model() const { return _transformMatrix; }
+    /*
+     * invModel() is a fast method to calculate the inverse.
+     * When columns of the model() matrix are perpendicular to each other
+     * invModel() will return the result of fast inverse.
+     * Otherwise, it will calculate the full inverse (computationally less efficient).
+     */
     [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(model()); }
-
-    // OpenGL function
-    [[nodiscard]] GLfloat *glModel() const;
-    [[nodiscard]] GLfloat *glInvModel() const;
 
     virtual ~Object();
 };

@@ -5,7 +5,7 @@
 #ifndef SHOOTER_HITBOX_H
 #define SHOOTER_HITBOX_H
 
-#include <geometry/Mesh.h>
+#include "objects/geometry/Mesh.h"
 
 class HitBox final {
 private:

@@ -6,14 +6,14 @@
 #define ENGINE_ACOLOR_H
 
 #include <animation/Animation.h>
-#include <geometry/Mesh.h>
+#include <objects/geometry/Mesh.h>
 
 class AColor final : public Animation {
 private:
     const std::weak_ptr<Mesh> _mesh;
 
-    sf::Color _startColor;
-    const sf::Color _newColor;
+    Color _startColor;
+    const Color _newColor;
     bool _started = false;
 
     void update() override {
@@ -26,19 +26,21 @@ private:
 
         if (!_started) {
             _started = true;
-            _startColor = mesh->color();
+            _startColor = mesh->getColor();
         }
 
-        Vec4D start(_startColor.r, _startColor.g, _startColor.b, _startColor.a);
-        Vec4D end(_newColor.r, _newColor.g, _newColor.b, _newColor.a);
-        Vec4D mid = start + (end - start) * progress();
+        Vec4D start(_startColor.r(), _startColor.g(), _startColor.b(), _startColor.a());
+        Vec4D end(_newColor.r(), _newColor.g(), _newColor.b(), _newColor.a());
+        Vec4D midColor = start + (end - start) * progress();
 
-        mesh->setColor(sf::Color(static_cast<sf::Uint8>(mid.x()), static_cast<sf::Uint8>(mid.y()),
-                                         static_cast<sf::Uint8>(mid.z()), static_cast<sf::Uint8>(mid.w())));
+        Color mid(midColor.x(), midColor.y(), midColor.z(), midColor.w());
+
+        mesh->setColor(Color(static_cast<uint8_t>(mid.r()), static_cast<uint8_t>(mid.g()),
+                                         static_cast<uint8_t>(mid.b()), static_cast<uint8_t>(mid.a())));
     }
 
 public:
-    AColor(std::weak_ptr<Mesh> mesh, const sf::Color &color, double duration = 1, LoopOut looped = LoopOut::None,
+    AColor(std::weak_ptr<Mesh> mesh, const Color &color, double duration = 1, LoopOut looped = LoopOut::None,
            InterpolationType interpolationType = InterpolationType::Linear) : Animation(duration, looped,
                                                                                         interpolationType),
                                                                               _mesh(mesh), _newColor(color) {

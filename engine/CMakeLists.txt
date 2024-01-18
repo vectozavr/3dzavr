@@ -9,10 +9,6 @@ add_library(
         Engine.cpp
         World.h
         World.cpp
-        Camera.h
-        Camera.cpp
-        Object.cpp
-        Object.h
         linalg/Vec4D.h
         linalg/Vec4D.cpp
         linalg/Vec3D.cpp
@@ -21,37 +17,47 @@ add_library(
         linalg/Vec2D.h
         linalg/Matrix4x4.h
         linalg/Matrix4x4.cpp
-        geometry/Triangle.h
-        geometry/Triangle.cpp
-        geometry/Plane.h
-        geometry/Plane.cpp
-        geometry/Mesh.h
-        geometry/Mesh.cpp
+        linalg/Color.cpp
+        linalg/Color.h
+        objects/Camera.h
+        objects/Camera.cpp
+        objects/Object.cpp
+        objects/Object.h
+        objects/DirectionalLight.cpp
+        objects/DirectionalLight.h
+        objects/geometry/Triangle.h
+        objects/geometry/Triangle.cpp
+        objects/geometry/Plane.h
+        objects/geometry/Plane.cpp
+        objects/geometry/Sphere.cpp
+        objects/geometry/Sphere.h
+        objects/geometry/Mesh.h
+        objects/geometry/Mesh.cpp
         physics/RigidBody.cpp
         physics/RigidBody.h
         physics/Simplex.h
         physics/HitBox.cpp
         physics/HitBox.h
+        io/Image.cpp
+        io/Image.h
         io/Screen.h
         io/Screen.cpp
         io/Keyboard.cpp
         io/Keyboard.h
         io/Mouse.cpp
         io/Mouse.h
-        io/SoundController.cpp
-        io/SoundController.h
         utils/Log.h
         utils/Log.cpp
         utils/Time.h
         utils/Time.cpp
         utils/Timer.cpp
         utils/Timer.h
-        utils/ResourceManager.h
-        utils/ResourceManager.cpp
-        utils/ObjectController.cpp
-        utils/ObjectController.h
         utils/EventHandler.cpp
         utils/EventHandler.h
+        utils/ResourceManager.h
+        utils/ResourceManager.cpp
+        utils/ObjectController.h
+        utils/ObjectController.cpp
         animation/Animation.h
         animation/Timeline.cpp
         animation/Timeline.h
@@ -71,58 +77,15 @@ add_library(
         animation/AShowUncreation.h
         animation/ARotateLeftUpLookAt.h
         animation/ADecompose.h
-        network/ClientUDP.cpp
-        network/ClientUDP.h
-        network/MsgType.cpp
-        network/MsgType.h
-        network/ReliableMsg.cpp
-        network/ReliableMsg.h
-        network/ServerUDP.cpp
-        network/ServerUDP.h
-        network/UDPConnection.cpp
-        network/UDPConnection.h
-        network/UDPSocket.cpp
-        network/UDPSocket.h
-        gui/Button.cpp
-        gui/Button.h
-        gui/Window.cpp
-        gui/Window.h
-)
+        objects/geometry/Texture.cpp objects/geometry/Texture.h)
 
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
-# SFML part
-if(APPLE OR UNIX)
-    include_directories(/usr/local/include)
-else()
-    set(SFML_DIR "C:/Libraries/SFML/lib/cmake/SFML")
-    set(SFML_STATIC_LIBRARIES TRUE)
-endif()
+# LibPNG library
+add_subdirectory(io/libpng)
+target_link_libraries(3DZAVR PUBLIC png)
+target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io/libpng)
 
-find_package(SFML 2.5.1 COMPONENTS graphics audio REQUIRED)
-
-if (SFML_FOUND)
-    target_include_directories(3DZAVR PUBLIC ${SFML_INCLUDE_DIR})
-endif()
-
-target_link_libraries(3DZAVR PUBLIC sfml-audio sfml-network sfml-graphics sfml-window sfml-system)
-
-# OpenGL part
-if (APPLE)
-    set(GLEW_H /usr/local/Cellar/glew/2.1.0/include/GL)
-    set(GLFW_H /usr/local/Cellar/glfw/3.2.1/include/GLFW)
-    target_include_directories(3DZAVR PUBLIC ${GLEW_H} ${GLFW_H})
-
-    set(GLEW_LINK /usr/local/Cellar/glew/2.1.0/lib/libGLEW.2.1.dylib)
-    set(GLFW_LINK /usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.dylib)
-    link_libraries(${OPENGL} ${GLEW_LINK} ${GLFW_LINK})
-
-    target_link_libraries(3DZAVR PUBLIC "-framework OpenGL")
-    target_link_libraries(3DZAVR PUBLIC "-framework GLUT")
-elseif(UNIX)
-    find_package(OpenGL REQUIRED)
-    find_package(GLUT REQUIRED)
-
-    target_link_libraries(3DZAVR PUBLIC ${OPENGL_LIBRARIES})
-    target_link_libraries(3DZAVR PUBLIC ${GLUT_LIBRARY})
-endif()
+# SDL Library
+find_package(SDL2 REQUIRED)
+target_link_libraries(3DZAVR PUBLIC SDL2::SDL2 ${SDL2TTF_LIBRARY})

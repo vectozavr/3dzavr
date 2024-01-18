@@ -6,7 +6,7 @@
 #define INC_3DZAVR_ADECOMPOSE_H
 
 #include <animation/Animation.h>
-#include <geometry/Mesh.h>
+#include <objects/geometry/Mesh.h>
 #include <Consts.h>
 
 class ADecompose final : public Animation {
@@ -37,7 +37,6 @@ private:
             newTriangles.emplace_back((t * Matrix4x4::Translation(t.position().normalized()*progress()*_value)));
         }
         mesh->setTriangles(std::move(newTriangles));
-        mesh->glFreeFloatArray();
     }
 
 public:

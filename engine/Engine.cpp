@@ -2,34 +2,60 @@
 // Created by Иван Ильин on 14.01.2021.
 //
 
-#include <utils/ResourceManager.h>
-#include <utils/EventHandler.h>
-#include <animation/Timeline.h>
-#include <io/SoundController.h>
-#include <utils/Time.h>
+#include <iostream>
+
 #include <Engine.h>
+#include <utils/Time.h>
+#include <utils/ResourceManager.h>
+#include <animation/Timeline.h>
+#include <io/Keyboard.h>
+#include <io/Mouse.h>
+#include <cmath>
 
 Engine::Engine() {
     Time::init();
     Timeline::init();
+    Keyboard::init();
+    Mouse::init();
     ResourceManager::init();
-    SoundController::init();
-    EventHandler::init();
 }
 
-void Engine::create(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background,
-                    sf::Uint32 style) {
+void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::string &name, const Color& background) {
+
     _name = name;
-    screen->open(screenWidth, screenHeight, name, verticalSync, background, style);
+    screen->open(screenWidth, screenHeight, name, background);
 
     Log::log("Engine::create(): started engine (" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) +
              ") with title '" + name + "'.");
     Time::update();
 
     start();
-    camera->init(screenWidth, screenHeight);
+    camera->setup(screenWidth, screenHeight);
+
+    SDL_Init(SDL_INIT_EVERYTHING);
 
     while (screen->isOpen()) {
+
+        // TODO: move event handling into another place
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            switch(e.type) {
+                case SDL_QUIT:
+                    screen->close();
+                    exit();
+                    break;
+                case SDL_KEYDOWN:
+                    Keyboard::sendKeyboardEvent(e);
+                    break;
+                case SDL_KEYUP:
+                    Keyboard::sendKeyboardEvent(e);
+                    break;
+                case SDL_MOUSEMOTION:
+                    Mouse::sendMouseEvent(e);
+                    break;
+            }
+        }
+
         // 'd' in the beginning of the name means debug.
         // While printing debug info we will take into account only timer names witch start with 'd '
         Time::startTimer("d all");
@@ -42,11 +68,7 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
         update();
         Time::stopTimer("d game update");
 
-        // sometimes we dont need to update physics world
-        // (for example in menu or while pause)
-        // hence we can set '_updateWorld' equal to false in setUpdateWorld(bool):
-        if (_updateWorld) {
-
+        if(_updateWorld) {
             Time::startTimer("d animations");
             Timeline::update();
             Time::stopTimer("d animations");
@@ -54,50 +76,60 @@ void Engine::create(int screenWidth, int screenHeight, const std::string &name, 
             Time::startTimer("d collisions");
             world->update();
             Time::stopTimer("d collisions");
-
-            Time::startTimer("d projections");
-            if (_useOpenGL) {
-                GLfloat *view = camera->glInvModel();
-                screen->popGLStates();
-                screen->prepareToGlDrawMesh();
-                for (auto &it : *world) {
-                    if (it.second->isVisible()) {
-                        GLfloat *model = it.second->glModel();
-                        GLfloat *geometry = it.second->glFloatArray();
-                        screen->glDrawMesh(geometry, view, model, 3 * it.second->triangles().size());
-                        delete[] model;
-                    }
-                }
-                screen->pushGLStates();
-                delete[] view;
-            } else {
-                // clear triangles from previous frame
-                camera->clear();
-                // project triangles to the camera plane
-                for (auto &it : *world) {
-                    camera->project(it.second);
-                }
-                // draw triangles on the screen
-                for (auto &t : camera->sorted()) {
-                    screen->drawTriangle(*t);
-                }
-
-                _triPerSec = camera->buffSize() * Time::fps();
-            }
-            Time::stopTimer("d projections");
-
-            if (Consts::SHOW_FPS_COUNTER) {
-                screen->drawText(std::to_string(Time::fps()) + " fps",
-                                 Vec2D(static_cast<double>(screen->width()) - 100.0, 10.0), 25,
-                                 sf::Color(100, 100, 100));
-            }
-            printDebugInfo();
-            gui();
         }
 
-        screen->display();
+        for (auto &it : *world) {
+            std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(it.second);
+            if(mesh) {
 
+                // project triangles to the camera plane
+                Time::startTimer("d projections");
+                auto projected = camera->project(mesh);
+                Time::pauseTimer("d projections");
+
+                // draw projected triangles
+                Time::startTimer("d rasterization");
+                for (auto &t : projected) {
+                    screen->drawTriangle(*t.first, t.second);
+                }
+                Time::pauseTimer("d rasterization");
+            }
+        }
+        Time::stopTimer("d projections");
+        Time::stopTimer("d rasterization");
+
+        Time::startTimer("d depthBuffer");
+        // draw triangles on the screen
+        screen->clearDepthBuffer();
+        Time::stopTimer("d depthBuffer");
+
+        // Ray tracing routine
+        /*
+        double a = (double)screenWidth/screenHeight;
+        for(int j = 0; j < screenHeight; j++) {
+            for(int i = 0; i < screenWidth; i++) {
+                double x = a*(1.0/2.0 - (1.0*i + 0.5)/screenWidth);
+                double y = 1*(1.0/2.0 - (1.0*j + 0.5)/screenHeight);
+                Vec3D camera_rd(x, y,1);
+
+                Vec3D world_rd = camera->model()*camera_rd;
+
+                auto intersection = world->rayCast(camera->position(), camera->position() + world_rd);
+
+                auto color = world->getIllumination(intersection, camera->position(), world_rd);
+
+                if(intersection.distanceToObject < std::numeric_limits<double>::infinity()) {
+                    screen->drawPixel(i, j, color/(1 + intersection.distanceToObject/50));
+                } else {
+                    screen->drawPixel(i, j, Color(0, 0, 0, 255));
+                }
+            }
+        }
+        */
         Time::stopTimer("d all");
+
+        printDebugInfo();
+        screen->display();
     }
 }
 
@@ -105,93 +137,76 @@ void Engine::exit() {
     if (screen->isOpen()) {
         screen->close();
     }
-    SoundController::free();
-    ResourceManager::free();
-    Timeline::free();
+
     Time::free();
+    Timeline::free();
+    Keyboard::free();
+    Mouse::free();
+    ResourceManager::free();
 
     Log::log("Engine::exit(): exit engine (" + std::to_string(screen->width()) + "x" +
              std::to_string(screen->height()) + ") with title '" + screen->title() + "'.");
 }
 
 void Engine::printDebugInfo() const {
-
     if (_showDebugInfo) {
         // coordinates & fps:
-
         std::string text = _name + "\n\n X: " +
                            std::to_string((camera->position().x())) + "\n Y: " +
                            std::to_string((camera->position().y())) + "\n Z: " +
                            std::to_string((camera->position().z())) + "\n RY:" +
-                            std::to_string(camera->angle().y()/Consts::PI) + "PI\n RL: " +
-                            std::to_string(camera->angleLeftUpLookAt().x()/Consts::PI) + "PI\n\n" +
+                            std::to_string(camera->angle().y()) + "\n RL: " +
+                            std::to_string(camera->angleLeftUpLookAt().x()) + "\n\n" +
                            std::to_string(screen->width()) + "x" +
-                           std::to_string(screen->height()) + "\t" +
+                           std::to_string(screen->height()) + " " +
                            std::to_string(Time::fps()) + " fps";
 
-        if (_useOpenGL) {
-            text += "\n Using OpenGL acceleration";
-        } else {
-            text += "\n" + std::to_string(_triPerSec) + " tris/s";
-        }
 
-        sf::Text t;
-
-        t.setFont(*ResourceManager::loadFont(Consts::THIN_FONT));
-        t.setString(text);
-        t.setCharacterSize(30);
-        t.setFillColor(sf::Color::Black);
-        t.setPosition(static_cast<float>(screen->width()) - 400.0f, 10.0f);
-
-        screen->drawText(t);
+        screen->drawText("fps: " + std::to_string(Time::fps()), 10, 10, 25, 10);
+        screen->drawText("X: " + std::to_string((camera->position().x())), 10, 20, 50, 10);
+        screen->drawText("Y: " + std::to_string((camera->position().y())), 10, 30, 50, 10);
+        screen->drawText("Z: " + std::to_string((camera->position().z())), 10, 40, 50, 10);
+        screen->drawText("RY: " +std::to_string(camera->angle().y()), 10, 50, 50, 10);
+        screen->drawText("RL: " +std::to_string(camera->angleLeftUpLookAt().x()), 10, 60, 50, 10);
 
         // timers:
-        int timerWidth = screen->width() - 100;
-        float xPos = 50;
-        float yPos = 300;
-        int height = 50;
+        int timerWidth = screen->width()*2/3;
+        float xPos = screen->width()/4;
+        float yPos = screen->height()/2;
+        int height = screen->height()/30;
 
         double totalTime = Time::elapsedTimerSeconds("d all");
         double timeSum = 0;
         int i = 0;
-        for (auto &[timerName, timer] : Time::timers()) {
+
+        if(!Time::timers()) {
+            return;
+        }
+        for (auto &[timerName, timer] : Time::timers()->get()) {
             int width = timerWidth * timer.elapsedSeconds() / totalTime;
 
             if (timerName == "d all" || timerName[0] != 'd') {
                 continue;
             }
 
-            screen->drawTetragon(Vec2D{xPos, yPos + height * i},
-                                 Vec2D{xPos + width, yPos + height * i},
-                                 Vec2D{xPos + width, yPos + height + height * i},
-                                 Vec2D{xPos, yPos + height + height * i},
-                                 {static_cast<sf::Uint8>(255.0 * static_cast<double>(width) / timerWidth),
-                                  static_cast<sf::Uint8>(255.0 * (1.0 - static_cast<double>(width) / timerWidth)),
-                                  0, 100});
+            screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
+                                        Color( {(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
 
             screen->drawText(
-                    timerName.substr(2, timerName.size()) + ":\t" + std::to_string(timer.elapsedMilliseconds()) + " ms \t (" +
+                    timerName.substr(2, timerName.size()) + " (" +
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
-                    Vec2D{xPos + 10, yPos + height * i + 5}, 30,
-                    sf::Color(0, 0, 0, 150));
+                    10, yPos + (1.5*height)*i, screen->width()/4 - 20, height, 12, Color(0, 0, 0, 150));
 
             i++;
             timeSum += timer.elapsedSeconds();
         }
 
         int width = timerWidth * (totalTime - timeSum) / totalTime;
-        screen->drawTetragon(Vec2D{xPos, yPos + height * i},
-                             Vec2D{xPos + width, yPos + height * i},
-                             Vec2D{xPos + width, yPos + height + height * i},
-                             Vec2D{xPos, yPos + height + height * i},
-                             {static_cast<sf::Uint8>(255.0 * static_cast<double>(width) / timerWidth),
-                              static_cast<sf::Uint8>(255.0 * (1.0 - static_cast<double>(width) / timerWidth)),
-                              0, 100});
+        screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
+                             Color( {(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
 
-        screen->drawText("other:\t" + std::to_string(1000*(totalTime - timeSum)) + " ms \t (" +
-                         std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
-                         Vec2D{xPos + 10, yPos + height * i + 5}, 30,
-                         sf::Color(0, 0, 0, 150));
+        screen->drawText("all other stuff (" + std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
+                         10, yPos + (1.5*height)*i, screen->width()/4 - 20, height, 12, Color(0, 0, 0, 150));
 
     }
 }

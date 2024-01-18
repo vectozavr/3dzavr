@@ -6,7 +6,7 @@
 #define SHOOTER_ASHOWUNCREATION_H
 
 #include <animation/Animation.h>
-#include <geometry/Mesh.h>
+#include <objects/geometry/Mesh.h>
 
 class AShowUncreation final : public Animation {
 private:
@@ -31,24 +31,25 @@ private:
 
         double progress_inv = 1 - progress();
 
+        // TODO: implement
+
         for(auto &t : _triangles) {
             if(progress_inv >= shift*k) {
                 if(progress_inv <= shift*k + oneTriangleTime) {
                     double triProgressLinear = (progress_inv - shift*k) / oneTriangleTime;
                     double triProgressBezier = Interpolation::Bezier(Consts::BEZIER[0], Consts::BEZIER[1], triProgressLinear);
-                    newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1]) * triProgressBezier, sf::Color(t.color().r, t.color().g, t.color().b, t.color().a*triProgressBezier));
+                    //newTriangles.emplace_back(t[0], t[1], t[1] + (t[2] - t[1]) * triProgressBezier, Color(t.color().r(), t.color().g(), t.color().b(), t.color().a()*triProgressBezier));
                 } else {
-                    newTriangles.emplace_back(t[0], t[1], t[2], t.color());
+                    //newTriangles.emplace_back(t[0], t[1], t[2], t.color());
                 }
 
             } else {
-                newTriangles.emplace_back(t[0], t[0], t[0]);
+                //newTriangles.emplace_back(t[0], t[0], t[0]);
             }
 
             k = k + 1.0;
         }
         mesh->setTriangles(std::move(newTriangles));
-        mesh->glFreeFloatArray();
     }
 
 public:

@@ -13,23 +13,26 @@
 
 class Mouse final {
 private:
-    const std::shared_ptr<Screen> _screen;
+    std::map<uint8_t, double> _tappedButtons;
+    Vec2D _motion;
 
-    std::map<sf::Mouse::Button, double> _tappedButtons;
+    static Mouse *_instance;
+    Mouse() = default;
 public:
-    explicit Mouse(std::shared_ptr<Screen> screen) : _screen(std::move(screen)) {};
 
     // returns true if this _button is _pressed
-    static bool isButtonPressed(sf::Mouse::Button button);
+    static bool isButtonPressed(uint8_t button);
 
     // returns true if this _button is tapped and 1/5 sec passed (_button bouncing problem solved)
-    bool isButtonTapped(sf::Mouse::Button button);
+    bool isButtonTapped(uint8_t button);
 
-    [[nodiscard]] Vec2D getMousePosition() const;
+    [[nodiscard]] static Vec2D getMousePosition();
+    [[nodiscard]] static Vec2D getMouseDisplacement();
 
-    [[nodiscard]] Vec2D getMouseDisplacement() const;
+    static void sendMouseEvent(const SDL_Event& event);
 
-    void setMouseInCenter() const;
+    static void init();
+    static void free();
 };
 
 

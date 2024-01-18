@@ -9,76 +9,73 @@
 #include <string>
 #include <map>
 
-#include <SFML/Graphics.hpp>
+#include "SDL.h"
+#include "SDL_ttf.h"
 
-#include <geometry/Triangle.h>
+#include "objects/geometry/Triangle.h"
 #include <utils/Time.h>
 #include <Consts.h>
-#include <geometry/Mesh.h>
-#include <Camera.h>
+#include "objects/geometry/Mesh.h"
+#include "objects/Camera.h"
 
 class Screen final {
 private:
+    SDL_Renderer* _renderer = nullptr;
+    SDL_Window* _window = nullptr;
+
+    std::vector<std::vector<float>> _depthBuffer;
+
+    uint16_t _width;
+    uint16_t _height;
+
     int _scene = 0;
     bool _renderVideo = false;
-    std::vector<sf::Texture> _renderSequence;
 
     std::string _title;
 
-    sf::Color _background;
+    Color _background;
 
-    std::string inputSymbols;
+    bool _isOpen = false;
 
-    const std::shared_ptr<sf::RenderWindow> _window = std::make_shared<sf::RenderWindow>();
+    void initDepthBuffer();
+
 public:
-    void open(int screenWidth = Consts::STANDARD_SCREEN_WIDTH, int screenHeight = Consts::STANDARD_SCREEN_HEIGHT,
-              const std::string &name = Consts::PROJECT_NAME, bool verticalSync = true,
-              sf::Color background = Consts::BACKGROUND_COLOR, sf::Uint32 style = sf::Style::Default);
+    Screen& operator=(const Screen& scr) = delete;
 
+    void open(uint16_t screenWidth = Consts::STANDARD_SCREEN_WIDTH,
+              uint16_t screenHeight = Consts::STANDARD_SCREEN_HEIGHT,
+              const std::string &title = Consts::PROJECT_NAME,
+              const Color& background = Consts::BACKGROUND_COLOR);
     void display();
-
     void clear();
 
-    [[nodiscard]] bool hasFocus() const { return _window->hasFocus(); }
+    void drawPixel(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer
+    void drawPixel(uint16_t x, uint16_t y, float z, const Color& color); // With using depth buffer
+    void drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness = 1);
+    void drawTriangle(const Triangle &triangle, std::shared_ptr<Texture> texture = nullptr);
+    void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color);
+    void drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
+                             const Color &color, uint16_t thickness = 1, const Color &strokeColor = Consts::BLACK);
 
-    void drawTriangle(const Triangle &triangle);
+    void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t fontsize = 12, const Color& color = Consts::BLACK);
 
-    void drawTetragon(const Vec2D &p1, const Vec2D &p2, const Vec2D &p3, const Vec2D &p4, sf::Color color);
-
-    void drawText(const std::string &string, const Vec2D &position, int size, sf::Color color);
-
-    void drawText(const sf::Text &text);
-
-    void drawSprite(const sf::Sprite &sprite);
+    void drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img);
 
     void setTitle(const std::string &title);
 
     [[nodiscard]] std::string title() const { return _title; };
 
-    bool isOpen();
+    [[nodiscard]] bool isOpen() const;
 
-    [[nodiscard]] int width() const { return _window->getSize().x; }
-
-    [[nodiscard]] int height() const { return _window->getSize().y; }
+    [[nodiscard]] uint16_t width() const { return _width; }
+    [[nodiscard]] uint16_t height() const { return _height; }
 
     void close();
-
-    void setMouseCursorVisible(bool visible);
-
-    // OpenGL functions
-    void prepareToGlDrawMesh();
-    
-    void glDrawMesh(GLfloat *geometry, GLfloat *view, GLfloat *model, size_t count);
-
-    [[nodiscard]] std::shared_ptr<sf::RenderWindow> renderWindow() { return _window; }
-
-    void pushGLStates() { _window->pushGLStates(); };
-    void popGLStates() { _window->popGLStates(); };
 
     void startRender();
     void stopRender();
 
-    std::string getInputSymbols() { return inputSymbols; };
+    void clearDepthBuffer();
 };
 
 

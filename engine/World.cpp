@@ -7,24 +7,44 @@
 
 #include <World.h>
 #include <utils/Log.h>
-#include <geometry/Plane.h>
+#include "objects/geometry/Plane.h"
 #include <utils/ResourceManager.h>
 
-std::shared_ptr<RigidBody> World::addBody(std::shared_ptr<RigidBody> body) {
-    _objects.emplace(body->name(), body);
-    Log::log("World::addBody(): inserted body '" + body->name().str() + "' with " +
-             std::to_string(_objects[body->name()]->triangles().size()) + " tris.");
-    return _objects[body->name()];
+#include <iostream>
+
+
+std::shared_ptr<Object> World::add(std::shared_ptr<Object> object) {
+    _objects.emplace(object->name(), object);
+    // TODO: add different cases when the object either the Mesh or RigidBody
+    //Log::log("World::addObject(): inserted object '" + object->name().str() + "' with " +
+    //         std::to_string(_objects[object->name()]->triangles().size()) + " tris.");
+
+    Log::log("World::add(): inserted object '" + object->name().str() + "'");
+
+    return _objects[object->name()];
 }
 
-std::shared_ptr<RigidBody> World::loadBody(const ObjectNameTag &tag, const std::string &filename, const Vec3D &scale) {
-    _objects.emplace(tag, std::make_shared<RigidBody>(tag, filename, scale));
-    Log::log("World::loadBody(): inserted body from " + filename + " with title '" + tag.str() + "' with " +
-             std::to_string(_objects[tag]->triangles().size()) + " tris.");
-    return _objects[tag];
+void World::remove(const ObjectNameTag &tag) {
+    if (_objects.erase(tag) > 0) {
+        Log::log("World::remove(): removed body '" + tag.str() + "'");
+    } else {
+        Log::log("World::remove(): cannot remove body '" + tag.str() + "': body does not exist.");
+    }
 }
 
-IntersectionInformation World::rayCast(const Vec3D &from, const Vec3D &to, const std::string &skipTags) {
+std::shared_ptr<Mesh> World::loadMesh(const ObjectNameTag &tag,
+                                      const std::string &mesh_file,
+                                      const std::string &texture_file,
+                                      const Vec3D &scale) {
+    std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(tag, mesh_file, texture_file, scale);
+
+    _objects.emplace(tag, newMesh);
+    Log::log("World::loadMesh(): inserted body from " + mesh_file + " with title '" + tag.str() + "' with " +
+             std::to_string(newMesh->triangles().size()) + " tris.");
+    return newMesh;
+}
+
+Object::IntersectionInformation World::rayCast(const Vec3D &from, const Vec3D &to, const std::string &skipTags) {
 
     // make vector of tags, that we are going to escape
     std::vector<std::string> tagsToSkip;
@@ -36,16 +56,20 @@ IntersectionInformation World::rayCast(const Vec3D &from, const Vec3D &to, const
 
     bool intersected = false;
     Vec3D point{};
+    Vec3D norm{};
     Triangle triangle;
+    Color color;
     std::string bodyName;
-    double minDistance = Consts::RAY_CAST_MAX_DISTANCE;
-    std::shared_ptr<RigidBody> intersectedBody = nullptr;
+    double k = std::numeric_limits<double>::infinity();
+    double minDistance = std::numeric_limits<double>::infinity();
+    std::shared_ptr<Object> intersectedBody = nullptr;
+    Triangle tri;
 
-    for (auto&[name, body]  : _objects) {
+    for (auto&[name, object]  : _objects) {
 
         bool escapeThisBody = false;
         for (auto &escapeTag : tagsToSkip) {
-            if (name.contains(ObjectNameTag(escapeTag))) {
+            if (name == ObjectNameTag(escapeTag)) {
                 escapeThisBody = true;
                 break;
             }
@@ -54,77 +78,65 @@ IntersectionInformation World::rayCast(const Vec3D &from, const Vec3D &to, const
             continue;
         }
 
-        Matrix4x4 model = body->model();
-        // It is computationally more efficient not to transform all object's triangles from model to global
-        // coordinate system, but translate 'from' and 'to' vectors inside once and check triangles without performing
-        // many matrix multiplication.
-        Matrix4x4 invModel = body->invModel();
+        auto intersection = object->intersect(from, to);
 
-        Vec3D v = (to - from).normalized();
-        Vec3D v_model = invModel*v;
-        Vec3D from_model = invModel*(from - body->position());
-        Vec3D to_model = invModel*(to - body->position());
-
-
-        for (auto &tri : body->triangles()) {
-
-            if(tri.norm().dot(v_model) > 0) {
-                continue;
-            }
-
-            auto intersection = Plane(tri).intersection(from_model, to_model);
-
-            if (intersection.second > 0 && tri.isPointInside(intersection.first)) {
-
-                // When you change to model coordinate system you also will get distance scaled by invModel.
-                // Due-to this effect if you scale some object in x times you will get distance in x times smaller.
-                // That's why we need to perform distance calculation in the global coordinate system where metric
-                // is the same for all objects.
-                Triangle globalTriangle(model * tri[0], model * tri[1], model * tri[2], tri.color());
-                auto globalIntersection = Plane(globalTriangle).intersection(from, to);
-                double globalDistance = (globalIntersection.first - from).abs();
-
-                if(globalDistance < minDistance) {
-                    minDistance = globalDistance;
-                    point = globalIntersection.first;
-                    triangle = globalTriangle;
-                    bodyName = name.str();
-                    intersected = true;
-                    intersectedBody = body;
-                    //Triangle triangleRED = Triangle(model * tri[0], model * tri[1], model * tri[2], sf::Color(255, 0, 0));
-                    //addBody(std::make_shared<RigidBody>(Mesh(ObjectNameTag("Test" + std::to_string(rand())), std::vector<Triangle>({triangleRED}))));
-                }
-            }
+        if(intersection.intersected && intersection.distanceToObject < minDistance) {
+            minDistance = intersection.distanceToObject;
+            point = intersection.pointOfIntersection;
+            bodyName = name.str();
+            intersected = true;
+            intersectedBody = object;
+            norm = intersection.normal;
+            color = intersection.color;
+            k = intersection.k;
+            tri = intersection.triangle;
+            //Triangle triangleRED = Triangle(tri.points(),
+            //                                {},
+            //                                {Color(255, 0, 0), Color(255, 0, 0), Color(255, 0, 0)});
+            //add(std::make_shared<RigidBody>(Mesh(ObjectNameTag("Test" + std::to_string(rand())), std::vector<Triangle>({triangleRED}))));
         }
+
     }
 
-    return IntersectionInformation{point, sqrt(minDistance), triangle, ObjectNameTag(bodyName), intersectedBody, intersected};
+    return Object::IntersectionInformation{point,
+                                           norm,
+                                           minDistance,
+                                           ObjectNameTag(bodyName),
+                                           intersectedBody,
+                                           intersected,
+                                           k,
+                                           color,
+                                           tri};
 }
 
 void World::loadMap(const std::string &filename, const Vec3D &scale) {
     auto objs = ResourceManager::loadObjects(filename);
     for (auto &i : objs) {
         std::shared_ptr<RigidBody> obj = std::make_shared<RigidBody>(*i, false);
-        addBody(obj);
+        add(obj);
         obj->scale(scale);
     }
 }
 
-void World::removeBody(const ObjectNameTag &tag) {
-    if (_objects.erase(tag) > 0) {
-        Log::log("World::removeBody(): removed body '" + tag.str() + "'");
-    } else {
-        Log::log("World::removeBody(): cannot remove body '" + tag.str() + "': body does not exist.");
-    }
-}
-
 void World::checkCollision(const ObjectNameTag &tag) {
-    if (_objects[tag]->hasCollision()) {
+    std::shared_ptr<RigidBody> rigidBodyObj = std::dynamic_pointer_cast<RigidBody>(_objects[tag]);
+    if (!rigidBodyObj) {
+        // The case when we cannot cast Object -> RigidBody
+        return;
+    }
 
-        _objects[tag]->setInCollision(false);
+    if (rigidBodyObj->hasCollision()) {
+
+        rigidBodyObj->setInCollision(false);
 
         for (auto it = _objects.begin(); it != _objects.end();) {
-            auto obj = it->second;
+
+            std::shared_ptr<RigidBody> obj = std::dynamic_pointer_cast<RigidBody>(it->second);
+            if (!obj) {
+                // The case when we cannot cast Object -> RigidBody
+                continue;
+            }
+
             ObjectNameTag name = it->first;
             it++;
 
@@ -132,14 +144,14 @@ void World::checkCollision(const ObjectNameTag &tag) {
                 continue;
             }
 
-            std::pair<bool, Simplex> gjk = _objects[tag]->checkGJKCollision(obj);
+            std::pair<bool, Simplex> gjk = rigidBodyObj->checkGJKCollision(obj);
             if (gjk.first) {
                 if (obj->isCollider()) {
-                    CollisionPoint epa = _objects[tag]->EPA(gjk.second, obj);
-                    _objects[tag]->solveCollision(epa);
+                    CollisionPoint epa = rigidBodyObj->EPA(gjk.second, obj);
+                    rigidBodyObj->solveCollision(epa);
                 }
-                if (_objects[tag]->collisionCallBack() != nullptr) {
-                    _objects[tag]->collisionCallBack()(name, obj);
+                if (rigidBodyObj->collisionCallBack() != nullptr) {
+                    rigidBodyObj->collisionCallBack()(name, obj);
                 }
             }
 
@@ -149,14 +161,85 @@ void World::checkCollision(const ObjectNameTag &tag) {
 
 void World::update() {
     for (auto &[nameTag, obj] : _objects) {
-        obj->updatePhysicsState();
-        checkCollision(nameTag);
+        std::shared_ptr<RigidBody> rigidBodyObj = std::dynamic_pointer_cast<RigidBody>(obj);
+        if(rigidBodyObj) {
+            rigidBodyObj->updatePhysicsState();
+            checkCollision(nameTag);
+        }
     }
 }
 
-std::shared_ptr<RigidBody> World::body(const ObjectNameTag &tag) {
+std::shared_ptr<Object> World::object(const ObjectNameTag &tag) {
     if (_objects.count(tag) == 0) {
+        Log::log("World::object(): no object with tag '" + tag.str() + "'");
         return nullptr;
     }
     return _objects.find(tag)->second;
 }
+
+std::shared_ptr<Object> World::add(std::shared_ptr<DirectionalLight> light) {
+    _lightSources.emplace(light->name(), light);
+
+    add(std::dynamic_pointer_cast<Object>(light));
+
+    return _objects[light->name()];
+}
+
+Color World::getIllumination(const Object::IntersectionInformation &point,
+                             const Vec3D& cameraPosition,
+                             const Vec3D& cameraDirection) {
+
+    Color result;
+
+    Vec3D norm = point.normal;
+    Color surfaceColor = point.color;
+    Vec3D d = cameraDirection;
+    Vec3D v = -cameraDirection;
+    Vec3D e = cameraPosition;
+
+    // Constant minimal illumination from the environment
+    Color env = point.color*0.3;
+
+    result = result + env;
+
+    for (auto &[nameTag, light] : _lightSources) {
+        // Light source:
+        Color lightColor = light->color();
+        Vec3D lightDir = light->direction();
+
+        // Lambertian Illumination
+        Color lamb = lightColor*surfaceColor*std::max(0.0, lightDir.dot(norm))*0.7;
+
+        // Blinn-Phong Illumination
+        double p = 20;
+        Vec3D h = (lightDir+v).normalized();
+        double dot = h.dot(norm);
+        Color spec = Consts::WHITE*lightColor*std::pow(std::max(0.0, dot), p)*0.5;
+
+        // Shadows
+        auto rc_shadow = rayCast(point.pointOfIntersection,
+                                 point.pointOfIntersection + lightDir,
+                                 point.objectName.str());
+        if(rc_shadow.distanceToObject < std::numeric_limits<double>::infinity()) {
+            lamb = lamb*0;
+            spec = spec*0;
+        }
+
+        result = result + lamb + spec;
+
+        // TODO: Reflections
+        /*
+        if(t < std::numeric_limits<double>::infinity() && flag != REFLECTION) {
+            // Reflections
+            Vec3D r = norm*2*v.dot(norm) - v;
+            RayCastInfo rc_reflection = rayCast(e + d*t, r, REFLECTION);
+
+            env = env + rc_reflection.color*0.5/(1.0 + rc_reflection.distance/5.0);
+        }
+        */
+    }
+
+    return result;
+}
+
+

@@ -7,7 +7,8 @@
 
 #include <chrono>
 #include <map>
-#include <string>
+#include <optional>
+#include <functional>
 
 #include <utils/Timer.h>
 
@@ -52,11 +53,12 @@ public:
 
     static void startTimer(const std::string& timerName);
     static void stopTimer(const std::string& timerName);
+    static void pauseTimer(const std::string& timerName);
 
     [[nodiscard]] static double elapsedTimerMilliseconds(const std::string& timerName);
     [[nodiscard]] static double elapsedTimerSeconds(const std::string& timerName);
 
-    [[nodiscard]] static std::map<std::string, Timer> const & timers() { return _instance->_timers; }
+    [[nodiscard]] static std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> timers();
 };
 
 #endif //INC_3DZAVR_TIME_H

@@ -7,22 +7,16 @@
 
 #include <map>
 
-#include <Camera.h>
+#include <objects/Camera.h>
 #include <io/Screen.h>
+#include <objects/Object.h>
+#include <objects/DirectionalLight.h>
 #include <physics/RigidBody.h>
-
-struct IntersectionInformation final {
-    const Vec3D pointOfIntersection;
-    const double distanceToObject;
-    const Triangle intersectedTriangle;
-    const ObjectNameTag objectName;
-    const std::shared_ptr<RigidBody> obj;
-    const bool intersected;
-};
 
 class World final {
 private:
-    std::map<ObjectNameTag, std::shared_ptr<RigidBody>> _objects;
+    std::map<ObjectNameTag, std::shared_ptr<DirectionalLight>> _lightSources;
+    std::map<ObjectNameTag, std::shared_ptr<Object>> _objects;
 
     void checkCollision(const ObjectNameTag &tag);
 public:
@@ -30,17 +24,26 @@ public:
 
     void update();
 
-    std::shared_ptr<RigidBody> addBody(std::shared_ptr<RigidBody> mesh);
-    std::shared_ptr<RigidBody> body(const ObjectNameTag &tag);
-    void removeBody(const ObjectNameTag &tag);
-    std::shared_ptr<RigidBody> loadBody(const ObjectNameTag &tag, const std::string &filename, const Vec3D &scale = Vec3D{1, 1, 1});
+    std::shared_ptr<Object> add(std::shared_ptr<Object> object);
+    std::shared_ptr<Object> add(std::shared_ptr<DirectionalLight> light);
+    std::shared_ptr<Object> object(const ObjectNameTag &tag);
+    void remove(const ObjectNameTag &tag);
+    std::shared_ptr<Mesh> loadMesh(const ObjectNameTag &tag,
+                                   const std::string &mesh_file,
+                                   const std::string &texture_file = "",
+                                   const Vec3D &scale = Vec3D{1, 1, 1});
     void loadMap(const std::string &filename, const Vec3D &scale = Vec3D{1, 1, 1});
 
     // std::string skipTags is a string that consist of all objects we want to skip in ray casting
-    IntersectionInformation rayCast(const Vec3D &from, const Vec3D &to, const std::string &skipTags = "");
+    Object::IntersectionInformation rayCast(const Vec3D &from, const Vec3D &to, const std::string &skipTags = "");
 
-    std::map<ObjectNameTag, std::shared_ptr<RigidBody>>::iterator begin() { return _objects.begin(); }
-    std::map<ObjectNameTag, std::shared_ptr<RigidBody>>::iterator end() { return _objects.end(); }
+    // TODO: this function should not be here: illumination should happen by shaders, not by CPU.
+    Color getIllumination(const Object::IntersectionInformation& point,
+                          const Vec3D& cameraPosition,
+                          const Vec3D& cameraDirection);
+
+    std::map<ObjectNameTag, std::shared_ptr<Object>>::iterator begin() { return _objects.begin(); }
+    std::map<ObjectNameTag, std::shared_ptr<Object>>::iterator end() { return _objects.end(); }
 };
 
 

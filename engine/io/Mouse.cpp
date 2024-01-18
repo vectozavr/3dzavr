@@ -4,32 +4,33 @@
 
 #include <io/Mouse.h>
 #include <utils/Time.h>
+#include <utils/Log.h>
 #include <Consts.h>
 
-Vec2D Mouse::getMousePosition() const {
-    sf::Vector2<int> pos = sf::Mouse::getPosition(*_screen->renderWindow());
-    return Vec2D(pos.x, pos.y);
+Mouse *Mouse::_instance = nullptr;
+
+Vec2D Mouse::getMousePosition() {
+    // TODO: implement
+    return Vec2D(0, 0);
 }
 
-Vec2D Mouse::getMouseDisplacement() const {
-    sf::Vector2<int> mousePos = sf::Mouse::getPosition(*_screen->renderWindow());
-    sf::Vector2<int> center = sf::Vector2<int>(_screen->width() / 2, _screen->height() / 2);
+Vec2D Mouse::getMouseDisplacement() {
+    if (_instance == nullptr) {
+        return Vec2D(0, 0);
+    }
 
-    sf::Vector2<int> displacement = mousePos - center;
-    setMouseInCenter();
-    return Vec2D(displacement.x, displacement.y);
+    Vec2D motion(_instance->_motion);
+    _instance->_motion = Vec2D();
+
+    return motion;
 }
 
-void Mouse::setMouseInCenter() const {
-    sf::Vector2<int> center = sf::Vector2<int>(_screen->width() / 2, _screen->height() / 2);
-    sf::Mouse::setPosition(center,*_screen->renderWindow());
+bool Mouse::isButtonPressed(uint8_t button) {
+    // TODO: implement
+    return false;
 }
 
-bool Mouse::isButtonPressed(sf::Mouse::Button button) {
-    return sf::Mouse::isButtonPressed(button);
-}
-
-bool Mouse::isButtonTapped(sf::Mouse::Button button) {
+bool Mouse::isButtonTapped(uint8_t button) {
     if (!Mouse::isButtonPressed(button)) {
         return false;
     }
@@ -42,4 +43,30 @@ bool Mouse::isButtonTapped(sf::Mouse::Button button) {
         return true;
     }
     return false;
+}
+
+void Mouse::sendMouseEvent(const SDL_Event &event) {
+
+    if (_instance == nullptr) {
+        return;
+    }
+
+    // TODO: include event.button.button == SDL_BUTTON_LEFT / SDL_BUTTON_RIGHT cases
+    if (event.type == SDL_MOUSEMOTION) {
+        _instance->_motion = _instance->_motion + Vec2D(event.motion.xrel, event.motion.yrel);
+    }
+}
+
+void Mouse::init() {
+    delete _instance;
+    _instance = new Mouse();
+
+    Log::log("Mouse::init(): mouse was initialized");
+}
+
+void Mouse::free() {
+    delete _instance;
+    _instance = nullptr;
+
+    Log::log("Mouse::free(): mouse was freed");
 }

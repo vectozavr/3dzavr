@@ -6,7 +6,7 @@
 #define SHOOTER_AROTATELEFTUPLOOKAT_H
 
 #include <animation/Animation.h>
-#include <Object.h>
+#include "objects/Object.h"
 
 
 class ARotateLeftUpLookAt final : public Animation {

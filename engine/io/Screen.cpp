@@ -5,7 +5,7 @@
 #include <utility>
 #include <cmath>
 
-#include <SFML/OpenGL.hpp>
+#include "SDL.h"
 
 #include <io/Screen.h>
 #include <utils/Time.h>
@@ -16,47 +16,67 @@
 #define popen _popen
 #endif
 
-void Screen::open(int screenWidth, int screenHeight, const std::string &name, bool verticalSync, sf::Color background,
-                  sf::Uint32 style) {
+
+void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const std::string &name, const Color& background) {
     _title = name;
     _background = background;
+    _width = screenWidth;
+    _height = screenHeight;
 
-    sf::ContextSettings settings;
-    settings.depthBits = 12;
-    settings.antialiasingLevel = 1;
+    _isOpen = true;
 
-    _window->create(sf::VideoMode(screenWidth, screenHeight), name, style, settings);
-    _window->setVerticalSyncEnabled(verticalSync);
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(_width*Consts::SCREEN_SCALE, _height*Consts::SCREEN_SCALE, 0, &_window, &_renderer);
+
+    SDL_RenderSetScale(_renderer, Consts::SCREEN_SCALE, Consts::SCREEN_SCALE);
+
+    SDL_SetRenderDrawColor(_renderer, background.r(), background.g(), background.b(), background.a());
+    SDL_RenderClear(_renderer);
+
+    SDL_ShowCursor(SDL_DISABLE);
+
+    initDepthBuffer();
+
+    // Initialize SDL_ttf
+    if ( TTF_Init() < 0 ) {
+        Log::log("Screen::open(): error initializing SDL_ttf: " + std::string(TTF_GetError()));
+    }
+}
+
+void Screen::initDepthBuffer() {
+    _depthBuffer.clear();
+    if(_height != 0 && _width != 0) {
+        _depthBuffer.reserve(_width);
+        for(uint16_t i = 0; i < _width; i++) {
+            std::vector<float> column;
+            column.reserve(_height);
+            for(uint16_t j = 0; j < _height; j++) {
+                column.push_back(1);
+            }
+            column.shrink_to_fit();
+            _depthBuffer.push_back(column);
+        }
+        _depthBuffer.shrink_to_fit();
+    }
 }
 
 void Screen::display() {
-    sf::Event event{};
-    inputSymbols = "";
-    while (_window->pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            _window->close();
-        }
-        else if (event.type == sf::Event::TextEntered) {
-            if (event.text.unicode < 128) {
-                inputSymbols += static_cast<char>(event.text.unicode);
-            }
-        }
-    }
 
     std::string title = _title + " (" + std::to_string(Time::fps()) + " fps)";
-    _window->setTitle(title);
 
     if(_renderVideo) {
-        sf::Texture copyTexture;
-        copyTexture.create(_window->getSize().x, _window->getSize().y);
-        copyTexture.update(*_window);
         // most of the time of video rendering is wasting on saving .png sequence
         // that's why we will save all images in the end
-        // TODO: sometimes we have a huge time delay here for no obvious reason
-        _renderSequence.push_back(copyTexture);
+
+        // TODO: implement saving screen state into _renderSequence
+        //_renderSequence.push_back(screenState);
     }
 
-    _window->display();
+    if(_isOpen) {
+        SDL_SetRenderDrawColor(_renderer, _background.r(), _background.g(), _background.b(), _background.a());
+        SDL_RenderPresent(_renderer);
+        SDL_WarpMouseInWindow(_window, (float)width()/2*Consts::SCREEN_SCALE, (float)height()/2*Consts::SCREEN_SCALE);
+    }
 }
 
 void Screen::startRender() {
@@ -73,12 +93,13 @@ void Screen::stopRender() {
         std::string c = "rm film/png/*.png";
         popen(c.c_str(), "w");
         int i = 0;
+        /*
         for(; i < _renderSequence.size(); i++) {
             _renderSequence[i].copyToImage().saveToFile("film/png/" + std::to_string(i) + ".png");
             Log::log("Screen::stopRender(): saving .png sequence (" + std::to_string(static_cast<int>(100*i/_renderSequence.size())) + "%)");
         }
         _renderSequence.clear();
-
+        */
         Log::log("Screen::stopRender(): start rendering final video");
         // TODO: .png sequence looks better than a final video (poor clarity and desaturated colors)
         c = "ffmpeg -stats -r 60 -i film/png/%d.png -vcodec libx264 -crf 1 -pix_fmt yuv420p -frames " + std::to_string(i) + " film/mp4/" + std::to_string(_scene) + "_" + _title + "_" + std::to_string(rand()) + ".mp4";
@@ -90,142 +111,214 @@ void Screen::stopRender() {
 }
 
 void Screen::clear() {
-    // Clear the depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    _window->clear(_background);
+    SDL_RenderClear(_renderer);
 }
 
-void Screen::drawTriangle(const Triangle &triangle) {
-    sf::Vertex tris[3] =
-            {
-                    sf::Vertex(sf::Vector2f(static_cast<float>(triangle[0].x()), static_cast<float>(triangle[0].y())),
-                               triangle.color()),
-                    sf::Vertex(sf::Vector2f(static_cast<float>(triangle[1].x()), static_cast<float>(triangle[1].y())),
-                               triangle.color()),
-                    sf::Vertex(sf::Vector2f(static_cast<float>(triangle[2].x()), static_cast<float>(triangle[2].y())),
-                               triangle.color())
-            };
+void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
+    if(x >= _width || x < 0 || y >= _height || y < 0)
+        return;
 
-    sf::Vertex lines[4] =
-            {
-                    sf::Vertex(sf::Vector2f(triangle[0].x(), triangle[0].y()), sf::Color(0, 0, 0, 255)),
-                    sf::Vertex(sf::Vector2f(triangle[1].x(), triangle[1].y()), sf::Color(0, 0, 0, 255)),
-                    sf::Vertex(sf::Vector2f(triangle[2].x(), triangle[2].y()), sf::Color(0, 0, 0, 255)),
-                    sf::Vertex(sf::Vector2f(triangle[0].x(), triangle[0].y()), sf::Color(0, 0, 0, 255))
-            };
+    SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
+    SDL_RenderDrawPoint(_renderer, x, y);
+}
 
-    // Uncomment this line to show boundaries of triangles
-    // Раскомментируйте эту строку для отображения границ треугольников
-    //           |
-    //          \/
-    _window->draw(lines, 4, sf::LineStrip);
+void Screen::drawPixel(uint16_t x, uint16_t y, float z, const Color &color) {
+    if(x >= _width || x < 0 || y >= _height || y < 0)
+        return;
 
-    //_window->draw(tris, 3, sf::Triangles);
+    if(z < _depthBuffer[x][y]) {
+        drawPixel(x, y, color);
+        _depthBuffer[x][y] = z;
+    }
+}
+
+void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness) {
+    // TODO: It is better to use built in SDL functions
+    //SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
+    //SDL_RenderDrawLine(_renderer, (int)from.x(), (int)from.y(), (int)to.x(), (int)to.y());
+
+
+    if(to.x() < from.x()) {
+        return drawLine(to, from, color, thickness);
+    }
+
+    double der = (to.y() - from.y())/(to.x() - from.x());
+
+    Vec2D from_to = (to - from).normalized();
+    Vec2D norm(-from_to.y(), from_to.x());
+
+
+    auto line = [from, to](double x_i, double y_i){
+        return x_i*(to.y() - from.y()) + y_i*(from.x() - to.x()) + to.x()*from.y() - from.x()*to.y();
+    };
+
+    auto x = (int)from.x();
+    auto y = (int)from.y();
+    auto to_x = (int)to.x();
+    auto to_y = (int)to.y();
+
+    int step_y = to.y() - from.y() > 0 ? 1 : -1;
+    int sign = std::abs(der) <= 1 ? 1 : -1;
+
+    while (x < to_x || y*step_y < to_y*step_y) {
+        for(int l = 0; l < thickness; l++) {
+            drawPixel(x + norm.x()*l, y + norm.y()*l, color);
+        }
+
+        if(line(x, y)*step_y*sign > 0) {
+            if(std::abs(der) <= 1) {
+                y += step_y;
+            } else {
+                x += 1;
+            }
+        }
+        if(std::abs(der) <= 1) {
+            x += 1;
+        } else {
+            y += step_y;
+        }
+    }
+
+    drawPixel(to_x, to_y, color);
+}
+
+void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Texture> texture) {
+    // Drawing edge
+    //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), triangle.colors()[0]);
+    //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), triangle.colors()[1]);
+    //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), triangle.colors()[2]);
+
+    // Filling inside
+    int x_min = (int)std::min({(double)_width, triangle[0].x(), triangle[1].x(), triangle[2].x()});
+    int x_max = (int)std::max({0.0, triangle[0].x(), triangle[1].x(), triangle[2].x()}) + 1;
+    int y_min = (int)std::min({(double)_height, triangle[0].y(), triangle[1].y(), triangle[2].y()});
+    int y_max = (int)std::max({0.0, triangle[0].y(), triangle[1].y(), triangle[2].y()}) + 1;
+
+    auto c = triangle.colors();
+    auto tc = triangle.textureCoordinates();
+
+    for(int y = y_min; y <= y_max; y++) {
+        for(int x = x_min; x <= x_max; x++) {
+            Vec3D abg = triangle.abgBarycCoord(Vec2D(x, y));
+
+            if(abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0) {
+                Color color;
+                if(texture) {
+                    Vec3D uv_hom = tc[0] + (tc[1] - tc[0])*abg.y() + (tc[2] - tc[0])*abg.z();
+                    // De homogenite UV coordinates
+                    Vec2D uv_dehom(uv_hom.x()/uv_hom.z(), uv_hom.y()/uv_hom.z());
+
+                    // TODO: move calculations of derivatives somewhere from here: it becomes messy
+                    // Derivative in X
+                    Vec3D abg_xp = triangle.abgBarycCoord(Vec2D(x+1, y));
+                    Vec3D uv_hom_xp = tc[0] + (tc[1] - tc[0])*abg_xp.y() + (tc[2] - tc[0])*abg_xp.z();
+                    Vec2D uv_dehom_xp(uv_hom_xp.x()/uv_hom_xp.z(), uv_hom_xp.y()/uv_hom_xp.z());
+
+                    // Derivative in Y
+                    Vec3D abg_yp = triangle.abgBarycCoord(Vec2D(x, y+1));
+                    Vec3D uv_hom_yp = tc[0] + (tc[1] - tc[0])*abg_yp.y() + (tc[2] - tc[0])*abg_yp.z();
+                    Vec2D uv_dehom_yp(uv_hom_yp.x()/uv_hom_yp.z(), uv_hom_yp.y()/uv_hom_yp.z());
+
+                    // Derivative in XY combined [Jacobian]
+                    Vec2D du(texture->width()*(uv_dehom_xp - uv_dehom).x(), texture->width()*(uv_dehom_yp - uv_dehom).x());
+                    Vec2D dv(texture->height()*(uv_dehom_xp - uv_dehom).y(), texture->height()*(uv_dehom_yp - uv_dehom).y());
+
+                    color = texture->get_pixel_from_UV(uv_dehom, du.abs()+dv.abs());
+                } else {
+                    color = c[0]*abg.x() + c[1]*abg.y() + c[2]*abg.z();
+                }
+                float z = triangle[0].z()*abg.x() + triangle[1].z()*abg.y() + triangle[2].z()*abg.z();
+
+                drawPixel(x, y, z, color);
+            }
+        }
+    }
 }
 
 void Screen::setTitle(const std::string &title) {
     _title = title;
+    SDL_SetWindowTitle(_window, title.c_str());
 }
 
-bool Screen::isOpen() {
-    return _window->isOpen();
+bool Screen::isOpen() const {
+    return _isOpen;
 }
 
 void Screen::close() {
-    _window->close();
+    _isOpen = false;
+
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
+    SDL_Quit();
+
+    _renderer = nullptr;
+    _window = nullptr;
 }
 
-void Screen::setMouseCursorVisible(bool visible) {
-    _window->setMouseCursorVisible(visible);
+void Screen::clearDepthBuffer() {
+    for (auto& row : _depthBuffer) {
+        for(auto& el : row) {
+            el = 1;
+        }
+    }
 }
 
-void Screen::drawTetragon(const Vec2D &p1, const Vec2D &p2, const Vec2D &p3, const Vec2D &p4, sf::Color color) {
-    sf::Vertex polygon[4] = {
-        sf::Vertex(sf::Vector2f(static_cast<float>(p1.x()), static_cast<float>(p1.y())), color),
-        sf::Vertex(sf::Vector2f(static_cast<float>(p2.x()), static_cast<float>(p2.y())), color),
-        sf::Vertex(sf::Vector2f(static_cast<float>(p3.x()), static_cast<float>(p3.y())), color),
-        sf::Vertex(sf::Vector2f(static_cast<float>(p4.x()), static_cast<float>(p4.y())), color)
-    };
+void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color) {
+    drawTriangle(Triangle({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)},
+                          {},
+                          {color, color, color}));
 
-    _window->draw(polygon, 4, sf::PrimitiveType::TriangleFan);
+    drawTriangle(Triangle({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)},
+                          {},
+                          {color, color, color}));
 }
 
-void Screen::drawText(const std::string &string, const Vec2D &position, int size, sf::Color color) {
-    sf::Text text;
+void Screen::drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color,
+                                 uint16_t thickness, const Color &strokeColor) {
 
-    text.setFont(*ResourceManager::loadFont(Consts::MEDIUM_FONT));
-
-    text.setCharacterSize(size);
-    text.setFillColor(color);
-    text.setStyle(sf::Text::Italic);
-    text.setString(string);
-    text.setPosition(static_cast<float>(position.x()), static_cast<float>(position.y()));
-
-    _window->draw(text);
+    drawRectangle(x, y, width, height, color);
+    drawLine(Vec2D(x, y), Vec2D(x + width, y), strokeColor);
+    drawLine(Vec2D(x+ width, y), Vec2D(x + width, y + height), strokeColor);
+    drawLine(Vec2D(x + width, y + height), Vec2D(x, y + height), strokeColor);
+    drawLine(Vec2D(x, y + height), Vec2D(x, y), strokeColor);
 }
 
-void Screen::drawSprite(const sf::Sprite &sprite) {
-    _window->draw(sprite);
+void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
+    for(int i = 0; i < img->width(); i++) {
+        for(int j = 0; j < img->height(); j++) {
+            drawPixel(i + x, j + y, img->get_pixel(i, j));
+        }
+    }
 }
 
-void Screen::drawText(const sf::Text &text) {
-    _window->draw(text);
-}
+void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t fontsize, const Color& color) {
 
-// OpenGL functions
-void Screen::prepareToGlDrawMesh() {
-    glEnable(GL_CULL_FACE); // enable culling face
-    glCullFace(GL_BACK); // cull faces from back
-    glFrontFace(GL_CCW); // vertex order (counter clock wise)
+    // TODO: add TTF_OpenFont routine to ResourceManager: it is inefficient to load the font every time
+    // TODO: make width and height adjustable to the fontsize OR fontsize and height adjustable to width
 
-    // Enable Z-buffer read and write
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glClearDepth(1.f);
-    glDepthFunc(GL_LESS);
+    std::string font_filename = "fonts/Roboto-Light.ttf";
 
-    // Disable lighting
-    glDisable(GL_LIGHTING);
+    TTF_Font* ourFont = TTF_OpenFont(font_filename.c_str(), fontsize);
+    // Confirm that it was loaded
+    if(ourFont == nullptr){
+        std::cout << "Could not load font" << std::endl;
+        Log::log("Screen::drawText(): Could not load font " + font_filename);
+        return;
+    }
 
-    // enable alpha channel:
-    glEnable( GL_ALPHA_TEST );
-    glAlphaFunc(GL_NOTEQUAL, 0.0);
+    SDL_Surface* surfaceText = TTF_RenderText_Solid(ourFont,
+                                                    text.c_str(),
+                                                    {color.r(),color.g(),color.b(), color.a()});
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    SDL_Texture* textureText = SDL_CreateTextureFromSurface(_renderer,surfaceText);
 
-    // Configure the viewport (the same size as the window)
-    glViewport(0, 0, _window->getSize().x, _window->getSize().y);
+    SDL_FreeSurface(surfaceText);
 
-    // Setup a perspective projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    GLfloat ratio = static_cast<float>(_window->getSize().x) / _window->getSize().y;
-    glFrustum(-ratio, ratio, -1.f, 1.f, 1.0f, 500.f);
+    SDL_Rect rectangle{x, y, w, h};
+    SDL_RenderCopy(_renderer,textureText,NULL,&rectangle);
 
-    // Enable position and texture coordinates vertex components
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    SDL_DestroyTexture(textureText);
 
-    // Disable normal and color vertex components
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    // Prepare to apply some transformations
-    glMatrixMode(GL_MODELVIEW);
-}
-
-// OpenGL functions
-void Screen::glDrawMesh(GLfloat* geometry, GLfloat* view, GLfloat* model, size_t count) {
-    glVertexPointer(3, GL_FLOAT, 7 * sizeof(GLfloat), geometry);
-    glColorPointer(4, GL_FLOAT, 7 * sizeof(GLfloat), geometry + 3);
-
-    glLoadIdentity();
-
-    glLoadMatrixf(view);
-    glMultMatrixf(model);
-
-    // Draw the mesh
-    glDrawArrays(GL_TRIANGLES, 0, count);
+    // Close our font subsystem
+    TTF_CloseFont(ourFont);
 }

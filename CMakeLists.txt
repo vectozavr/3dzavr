@@ -1,14 +1,11 @@
-cmake_minimum_required(VERSION 3.17)
-project(engine_test)
+cmake_minimum_required(VERSION 3.25)
+project(raytrace3d)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+set(CMAKE_CXX_STANDARD 23)
 
-add_executable(${CMAKE_PROJECT_NAME}
-        # custom files:
-        Source.cpp
-        )
+add_executable(raytrace3d asst3.cpp)
 
-# include 3dzavr engine into our project
+
+# include engine into our project
 add_subdirectory(engine)
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC 3DZAVR)

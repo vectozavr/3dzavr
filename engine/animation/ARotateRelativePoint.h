@@ -6,7 +6,7 @@
 #define SHOOTER_AROTATERELATIVEPOINT_H
 
 #include <animation/Animation.h>
-#include <Object.h>
+#include "objects/Object.h"
 
 class ARotateRelativePoint : public Animation {
 private:

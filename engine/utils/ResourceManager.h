@@ -7,30 +7,20 @@
 
 #include <memory>
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
+#include "SDL_ttf.h"
 
-#include <geometry/Mesh.h>
+#include "objects/geometry/Mesh.h"
 
 class ResourceManager final {
 private:
-    std::map<std::string, std::shared_ptr<sf::Texture>> _textures;
-    std::map<std::string, std::shared_ptr<sf::Font>> _fonts;
-    std::map<std::string, std::shared_ptr<sf::SoundBuffer>> _soundBuffers;
     std::map<std::string, std::vector<std::shared_ptr<Mesh>>> _objects;
+    std::map<std::string, std::shared_ptr<TTF_Font>> _fonts;
 
     static ResourceManager *_instance;
 
     ResourceManager() = default;
 
-    // Unloads all currently loaded textures.
     static void unloadObjects();
-
-    static void unloadTextures();
-
-    static void unloadSoundBuffers();
-
-    static void unloadFonts();
 
 public:
     ResourceManager(const ResourceManager &) = delete;
@@ -46,13 +36,8 @@ public:
     // Try to load texture from file.
     // If success returns pointer to texture.
     // Otherwise, returns nullptr.
-    static std::vector<std::shared_ptr<Mesh>> loadObjects(const std::string &filename);
+    static std::vector<std::shared_ptr<Mesh>> loadObjects(const std::string &mesh_file, const std::string &texture_file = "");
 
-    static std::shared_ptr<sf::Texture> loadTexture(const std::string &filename);
-
-    static std::shared_ptr<sf::Font> loadFont(const std::string &filename);
-
-    static std::shared_ptr<sf::SoundBuffer> loadSoundBuffer(const std::string &filename);
 };
 
 #endif //PSEUDO3DENGINE_RESOURCEMANAGER_H
