@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "SDL_ttf.h"
+#include <SDL_ttf.h>
 
 #include "objects/geometry/Mesh.h"
 

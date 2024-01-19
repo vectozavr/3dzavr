@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
-project(raytrace3d)
+set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_STANDARD 23)
+project(3dzavr_test)
 
-add_executable(raytrace3d asst3.cpp)
+add_executable(${CMAKE_PROJECT_NAME} asst3.cpp)
 
 
 # include engine into our project

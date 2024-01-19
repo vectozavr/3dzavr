@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD 20)
 
 # create target
@@ -82,10 +82,10 @@ add_library(
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
 # LibPNG library
-add_subdirectory(io/libpng)
-target_link_libraries(3DZAVR PUBLIC png)
-target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io/libpng)
+find_package(PNG REQUIRED)
+target_link_libraries(3DZAVR PUBLIC ${PNG_LIBRARY})
 
 # SDL Library
 find_package(SDL2 REQUIRED)
-target_link_libraries(3DZAVR PUBLIC SDL2::SDL2 ${SDL2TTF_LIBRARY})
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(3DZAVR PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf)

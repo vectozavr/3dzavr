@@ -10,7 +10,7 @@
 #include <map>
 
 #include "SDL.h"
-#include "SDL_ttf.h"
+//#include "SDL_ttf.h"
 
 #include "objects/geometry/Triangle.h"
 #include <utils/Time.h>
