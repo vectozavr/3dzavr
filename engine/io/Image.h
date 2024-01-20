@@ -8,7 +8,7 @@
 
 
 #include <cstdint>
-//#include <png.h>
+#include <png.h>
 
 #include <linalg/Vec3D.h>
 #include <Consts.h>
@@ -20,7 +20,7 @@ private:
     uint16_t _width;
     uint16_t _height;
 
-    //png_bytep* _row_pointers = nullptr;
+    png_bytep* _row_pointers = nullptr;
 
     bool _valid = false;
 public:

@@ -83,7 +83,8 @@ target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
 # LibPNG library
 find_package(PNG REQUIRED)
-target_link_libraries(3DZAVR PUBLIC ${PNG_LIBRARY})
+include_directories(${PNG_INCLUDE_DIR})
+target_link_libraries(3DZAVR PUBLIC PNG::PNG)
 
 # SDL Library
 find_package(SDL2 REQUIRED)
