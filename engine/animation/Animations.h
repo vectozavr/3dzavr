@@ -8,7 +8,6 @@
 #include <animation/Timeline.h>
 
 #include <animation/AAttractToPoint.h>
-#include <animation/AColor.h>
 #include <animation/AFunction.h>
 #include <animation/ARotate.h>
 #include <animation/ARotateLeft.h>

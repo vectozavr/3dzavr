@@ -92,5 +92,6 @@ Vec4D Vec3D::makePoint4D() const {
 }
 
 Vec3D Vec3D::Random() {
+    // TODO: use C++11 random library instead of Rand()
     return Vec3D((double) rand() / RAND_MAX, (double) rand() / RAND_MAX, (double) rand() / RAND_MAX);
 }

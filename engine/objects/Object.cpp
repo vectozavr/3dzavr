@@ -7,8 +7,8 @@
 #include "linalg/Matrix4x4.h"
 #include "Object.h"
 
-bool ObjectNameTag::contains(const ObjectNameTag &nameTag) const {
-    if(_name.find(nameTag.str()) != std::string::npos) {
+bool ObjectTag::contains(const std::string& str) const {
+    if(_name.find(str) != std::string::npos) {
         return true;
     }
     return false;
@@ -18,9 +18,9 @@ void Object::transform(const Matrix4x4 &t) {
     _transformMatrix = t * _transformMatrix;
 
     for (auto &[attachedName, attachedObject] : _attachedObjects) {
-        if (!attachedObject.expired()) {
-            attachedObject.lock()->transformRelativePoint(position(), t);
-        }
+        // TODO: maybe it is better not to modify model matrices of _attachedObjects, but apply invModel
+        // of the parents during projection stage..
+        attachedObject->transformRelativePoint(position(), t);
     }
 }
 
@@ -34,9 +34,7 @@ void Object::transformRelativePoint(const Vec3D &point, const Matrix4x4 &transfo
     _transformMatrix = Matrix4x4::Translation(point) * _transformMatrix;
 
     for (auto &[attachedName, attachedObject] : _attachedObjects) {
-        if (!attachedObject.expired()) {
-            attachedObject.lock()->transformRelativePoint(point, transform);
-        }
+        attachedObject->transformRelativePoint(point, transform);
     }
 }
 
@@ -122,16 +120,16 @@ void Object::rotateToAngle(const Vec3D &v) {
     rotate(v - _angle);
 }
 
-std::shared_ptr<Object> Object::attached(const ObjectNameTag &tag) {
-    if (_attachedObjects.count(tag) == 0 || _attachedObjects.find(tag)->second.expired()) {
+std::shared_ptr<Object> Object::attached(const ObjectTag &tag) {
+    if (_attachedObjects.count(tag) == 0) {
         return nullptr;
     }
-    return _attachedObjects.find(tag)->second.lock();
+    return _attachedObjects[tag];
 }
 
 bool Object::checkIfAttached(Object *obj) {
     for (const auto&[nameTag, attachedObject] : _attachedObjects) {
-        if (obj == attachedObject.lock().get() || attachedObject.lock()->checkIfAttached(obj)) {
+        if (obj->name() == attachedObject->name() || attachedObject->checkIfAttached(obj)) {
             return true;
         }
     }
@@ -150,7 +148,7 @@ void Object::attach(std::shared_ptr<Object> object) {
     }
 }
 
-void Object::unattach(const ObjectNameTag &tag) {
+void Object::unattach(const ObjectTag &tag) {
     _attachedObjects.erase(tag);
 }
 
@@ -158,8 +156,8 @@ Object::IntersectionInformation Object::intersect(const Vec3D &from, const Vec3D
     return IntersectionInformation{Vec3D(),
                                    Vec3D(),
                                    std::numeric_limits<double>::infinity(),
-                                   ObjectNameTag("NONE"),
-                                   std::make_shared<Object>(ObjectNameTag("NONE")),
+                                   ObjectTag(""),
+                                   std::make_shared<Object>(ObjectTag("")),
                                    false};
 }
 

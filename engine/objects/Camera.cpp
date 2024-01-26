@@ -8,9 +8,9 @@
 #include "Camera.h"
 #include "Consts.h"
 
-std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Texture>>> Camera::project(std::shared_ptr<Mesh> mesh) {
+std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> Camera::project(std::shared_ptr<Mesh> mesh) {
 
-    std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Texture>>> result{};
+    std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> result{};
 
     if (!_ready) {
         Log::log("Camera::project(): cannot project _tris without camera initialization ( Camera::setup() ) ");
@@ -59,11 +59,6 @@ std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Texture>>> Came
         }
 
         for (auto &clipped : clippedTriangles) {
-            auto colors = clipped.colors();
-            auto ambientColors = std::array<Color, 3>{colors[0]*(0.3 * std::abs(dot) + 0.7),
-                                                      colors[1]*(0.3 * std::abs(dot) + 0.7),
-                                                      colors[2]*(0.3 * std::abs(dot) + 0.7)};
-
             // Finally its time to project our clipped colored drawTriangle from 3D -> 2D
             // and transform it's coordinate to screen space (in pixels):
             Triangle clippedProjected = clipped * _SP;
@@ -74,12 +69,11 @@ std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Texture>>> Came
                                                             clippedProjected[2] / clippedProjected[2].w()},
                                                            {clippedTexCoord[0] / clippedProjected[0].w(),
                                                             clippedTexCoord[1] / clippedProjected[1].w(),
-                                                            clippedTexCoord[2] / clippedProjected[2].w()},
-                                                           ambientColors);
+                                                            clippedTexCoord[2] / clippedProjected[2].w()});
 
-            auto textureRef = mesh->getTexture();
+            auto material = mesh->getMaterial();
             auto tri = std::make_shared<Triangle>(clippedProjectedNormalized);
-            std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Texture>> pair(tri, textureRef);
+            std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>> pair(tri, material);
 
             result.emplace_back(pair);
         }
@@ -99,15 +93,15 @@ void Camera::setup(int width, int height, double fov, double ZNear, double ZFar)
 
     // This is planes for clipping _tris.
     // Motivation: we are not interested in _tris that we cannot see.
-    _clipPlanes.emplace_back(Vec3D{0, 0, 1}, Vec3D{0, 0, ZNear}, ObjectNameTag("near")); // near plane
-    _clipPlanes.emplace_back(Vec3D{0, 0, -1}, Vec3D{0, 0, ZFar}, ObjectNameTag("far")); // far plane
+    _clipPlanes.emplace_back(Vec3D{0, 0, 1}, Vec3D{0, 0, ZNear}, ObjectTag("near")); // near plane
+    _clipPlanes.emplace_back(Vec3D{0, 0, -1}, Vec3D{0, 0, ZFar}, ObjectTag("far")); // far plane
 
     double thetta1 = Consts::PI * fov * 0.5 / 180.0;
     double thetta2 = atan(_aspect * tan(thetta1));
-    _clipPlanes.emplace_back(Vec3D{-cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectNameTag("left")); // left plane
-    _clipPlanes.emplace_back(Vec3D{cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectNameTag("right")); // right plane
-    _clipPlanes.emplace_back(Vec3D{0, cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectNameTag("down")); // down plane
-    _clipPlanes.emplace_back(Vec3D{0, -cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectNameTag("up")); // up plane
+    _clipPlanes.emplace_back(Vec3D{-cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectTag("left")); // left plane
+    _clipPlanes.emplace_back(Vec3D{cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectTag("right")); // right plane
+    _clipPlanes.emplace_back(Vec3D{0, cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectTag("down")); // down plane
+    _clipPlanes.emplace_back(Vec3D{0, -cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectTag("up")); // up plane
 
     _ready = true;
     Log::log("Camera::init(): camera successfully initialized.");

@@ -5,10 +5,10 @@
 
 #include "Plane.h"
 
-Plane::Plane(const Triangle &tri, const ObjectNameTag& nameTag, const Color& color) :
+Plane::Plane(const Triangle &tri, const ObjectTag& nameTag, const Color& color) :
 Object(nameTag), _normal(tri.norm()), _point(tri[0]), _color(color) {}
 
-Plane::Plane(const Vec3D &N, const Vec3D &P, const ObjectNameTag& nameTag, const Color& color) :
+Plane::Plane(const Vec3D &N, const Vec3D &P, const ObjectTag& nameTag, const Color& color) :
 Object(nameTag), _normal(N.normalized()), _point(P), _color(color) {}
 
 double Plane::distance(const Vec3D &point) const {
@@ -53,7 +53,7 @@ std::vector<Triangle> Plane::clip(const Triangle &tri) const {
         result.emplace_back(std::array<Vec4D, 3>{insidePoints[0].makePoint4D(),
                                                  intersect1.pointOfIntersection.makePoint4D(),
                                                  intersect2.pointOfIntersection.makePoint4D()},
-                            newTexUV,tri.colors());
+                            newTexUV);
     }
 
     if (insidePoints.size() == 2) {
@@ -69,12 +69,12 @@ std::vector<Triangle> Plane::clip(const Triangle &tri) const {
         result.emplace_back(std::array<Vec4D, 3>{insidePoints[0].makePoint4D(),
                                                  intersect1.pointOfIntersection.makePoint4D(),
                                                  insidePoints[1].makePoint4D()},
-                            newTexUV1, tri.colors());
+                            newTexUV1);
 
         result.emplace_back(std::array<Vec4D, 3>{intersect1.pointOfIntersection.makePoint4D(),
                                                  intersect2.pointOfIntersection.makePoint4D(),
                                                  insidePoints[1].makePoint4D()},
-                            newTexUV2, tri.colors());
+                            newTexUV2);
     }
 
     if (insidePoints.size() == 3) {

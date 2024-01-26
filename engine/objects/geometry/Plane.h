@@ -21,10 +21,10 @@ public:
     Plane(const Plane &plane) = default;
 
     // You can define plane by defining the points in 3D space
-    explicit Plane(const Triangle &tri, const ObjectNameTag& nameTag, const Color& color = Consts::WHITE_COLORS[2]);
+    explicit Plane(const Triangle &tri, const ObjectTag& nameTag, const Color& color = Consts::WHITE_COLORS[2]);
 
     // Or by defining normal vector and one val laying on the plane
-    Plane(const Vec3D &N, const Vec3D &P, const ObjectNameTag& nameTag, const Color& color = Consts::WHITE_COLORS[2]);
+    Plane(const Vec3D &N, const Vec3D &P, const ObjectTag& nameTag, const Color& color = Consts::WHITE_COLORS[2]);
 
     [[nodiscard]] double distance(const Vec3D &point4D) const;
 

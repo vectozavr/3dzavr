@@ -47,7 +47,7 @@ private:
 
     Vec3D _findFurthestPoint(const Vec3D &direction);
     Vec3D _support(std::shared_ptr<RigidBody> obj, const Vec3D &direction);
-    std::function<void(const ObjectNameTag &, std::shared_ptr<RigidBody>)> _collisionCallBack;
+    std::function<void(const ObjectTag &, std::shared_ptr<RigidBody>)> _collisionCallBack;
 
     static NextSimplex _nextSimplex(const Simplex &points);
     static NextSimplex _lineCase(const Simplex &points);
@@ -61,12 +61,11 @@ private:
     _addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces, size_t a,
                      size_t b);
 public:
-    explicit RigidBody(ObjectNameTag nameTag) : Mesh(std::move(nameTag)) {};
+    explicit RigidBody(const ObjectTag& tag) : Mesh(tag) {};
     RigidBody(const RigidBody &rigidBody) = default;
     explicit RigidBody(const Mesh &mesh, bool useSimpleBox = true);
-    RigidBody(ObjectNameTag nameTag,
-              const std::string &mesh_file,
-              const std::string &texture_file = "",
+    RigidBody(const ObjectTag& tag,
+              const FileName &meshFile,
               const Vec3D &scale = Vec3D{1, 1, 1},
               bool useSimpleBox = true);
 
@@ -94,10 +93,10 @@ public:
     [[nodiscard]] Vec3D velocity() const { return _velocity; }
     [[nodiscard]] Vec3D acceleration() const { return _acceleration; }
 
-    [[nodiscard]] const std::function<void(const ObjectNameTag &, std::shared_ptr<RigidBody>)> &
+    [[nodiscard]] const std::function<void(const ObjectTag &, std::shared_ptr<RigidBody>)> &
     collisionCallBack() const { return _collisionCallBack; }
 
-    void setCollisionCallBack(const std::function<void(const ObjectNameTag &tag,
+    void setCollisionCallBack(const std::function<void(const ObjectTag &tag,
                                                        std::shared_ptr<RigidBody>)> &f) { _collisionCallBack = f; }
 
     ~RigidBody() override = default;

@@ -9,60 +9,77 @@ add_library(
         Engine.cpp
         World.h
         World.cpp
+
+        linalg/Vec2D.h
+        linalg/Vec2D.cpp
+        linalg/Vec3D.h
+        linalg/Vec3D.cpp
         linalg/Vec4D.h
         linalg/Vec4D.cpp
-        linalg/Vec3D.cpp
-        linalg/Vec3D.h
-        linalg/Vec2D.cpp
-        linalg/Vec2D.h
         linalg/Matrix4x4.h
         linalg/Matrix4x4.cpp
-        linalg/Color.cpp
-        linalg/Color.h
+
         objects/Camera.h
         objects/Camera.cpp
-        objects/Object.cpp
         objects/Object.h
-        objects/DirectionalLight.cpp
+        objects/Object.cpp
+        objects/Group.h
+        objects/Group.cpp
         objects/DirectionalLight.h
+        objects/DirectionalLight.cpp
+
+        objects/props/Color.h
+        objects/props/Color.cpp
+        objects/props/Texture.h
+        objects/props/Texture.cpp
+        objects/props/Material.h
+        objects/props/Material.cpp
+
         objects/geometry/Triangle.h
         objects/geometry/Triangle.cpp
         objects/geometry/Plane.h
         objects/geometry/Plane.cpp
-        objects/geometry/Sphere.cpp
         objects/geometry/Sphere.h
+        objects/geometry/Sphere.cpp
         objects/geometry/Mesh.h
         objects/geometry/Mesh.cpp
-        physics/RigidBody.cpp
+
         physics/RigidBody.h
+        physics/RigidBody.cpp
         physics/Simplex.h
-        physics/HitBox.cpp
         physics/HitBox.h
-        io/Image.cpp
+        physics/HitBox.cpp
+
         io/Image.h
+        io/Image.cpp
         io/Screen.h
         io/Screen.cpp
-        io/Keyboard.cpp
         io/Keyboard.h
-        io/Mouse.cpp
+        io/Keyboard.cpp
         io/Mouse.h
+        io/Mouse.cpp
+
         utils/Log.h
         utils/Log.cpp
         utils/Time.h
         utils/Time.cpp
-        utils/Timer.cpp
         utils/Timer.h
-        utils/EventHandler.cpp
+        utils/Timer.cpp
         utils/EventHandler.h
+        utils/EventHandler.cpp
         utils/ResourceManager.h
         utils/ResourceManager.cpp
+        utils/FileName.h
+        utils/FileName.cpp
         utils/ObjectController.h
         utils/ObjectController.cpp
+
         animation/Animation.h
-        animation/Timeline.cpp
-        animation/Timeline.h
-        animation/Interpolation.h
         animation/Animation.cpp
+        animation/Timeline.h
+        animation/Timeline.cpp
+        animation/Interpolation.h
+        animation/Interpolation.cpp
         animation/ATranslate.h
         animation/AScale.h
         animation/ARotate.h
@@ -71,13 +88,11 @@ add_library(
         animation/AAttractToPoint.h
         animation/ARotateRelativePoint.h
         animation/ARotateLeft.h
-        animation/Interpolation.cpp
         animation/Animations.h
         animation/AShowCreation.h
         animation/AShowUncreation.h
         animation/ARotateLeftUpLookAt.h
-        animation/ADecompose.h
-        objects/geometry/Texture.cpp objects/geometry/Texture.h)
+        animation/ADecompose.h)
 
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 

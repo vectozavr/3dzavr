@@ -12,6 +12,7 @@
 
 #include <linalg/Vec3D.h>
 #include <Consts.h>
+#include <utils/FileName.h>
 
 class Image {
 public:
@@ -25,7 +26,7 @@ private:
     bool _valid = false;
 public:
     explicit Image(uint16_t width = Consts::STANDARD_SCREEN_WIDTH, uint16_t height = Consts::STANDARD_SCREEN_HEIGHT);
-    explicit Image(const std::string &filename);
+    explicit Image(const FileName &filename);
 
     Image(const Image& img) = delete;
     Image& operator=(const Image &img) = delete;
@@ -36,10 +37,10 @@ public:
 
     void set_pixel(uint16_t x, uint16_t y, const Color& color);
     [[nodiscard]] Color get_pixel(uint16_t x, uint16_t y) const;
-    [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv) const;
+    [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, bool bottomUp = true) const;
     [[nodiscard]] std::shared_ptr<Image> downSampled() const;
 
-    CODE save2png(const std::string& file_name, uint16_t bit_depth = 8);
+    CODE save2png(const FileName& file_name, uint16_t bit_depth = 8);
 
     ~Image();
 };

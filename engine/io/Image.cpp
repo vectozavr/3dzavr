@@ -18,12 +18,12 @@ Image::Image(uint16_t width, uint16_t height) : _width(width), _height(height), 
     }
 }
 
-Image::CODE Image::save2png(const std::string &file_name, uint16_t bit_depth) {
+Image::CODE Image::save2png(const FileName &file_name, uint16_t bit_depth) {
     if(!isValid()) {
         return ERROR;
     }
 
-    FILE * fp2 = fopen(file_name.c_str(), "wb");
+    FILE * fp2 = fopen(file_name.str().c_str(), "wb");
     if (!fp2) {
         return FILE_OPEN_ERROR;
     }
@@ -77,9 +77,9 @@ Color Image::get_pixel(uint16_t x, uint16_t y) const {
                  _row_pointers[y][4*x + 3]);
 }
 
-Image::Image(const std::string &filename) {
+Image::Image(const FileName &filename) {
 
-    FILE *fp = fopen(filename.c_str(), "rb");
+    FILE *fp = fopen(filename.str().c_str(), "rb");
 
     if (!fp) {
         _valid = false;
@@ -144,8 +144,34 @@ Image::Image(const std::string &filename) {
     _valid = true;
 }
 
-Color Image::get_pixel_from_UV(const Vec2D& uv) const {
-    return get_pixel((uint16_t)(uv.x()*_width), (uint16_t)(uv.y()*_height));
+Color Image::get_pixel_from_UV(const Vec2D& uv, bool bottomUp) const {
+
+    /*
+     * In most systems, U = 0 corresponds to the left edge of the
+     * texture image, and U = 1 corresponds to the right edge.
+     */
+
+    if(bottomUp) {
+        /*
+         * Bottom-up approach (used in most systems including Blender)
+         * In some systems (like OpenGL),
+         * V = 0 corresponds to the bottom edge of the texture image, and
+         * V = 1 corresponds to the top edge.
+         *
+         */
+
+        return get_pixel((uint16_t)(uv.x()*_width), (uint16_t)((1-uv.y())*_height));
+    } else {
+        /*
+         * Top-down approach
+         * n other systems (like DirectX),
+         * V = 0 corresponds to the top edge of the texture image, and
+         * V = 1 corresponds to the bottom edge.
+         *
+         */
+
+        return get_pixel((uint16_t)(uv.x()*_width), (uint16_t)(uv.y()*_height));
+    }
 }
 
 Image::~Image() {

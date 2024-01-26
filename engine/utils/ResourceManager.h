@@ -10,11 +10,15 @@
 #include <SDL_ttf.h>
 
 #include "objects/geometry/Mesh.h"
+#include "objects/Group.h"
+
 
 class ResourceManager final {
 private:
-    std::map<std::string, std::vector<std::shared_ptr<Mesh>>> _objects;
-    std::map<std::string, std::shared_ptr<TTF_Font>> _fonts;
+    std::map<FileName, std::shared_ptr<Group>> _objects;
+
+    // TODO: implement ResourceManager for TTF_Font
+    std::map<FileName, std::shared_ptr<TTF_Font>> _fonts;
 
     static ResourceManager *_instance;
 
@@ -22,6 +26,9 @@ private:
 
     static void unloadObjects();
 
+    // For now this function is only used in ResourceManager::loadObjects(), if it will be necessary
+    // we can move it to the public domain.
+    static std::map<MaterialTag, std::shared_ptr<Material>> loadMaterials(const FileName &mtl_file);
 public:
     ResourceManager(const ResourceManager &) = delete;
 
@@ -33,11 +40,10 @@ public:
 
     static void free();
 
-    // Try to load texture from file.
-    // If success returns pointer to texture.
-    // Otherwise, returns nullptr.
-    static std::vector<std::shared_ptr<Mesh>> loadObjects(const std::string &mesh_file, const std::string &texture_file = "");
-
+    // This function tries to load texture from the file.
+    // If it succeeded - the function returns a pointer to the texture.
+    // Otherwise, it returns a nullptr.
+    static std::shared_ptr<Group> loadObject(const ObjectTag &tag, const FileName &mesh_file);
 };
 
 #endif //PSEUDO3DENGINE_RESOURCEMANAGER_H

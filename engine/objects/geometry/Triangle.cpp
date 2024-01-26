@@ -5,8 +5,8 @@
 #include "Triangle.h"
 #include "Consts.h"
 
-Triangle::Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv, const std::array<Color, 3>& color) :
-_points{p}, _textureCoordinates(uv), _colors(color) {
+Triangle::Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv) :
+_points{p}, _textureCoordinates(uv) {
     calculateNormal();
 }
 
@@ -23,7 +23,7 @@ void Triangle::calculateNormal() {
 }
 
 Triangle Triangle::operator*(const Matrix4x4 &matrix4X4) const {
-    return Triangle{{matrix4X4 * _points[0], matrix4X4 * _points[1], matrix4X4 * _points[2]}, _textureCoordinates, _colors};
+    return Triangle{{matrix4X4 * _points[0], matrix4X4 * _points[1], matrix4X4 * _points[2]}, _textureCoordinates};
 }
 
 Vec3D Triangle::norm() const {
@@ -71,16 +71,11 @@ Vec3D Triangle::abgBarycCoord(const Vec2D &point) const {
     return Vec3D{alpha, betta, gamma};
 }
 
-void Triangle::setColor(const Color &newColor) {
-    _colors[0] = newColor;
-    _colors[1] = newColor;
-    _colors[2] = newColor;
-}
-
 Vec2D Triangle::uvCoord(const Vec2D &point) const {
-    return Vec2D();
+    return {};
 }
 
 Vec2D Triangle::uvCoordDer(const Vec2D &point) const {
-    return Vec2D();
+    // TODO: implement or delete
+    return {};
 }

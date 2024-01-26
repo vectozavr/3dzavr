@@ -12,7 +12,6 @@
 class Vec3D final {
 private:
     std::array<double, 3> _arr_point{};
-
 public:
     Vec3D() = default;
 

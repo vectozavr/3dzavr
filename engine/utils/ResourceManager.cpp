@@ -12,6 +12,7 @@
 
 ResourceManager *ResourceManager::_instance = nullptr;
 
+
 void ResourceManager::init() {
     delete _instance;
     _instance = new ResourceManager();
@@ -19,37 +20,31 @@ void ResourceManager::init() {
     Log::log("ResourceManager::init(): resource manager was initialized");
 }
 
-std::vector<std::shared_ptr<Mesh>> ResourceManager::loadObjects(const std::string &mesh_file, const std::string &texture_file) {
+std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(const FileName &mtl_file) {
+    std::map<MaterialTag, std::shared_ptr<Material>> materials;
 
-    std::vector<std::shared_ptr<Mesh>> objects{};
-    std::map<std::string, Color> maters{};
-
-    if (_instance == nullptr) {
-        return objects;
-    }
-
-
-    // If objects is already loaded - return pointer to it
-    auto it = _instance->_objects.find(mesh_file);
-    if (it != _instance->_objects.end()) {
-        return it->second;
-    }
-
-    std::ifstream file(mesh_file);
+    std::ifstream file(mtl_file.str());
     if (!file.is_open()) {
-        Log::log("Mesh::LoadObjects(): cannot load file from '" + mesh_file + "'");
-        return objects;
+        Log::log("ResourceManager::loadMaterials(): cannot open '" + mtl_file.str() + "'");
+        return materials;
     }
 
+    // parameters of the material
+    std::string matName;
     std::shared_ptr<Texture> texture = nullptr;
-    if(!texture_file.empty()) {
-        texture = std::make_shared<Texture>(texture_file);
-    }
+    Vec3D ambient, diffuse, specular;
+    u_int16_t illum;
+    bool readAmbient = false, readDiffuse = false, readSpecular = false, readIllum = false;
 
-    std::vector<Vec4D> v{};
-    std::vector<Vec3D> vt{};
-    std::vector<Triangle> tris{};
-    Color currentColor = Color(255, 245, 194, 255);
+    // On each step we will check did we read all the information to be able to create a new material
+    auto checkMaterialData = []
+            (const std::string& matName,
+                    std::shared_ptr<Texture> texture, bool readAmbient, bool readDiffuse, bool readSpecular, bool readIllum)-> bool {
+        if(!matName.empty() && texture != nullptr && readAmbient && readDiffuse && readSpecular && readIllum) {
+            return true;
+        }
+        return false;
+    };
 
     while (!file.eof()) {
         std::string line;
@@ -61,13 +56,109 @@ std::vector<std::shared_ptr<Mesh>> ResourceManager::loadObjects(const std::strin
         std::string type;
         lineStream >> type;
 
+        // Use std::transform to convert the whole string to lowercase
+        std::transform(type.begin(), type.end(), type.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+
+        // material name
+        if (type == "newmtl") {
+            lineStream >> matName;
+        }
+        // illumination type
+        if (type == "illum") {
+            lineStream >> illum;
+            readIllum = true;
+        }
+        // Ambient, diffuse and specular components
+        if (type == "ka") {
+            double r, g, b;
+            lineStream >> r >> g >> b;
+            ambient = Vec3D(r, g, b);
+            readAmbient = true;
+        }
+        if (type == "kd") {
+            double r, g, b;
+            lineStream >> r >> g >> b;
+            diffuse = Vec3D(r, g, b);
+            readDiffuse = true;
+        }
+        if (type == "ks") {
+            double r, g, b;
+            lineStream >> r >> g >> b;
+            specular = Vec3D(r, g, b);
+            readSpecular = true;
+        }
+        if (type == "map_kd") {
+            std::string textureFileName;
+            lineStream >> textureFileName;
+            texture = std::make_shared<Texture>(FileName(mtl_file.parent_path(), textureFileName));
+        }
+
+        // Add a new material into the array of materials
+        if(checkMaterialData(matName, texture, readAmbient, readDiffuse, readSpecular, readIllum)) {
+            auto material = std::make_shared<Material>(
+                    MaterialTag(matName), texture, ambient, diffuse, specular, illum);
+            materials.insert({material->tag(), material});
+
+            // When we read all data and created a new material
+            // we have to clear the fields and start reading over again
+            matName = "";
+            texture = nullptr;
+            readAmbient = false;
+            readDiffuse = false;
+            readSpecular = false;
+            readIllum = false;
+        }
+    }
+
+    return materials;
+}
+
+std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const FileName &objFile) {
+
+    std::shared_ptr<Group> objects = std::make_shared<Group>(tag);
+    std::map<MaterialTag, std::shared_ptr<Material>> materials;
+
+    if (_instance == nullptr) {
+        return objects;
+    }
+
+    // If objects is already loaded - return pointer to it
+    auto it = _instance->_objects.find(objFile);
+    if (it != _instance->_objects.end()) {
+        objects = std::make_shared<Group>(*it->second);
+        return objects;
+    }
+
+    std::ifstream file(objFile.str());
+    if (!file.is_open()) {
+        Log::log("ResourceManager::loadObjects(): cannot open '" + objFile.str() + "'");
+        return objects;
+    }
+
+    std::vector<Vec4D> v{};
+    std::vector<Vec3D> vt{};
+    std::vector<Triangle> tris{};
+    std::string objName, materialName;
+    std::string prevType;
+
+    while (!file.eof()) {
+        std::string line;
+        std::getline(file, line);
+
+        std::stringstream lineStream;
+        lineStream << line;
+
+        std::string type;
+        lineStream >> type;
+
+        // Use std::transform to convert the whole string to lowercase
+        std::transform(type.begin(), type.end(), type.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+
         // Starting of the new object
-        if (type == "o") {
-            if (!tris.empty())
-                objects.push_back(std::make_shared<Mesh>(
-                        ObjectNameTag(mesh_file + "_temp_obj_" + std::to_string(objects.size())),
-                        tris, texture));
-            tris.clear();
+        if (type == "o" || type == "g") {
+            lineStream >> objName;
         }
         // Vertex coordinates
         if (type == "v") {
@@ -82,26 +173,8 @@ std::vector<std::shared_ptr<Mesh>> ResourceManager::loadObjects(const std::strin
             vt.emplace_back(x, y, 1.0);
         }
 
-        // Starting of the new material
-        /*
-        if (type == "g") {
-            std::string matInfo;
-            s >> matInfo;
-            std::string colorName = matInfo.substr(matInfo.size() - 3, 3);
-            currentColor = maters[matInfo.substr(matInfo.size() - 3, 3)];
-        }*/
-
         // Add a new face
         if (type == "f") {
-            /*
-            int f[3];
-            s >> f[0] >> f[1] >> f[2];
-            // TODO: we need to add separate color for each vertex
-            tris.emplace_back(v[f[0] - 1], v[f[1] - 1], v[f[2] - 1],
-                              std::array<Color, 3>{currentColor, currentColor, currentColor});
-
-            */
-
             std::string nodes[3];
             lineStream >> nodes[0] >> nodes[1] >> nodes[2];
 
@@ -122,25 +195,53 @@ std::vector<std::shared_ptr<Mesh>> ResourceManager::loadObjects(const std::strin
                 }
             }
 
-            // TODO: add texture coordinates to the triangle
-            tris.emplace_back(std::array<Vec4D, 3>{v[vertex[0] - 1], v[vertex[1] - 1], v[vertex[2] - 1]},
-                              std::array<Vec3D, 3>{vt[color[0] - 1], vt[color[1] - 1], vt[color[2] - 1]},
-                              std::array<Color, 3>{currentColor, currentColor, currentColor});
+            std::array<Vec3D, 3> uv = {};
+            if(!vt.empty()) {
+                uv = std::array<Vec3D, 3>{vt[color[0] - 1], vt[color[1] - 1], vt[color[2] - 1]};
+            }
+
+            tris.emplace_back(std::array<Vec4D, 3>{v[vertex[0] - 1], v[vertex[1] - 1], v[vertex[2] - 1]}, uv);
         }
+
+        // material file
+        if (type == "mtllib") {
+            std::string mtlFileName;
+            lineStream >> mtlFileName;
+
+            if(!mtlFileName.empty()) {
+                materials = ResourceManager::loadMaterials(
+                        FileName(objFile.parent_path(), mtlFileName));
+            }
+        }
+
+        // Starting of the new object
+        if (type == "usemtl") {
+            lineStream >> materialName;
+        }
+
+        // Add a new material into the array of materials
+        if((prevType == "f" && type != "f") || file.eof()) {
+            objects->add(std::make_shared<Mesh>(
+                    ObjectTag(objName), tris,
+                    materials[MaterialTag(materialName)]));
+
+            // When we read all data and created a new Mesh
+            // we have to clear the fields and start reading over again
+            v.clear();
+            vt.clear();
+            tris.clear();
+            objName = "";
+            materialName = "";
+        }
+
+        prevType = type;
     }
 
-    if (!tris.empty()) {
-        objects.push_back(std::make_shared<Mesh>(
-                ObjectNameTag(mesh_file + "_temp_obj_" + std::to_string(objects.size())),
-                tris, texture));
-    }
-    tris.clear();
     file.close();
-
-    Log::log("Mesh::LoadObjects(): obj '" + mesh_file + "' was loaded");
+    Log::log("ResourceManager::LoadObjects(): obj '" + objFile.str() + "' was loaded");
 
     // If success - remember and return vector of objects pointer
-    _instance->_objects.emplace(mesh_file, objects);
+    _instance->_objects.emplace(objFile, objects);
 
     return objects;
 }

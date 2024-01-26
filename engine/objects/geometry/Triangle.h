@@ -8,13 +8,12 @@
 #include <linalg/Vec4D.h>
 #include <linalg/Vec3D.h>
 #include <linalg/Vec2D.h>
-#include <linalg/Color.h>
+#include "objects/props/Color.h"
 #include <linalg/Matrix4x4.h>
 #include <Consts.h>
 
 class Triangle final {
 private:
-    std::array<Color, 3> _colors;
     std::array<Vec4D, 3> _points;
     std::array<Vec3D, 3> _textureCoordinates;
 
@@ -26,10 +25,7 @@ public:
 
     Triangle(const Triangle &triangle) = default;
 
-    Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv = {},
-             const std::array<Color, 3>& colors = {Consts::WHITE_COLORS[0],
-                                                   Consts::WHITE_COLORS[1],
-                                                   Consts::WHITE_COLORS[2]});
+    Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv = {});
 
     Triangle &operator=(const Triangle &) = default;
 
@@ -44,7 +40,6 @@ public:
 
     [[nodiscard]] bool isPointInside(const Vec3D &point) const;
 
-    [[nodiscard]] std::array<Color, 3> colors() const { return _colors; }
     [[nodiscard]] std::array<Vec4D, 3> points() const {return _points; }
     [[nodiscard]] std::array<Vec3D, 3> textureCoordinates() const { return _textureCoordinates; }
     void setColor(const Color& newColor);

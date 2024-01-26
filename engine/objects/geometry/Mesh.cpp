@@ -19,53 +19,25 @@ Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
     return *this;
 }
 
-void Mesh::loadObj(const std::string &mesh_file, const std::string &texture_file, const Vec3D &scale) {
-    _tris.clear();
-    auto objects = ResourceManager::loadObjects(mesh_file, texture_file);
-    for (auto &obj : objects) {
-        for (auto &tri : obj->triangles()) {
-            _tris.push_back(tri);
-        }
-    }
-    _texture = objects[0]->_texture;
+Mesh::Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, std::shared_ptr<Material> material) :
+Object(tag), _tris(tries), _material(material) {}
 
-    this->scale(scale);
-}
-
-Mesh::Mesh(ObjectNameTag nameTag,
-           const std::string &mesh_file,
-           const std::string &texture_file,
-           const Vec3D &scale) : Object(std::move(nameTag)) {
-    loadObj(mesh_file, texture_file, scale);
-}
-
-Mesh::Mesh(ObjectNameTag nameTag, const std::vector<Triangle> &tries, std::shared_ptr<Texture> texture) :
-Object(std::move(nameTag)), _tris(tries), _texture(texture) {}
-
-void Mesh::setColor(const Color &c) {
-    _color = c;
-
-    for (auto &t : _tris) {
-        t.setColor(c);
-    }
-}
-
-Mesh Mesh::Surface(ObjectNameTag tag, double w, double h, std::shared_ptr<Texture> texture) {
-    Mesh surface(std::move(tag));
+Mesh Mesh::Surface(const ObjectTag &tag, double w, double h, std::shared_ptr<Material> material) {
+    Mesh surface(tag);
 
     surface._tris = {
             { {Vec4D{w/2, 0.0, h/2, 1.0}, Vec4D{w/2, 0.0, -h/2, 1.0}, Vec4D{-w/2, 0.0, -h/2, 1.0}}, {Vec3D{0, 0, 1}, Vec3D{0, 1, 1}, Vec3D{1, 1, 1}} },
             { {Vec4D{-w/2, 0.0, -h/2, 1.0}, Vec4D{-w/2, 0.0, h/2, 1.0}, Vec4D{w/2, 0.0, h/2, 1.0}}, {Vec3D{1, 1, 1}, Vec3D{1, 0, 1}, Vec3D{0, 0, 1}} }
     };
-    if(texture) {
-        surface.setTexture(texture);
+    if(material) {
+        surface.setMaterial(material);
     }
 
     return surface;
 }
 
-Mesh Mesh::Cube(ObjectNameTag tag, double size, Color color) {
-    Mesh cube(std::move(tag));
+Mesh Mesh::Cube(const ObjectTag &tag, double size) {
+    Mesh cube(tag);
 
     cube._tris = {
             { {Vec4D{0.0, 0.0, 0.0, 1.0},    Vec4D{0.0, 1.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 0.0, 1.0}} },
@@ -81,14 +53,13 @@ Mesh Mesh::Cube(ObjectNameTag tag, double size, Color color) {
             { {Vec4D{1.0, 0.0, 1.0, 1.0},    Vec4D{0.0, 0.0, 1.0, 1.0},    Vec4D{0.0, 0.0, 0.0, 1.0}} },
             { {Vec4D{1.0, 0.0, 1.0, 1.0},    Vec4D{0.0, 0.0, 0.0, 1.0},    Vec4D{1.0, 0.0, 0.0, 1.0}} },
     };
-    cube.setColor(color);
 
     return cube *= Matrix4x4::Scale(Vec3D(size, size, size))*Matrix4x4::Translation(Vec3D(-0.5, -0.5, -0.5));
 }
 
-Mesh Mesh::LineTo(ObjectNameTag nameTag, const Vec3D &from, const Vec3D &to, double line_width, const Color &color) {
+Mesh Mesh::LineTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, double line_width) {
 
-    Mesh line(std::move(nameTag));
+    Mesh line(tag);
 
     Vec3D v1 = (to - from).normalized();
     Vec3D v2 = from.cross(from + Vec3D{1, 0, 0}).normalized();
@@ -120,16 +91,15 @@ Mesh Mesh::LineTo(ObjectNameTag nameTag, const Vec3D &from, const Vec3D &to, dou
             {{p1, p8, p5}},
             {{p1, p4, p8}}
     });
-    line.setColor(color);
     line.translateToPoint(from);
 
     return line;
 }
 
 
-Mesh Mesh::ArrowTo(ObjectNameTag nameTag, const Vec3D &from, const Vec3D &to, double line_width, Color color) {
+Mesh Mesh::ArrowTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, double line_width) {
 
-    Mesh arrow(std::move(nameTag));
+    Mesh arrow(tag);
 
     Vec3D v1 = (to - from).normalized();
     Vec3D v2 = from.cross(from + Vec3D{1, 0, 0}).normalized();
@@ -175,14 +145,9 @@ Mesh Mesh::ArrowTo(ObjectNameTag nameTag, const Vec3D &from, const Vec3D &to, do
             {{ p11, p12, p13 }},
             {{ p12, p9, p13  }},
     });
-    arrow.setColor(color);
     arrow.translateToPoint(from);
 
     return arrow;
-}
-
-void Mesh::setOpacity(double t) {
-    setColor(Color(_color.r(), _color.g(), _color.b(), t*255));
 }
 
 void Mesh::setTriangles(std::vector<Triangle>&& t) {
@@ -220,7 +185,7 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             continue;
         }
 
-        auto intersection = Plane(tri, ObjectNameTag("")).intersect(from_model, to_model);
+        auto intersection = Plane(tri, ObjectTag("")).intersect(from_model, to_model);
 
         if (intersection.distanceToObject > 0 && tri.isPointInside(intersection.pointOfIntersection)) {
 
@@ -229,7 +194,7 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             // That's why we need to perform distance calculation in the global coordinate system where metric
             // is the same for all objects.
             Triangle globalTriangle = tri*model;
-            auto globalIntersection = Plane(globalTriangle, ObjectNameTag("")).intersect(from, to);
+            auto globalIntersection = Plane(globalTriangle, ObjectTag("")).intersect(from, to);
             double globalDistance = (globalIntersection.pointOfIntersection - from).abs();
 
             if(globalDistance < minDistance) {
@@ -237,7 +202,7 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
                 point = globalIntersection.pointOfIntersection;
                 intersected = true;
                 norm = Vec3D(model * tri.norm());
-                triangle = Triangle({model * tri[0], model * tri[1], model * tri[2]}, tri.textureCoordinates(), tri.colors());
+                triangle = Triangle({model * tri[0], model * tri[1], model * tri[2]}, tri.textureCoordinates());
             }
         }
     }
@@ -249,9 +214,23 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
                                    norm,
                                    minDistance,
                                    name(),
-                                   std::make_shared<Object>(*this),
+                                   nullptr,
                                    intersected,
                                    kx,
                                    Color{},
                                    triangle};
+}
+
+Mesh::Mesh(const Mesh &mesh) :
+Object(mesh), _material(mesh._material), _visible(mesh._visible) {
+    for (const auto& tr : mesh._tris) {
+        _tris.push_back(tr);
+    }
+}
+
+Mesh::Mesh(const ObjectTag &tag, const Mesh &mesh) :
+Object(tag, mesh), _material(mesh._material), _visible(mesh._visible) {
+    for (const auto& tr : mesh._tris) {
+        _tris.push_back(tr);
+    }
 }

@@ -5,7 +5,7 @@
 
 #include "Sphere.h"
 
-Sphere::Sphere(double radius, const Vec3D &position, const ObjectNameTag& nameTag, const Color& color)
+Sphere::Sphere(double radius, const Vec3D &position, const ObjectTag& nameTag, const Color& color)
 : Object(nameTag), _radius(radius), _color(color) {
     translateToPoint(position);
 }

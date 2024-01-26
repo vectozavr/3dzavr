@@ -6,29 +6,34 @@
 #define ENGINE_OBJECT_H
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <memory>
 
-#include "linalg/Matrix4x4.h"
-#include "linalg/Vec3D.h"
-#include "linalg/Color.h"
-#include "Consts.h"
-#include "objects/geometry/Triangle.h"
+#include <linalg/Matrix4x4.h>
+#include <linalg/Vec3D.h>
+#include <objects/props/Color.h>
+#include <Consts.h>
+#include <objects/geometry/Triangle.h>
 
-class ObjectNameTag final {
+class ObjectTag final {
 private:
     const std::string _name;
 public:
-    explicit ObjectNameTag(std::string name = "") : _name(std::move(name)) {}
+    explicit ObjectTag(const std::string& name = "") : _name(name) {}
+
+    // Copy constructor
+    ObjectTag(const ObjectTag& other) : _name(other._name) {}
 
     [[nodiscard]] std::string str() const { return _name; }
+    [[nodiscard]] bool empty() const { return _name.empty(); }
 
-    bool operator==(const ObjectNameTag &tag) const { return _name == tag._name; }
-    bool operator!=(const ObjectNameTag &tag) const { return _name != tag._name; }
-    bool operator<(const ObjectNameTag &tag) const { return _name < tag._name; }
+    bool operator==(const ObjectTag &tag) const { return _name == tag._name; }
+    bool operator!=(const ObjectTag &tag) const { return _name != tag._name; }
+    bool operator<(const ObjectTag &tag) const { return _name < tag._name; }
 
-    [[nodiscard]] bool contains(const ObjectNameTag& nameTag) const;
+    [[nodiscard]] bool contains(const std::string& str) const;
 };
 
 
@@ -38,38 +43,43 @@ public:
     struct IntersectionInformation final {
         const Vec3D pointOfIntersection;
         const Vec3D normal;
-        const double distanceToObject;
-        const ObjectNameTag objectName;
-        const std::shared_ptr<Object> obj;
-        const bool intersected;
-        const double k;
+        const double distanceToObject = std::numeric_limits<double>::infinity();
+        const ObjectTag objectName;
+        std::shared_ptr<Object> obj = nullptr;
+        const bool intersected = false;
+        const double k = 0;
         const Color color = Consts::BLACK;
         const Triangle triangle{};
     };
 private:
     bool checkIfAttached(Object *obj);
 
-    const ObjectNameTag _nameTag;
+    const ObjectTag _tag;
 
     Matrix4x4 _transformMatrix = Matrix4x4::Identity();
     /*
-     * Take into account when you rotate body,
+     * Take into account that when you rotate a body,
      * you change '_angle' & '_angleLeftUpLookAt' only for this particular body,
-     * but not for attached objects! This way during rotation
+     * not for attached objects! Therefore, during rotations
      * '_angle' & '_angleLeftUpLookAt' stays constant for all attached objects.
      */
     Vec3D _angle{0, 0, 0};
     Vec3D _angleLeftUpLookAt{0, 0, 0};
 
-    std::map<ObjectNameTag, std::weak_ptr<Object>> _attachedObjects;
+    std::map<ObjectTag, std::shared_ptr<Object>> _attachedObjects;
 
 public:
-    explicit Object(ObjectNameTag nameTag) : _nameTag(std::move(nameTag)) {};
+    explicit Object(const ObjectTag& tag) : _tag(tag) {};
 
-    Object(const Object &object) :  _nameTag(object._nameTag),
+    Object(const Object &object) :  _tag(object._tag),
                                     _transformMatrix(object._transformMatrix),
                                     _angle(object._angle),
                                     _angleLeftUpLookAt(object._angleLeftUpLookAt) {};
+    Object(const ObjectTag& tag, const Object &object) :
+                                    _tag(tag),
+                                    _transformMatrix(object._transformMatrix),
+                                    _angle(object._angle),
+                                    _angleLeftUpLookAt(object._angleLeftUpLookAt) {}
 
     // TODO: implement rotations using quaternions (?)
     void transform(const Matrix4x4 &t);
@@ -99,10 +109,10 @@ public:
     [[nodiscard]] Vec3D angleLeftUpLookAt() const { return _angleLeftUpLookAt; }
 
     void attach(std::shared_ptr<Object> object);
-    void unattach(const ObjectNameTag &tag);
-    std::shared_ptr<Object> attached(const ObjectNameTag &tag);
+    void unattach(const ObjectTag &tag);
+    std::shared_ptr<Object> attached(const ObjectTag &tag);
 
-    [[nodiscard]] ObjectNameTag name() const { return _nameTag; }
+    [[nodiscard]] ObjectTag name() const { return _tag; }
 
     [[nodiscard]] Matrix4x4 model() const { return _transformMatrix; }
     /*

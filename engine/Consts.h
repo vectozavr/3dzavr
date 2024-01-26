@@ -7,13 +7,13 @@
 
 #include <filesystem>
 
-#include <linalg/Color.h>
+#include "objects/props/Color.h"
 #include <linalg/Vec2D.h>
 
 namespace Consts {
-    const uint16_t STANDARD_SCREEN_WIDTH = 640/2;
-    const uint16_t STANDARD_SCREEN_HEIGHT = 480/2;
-    const uint16_t SCREEN_SCALE = 4;
+    const uint16_t STANDARD_SCREEN_WIDTH = 640;
+    const uint16_t STANDARD_SCREEN_HEIGHT = 480;
+    const uint16_t SCREEN_SCALE = 2;
     const Color BACKGROUND_COLOR = Color(255, 255, 255);
     const std::string PROJECT_NAME = "engine";
     const bool USE_LOG_FILE = true;

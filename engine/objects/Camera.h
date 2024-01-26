@@ -19,13 +19,13 @@ private:
 
     Matrix4x4 _SP;
 public:
-    Camera() : Object(ObjectNameTag("Camera")) {};
+    Camera() : Object(ObjectTag("Camera")) {};
 
     Camera(const Camera &camera) = delete;
 
     void setup(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
 
-    std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Texture>>> project(std::shared_ptr<Mesh> mesh);
+    std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> project(std::shared_ptr<Mesh> mesh);
 };
 
 

@@ -53,4 +53,5 @@ CMakeUserPresets.json
 
 # Project exclude paths
 engine.log
-engine_test
+3dzavr_test
+*.blend

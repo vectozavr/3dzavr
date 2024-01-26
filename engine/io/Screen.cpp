@@ -122,7 +122,7 @@ void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
     SDL_RenderDrawPoint(_renderer, x, y);
 }
 
-void Screen::drawPixel(uint16_t x, uint16_t y, float z, const Color &color) {
+void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
@@ -182,7 +182,7 @@ void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, ui
     drawPixel(to_x, to_y, color);
 }
 
-void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Texture> texture) {
+void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Material> material) {
     // Drawing edge
     //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), triangle.colors()[0]);
     //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), triangle.colors()[1]);
@@ -194,7 +194,6 @@ void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Texture> tex
     int y_min = (int)std::min({(double)_height, triangle[0].y(), triangle[1].y(), triangle[2].y()});
     int y_max = (int)std::max({0.0, triangle[0].y(), triangle[1].y(), triangle[2].y()}) + 1;
 
-    auto c = triangle.colors();
     auto tc = triangle.textureCoordinates();
 
     for(int y = y_min; y <= y_max; y++) {
@@ -203,9 +202,12 @@ void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Texture> tex
 
             if(abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0) {
                 Color color;
-                if(texture) {
+                if(material) {
+                    auto texture = material->texture();
+
                     Vec3D uv_hom = tc[0] + (tc[1] - tc[0])*abg.y() + (tc[2] - tc[0])*abg.z();
-                    // De homogenite UV coordinates
+
+                    // Dehomogenite UV coordinates
                     Vec2D uv_dehom(uv_hom.x()/uv_hom.z(), uv_hom.y()/uv_hom.z());
 
                     // TODO: move calculations of derivatives somewhere from here: it becomes messy
@@ -224,10 +226,9 @@ void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Texture> tex
                     Vec2D dv(texture->height()*(uv_dehom_xp - uv_dehom).y(), texture->height()*(uv_dehom_yp - uv_dehom).y());
 
                     color = texture->get_pixel_from_UV(uv_dehom, du.abs()+dv.abs());
-                } else {
-                    color = c[0]*abg.x() + c[1]*abg.y() + c[2]*abg.z();
                 }
-                float z = triangle[0].z()*abg.x() + triangle[1].z()*abg.y() + triangle[2].z()*abg.z();
+
+                double z = triangle[0].z()*abg.x() + triangle[1].z()*abg.y() + triangle[2].z()*abg.z();
 
                 drawPixel(x, y, z, color);
             }
@@ -264,6 +265,10 @@ void Screen::clearDepthBuffer() {
 }
 
 void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color) {
+    // TODO: implement this function
+    /*
+     * This is an old version of this function
+     * that relied on the color functionality that was deleted.
     drawTriangle(Triangle({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)},
                           {},
                           {color, color, color}));
@@ -271,6 +276,7 @@ void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t heig
     drawTriangle(Triangle({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)},
                           {},
                           {color, color, color}));
+                          */
 }
 
 void Screen::drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color,
@@ -293,10 +299,9 @@ void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
 
 void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t fontsize, const Color& color) {
 
-    // TODO: add TTF_OpenFont routine to ResourceManager: it is inefficient to load the font every time
+    // TODO: add TTF_OpenFont routine to ResourceManager: it is VERY inefficient to load the font every time
     // TODO: make width and height adjustable to the fontsize OR fontsize and height adjustable to width
-
-    std::string font_filename = "fonts/Roboto-Light.ttf";
+    std::string font_filename = "resources/fonts/Roboto-Light.ttf";
 
     TTF_Font* ourFont = TTF_OpenFont(font_filename.c_str(), fontsize);
     // Confirm that it was loaded

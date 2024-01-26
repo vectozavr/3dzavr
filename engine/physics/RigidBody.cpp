@@ -10,12 +10,12 @@
 #include <utils/Log.h>
 #include <Consts.h>
 
-RigidBody::RigidBody(ObjectNameTag nameTag,
-                     const std::string &mesh_file,
-                     const std::string &texture_file,
+RigidBody::RigidBody(const ObjectTag& tag,
+                     const FileName &meshFile,
                      const Vec3D &scale,
-                     bool useSimpleBox) : Mesh(std::move(nameTag), mesh_file, texture_file, scale),
+                     bool useSimpleBox) : Mesh(tag),
                      _hitBox(*this, useSimpleBox) {
+    // TODO: implement this (or delete)
 }
 
 RigidBody::RigidBody(const Mesh &mesh, bool useSimpleBox) : Mesh(mesh), _hitBox(mesh, useSimpleBox) {

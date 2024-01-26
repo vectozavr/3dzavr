@@ -78,23 +78,27 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
             Time::stopTimer("d collisions");
         }
 
-        for (auto &it : *world) {
-            std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(it.second);
-            if(mesh) {
+        for (const auto &[groupTag, group] : *world) {
+            for(const auto& [objTag, obj] : *group) {
+                // TODO: add support for groups of groups of objects (recursive call of the projection function)
 
-                // project triangles to the camera plane
-                Time::startTimer("d projections");
-                auto projected = camera->project(mesh);
-                Time::pauseTimer("d projections");
+                std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(obj);
+                if(mesh) {
+                    // project triangles to the camera plane
+                    Time::startTimer("d projections");
+                    auto projected = camera->project(mesh);
+                    Time::pauseTimer("d projections");
 
-                // draw projected triangles
-                Time::startTimer("d rasterization");
-                for (auto &t : projected) {
-                    screen->drawTriangle(*t.first, t.second);
+                    // draw projected triangles
+                    Time::startTimer("d rasterization");
+                    for (auto &t : projected) {
+                        screen->drawTriangle(*t.first, t.second);
+                    }
+                    Time::pauseTimer("d rasterization");
                 }
-                Time::pauseTimer("d rasterization");
             }
         }
+
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");
 
@@ -102,30 +106,6 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
         // draw triangles on the screen
         screen->clearDepthBuffer();
         Time::stopTimer("d depthBuffer");
-
-        // Ray tracing routine
-        /*
-        double a = (double)screenWidth/screenHeight;
-        for(int j = 0; j < screenHeight; j++) {
-            for(int i = 0; i < screenWidth; i++) {
-                double x = a*(1.0/2.0 - (1.0*i + 0.5)/screenWidth);
-                double y = 1*(1.0/2.0 - (1.0*j + 0.5)/screenHeight);
-                Vec3D camera_rd(x, y,1);
-
-                Vec3D world_rd = camera->model()*camera_rd;
-
-                auto intersection = world->rayCast(camera->position(), camera->position() + world_rd);
-
-                auto color = world->getIllumination(intersection, camera->position(), world_rd);
-
-                if(intersection.distanceToObject < std::numeric_limits<double>::infinity()) {
-                    screen->drawPixel(i, j, color/(1 + intersection.distanceToObject/50));
-                } else {
-                    screen->drawPixel(i, j, Color(0, 0, 0, 255));
-                }
-            }
-        }
-        */
         Time::stopTimer("d all");
 
         printDebugInfo();

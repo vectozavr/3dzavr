@@ -16,14 +16,13 @@ class AnimationListTag final {
 private:
     const std::string _name;
 public:
-    explicit AnimationListTag(std::string name = "") : _name(std::move(name)) {}
+    explicit AnimationListTag(const std::string& name = "") : _name(name) {}
 
     [[nodiscard]] std::string str() const { return _name; }
+    [[nodiscard]] bool empty() const { return _name.empty(); }
 
     bool operator==(const AnimationListTag &tag) const { return _name == tag._name; }
-
     bool operator!=(const AnimationListTag &tag) const { return _name != tag._name; }
-
     bool operator<(const AnimationListTag &tag) const { return _name < tag._name; }
 };
 

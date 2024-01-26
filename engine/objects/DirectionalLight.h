@@ -12,7 +12,7 @@ private:
     Vec3D _dir;
     Color _color;
 public:
-    DirectionalLight(const ObjectNameTag& tag, const Vec3D& direction, const Color& color = Consts::WHITE);
+    DirectionalLight(const ObjectTag& tag, const Vec3D& direction, const Color& color = Consts::WHITE);
 
     [[nodiscard]] Color color() const;
     [[nodiscard]] Vec3D direction() const;

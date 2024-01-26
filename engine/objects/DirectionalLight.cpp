@@ -4,7 +4,7 @@
 
 #include "DirectionalLight.h"
 
-DirectionalLight::DirectionalLight(const ObjectNameTag& tag, const Vec3D &direction, const Color &color) :
+DirectionalLight::DirectionalLight(const ObjectTag& tag, const Vec3D &direction, const Color &color) :
 Object(tag), _dir(direction.normalized()), _color(color) {
 
 }

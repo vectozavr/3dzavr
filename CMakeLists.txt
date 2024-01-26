@@ -3,8 +3,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(3dzavr_test)
 
-add_executable(${CMAKE_PROJECT_NAME} asst3.cpp)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+add_executable(${CMAKE_PROJECT_NAME} main.cpp)
 
 # include engine into our project
 add_subdirectory(engine)
