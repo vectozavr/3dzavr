@@ -26,7 +26,7 @@ private:
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
 
-        obj = world->loadObject(ObjectTag("car1"), FileName("resources/obj/car/Car.obj"));
+        obj = world->loadObject(ObjectTag("car1"), FilePath("resources/obj/car/Car.obj"));
         obj->translate(Vec3D(0, -3, 10));
 
         /*

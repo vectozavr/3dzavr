@@ -65,7 +65,7 @@ public:
     RigidBody(const RigidBody &rigidBody) = default;
     explicit RigidBody(const Mesh &mesh, bool useSimpleBox = true);
     RigidBody(const ObjectTag& tag,
-              const FileName &meshFile,
+              const FilePath &meshFile,
               const Vec3D &scale = Vec3D{1, 1, 1},
               bool useSimpleBox = true);
 
@@ -98,8 +98,6 @@ public:
 
     void setCollisionCallBack(const std::function<void(const ObjectTag &tag,
                                                        std::shared_ptr<RigidBody>)> &f) { _collisionCallBack = f; }
-
-    ~RigidBody() override = default;
 };
 
 

@@ -297,17 +297,11 @@ void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
     }
 }
 
-void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t fontsize, const Color& color) {
+void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize, const Color& color) {
+    TTF_Font* ourFont = ResourceManager::loadFont(Consts::DEFAULT_FONT_FILENAME)->getFont(fontsize);
 
-    // TODO: add TTF_OpenFont routine to ResourceManager: it is VERY inefficient to load the font every time
-    // TODO: make width and height adjustable to the fontsize OR fontsize and height adjustable to width
-    std::string font_filename = "resources/fonts/Roboto-Light.ttf";
-
-    TTF_Font* ourFont = TTF_OpenFont(font_filename.c_str(), fontsize);
     // Confirm that it was loaded
-    if(ourFont == nullptr){
-        std::cout << "Could not load font" << std::endl;
-        Log::log("Screen::drawText(): Could not load font " + font_filename);
+    if(ourFont == nullptr) {
         return;
     }
 
@@ -315,15 +309,32 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
                                                     text.c_str(),
                                                     {color.r(),color.g(),color.b(), color.a()});
 
+    int textWidth = 0;
+    int textHeight = 0;
+    TTF_SizeText(ourFont, text.c_str(), &textWidth, &textHeight);
+
     SDL_Texture* textureText = SDL_CreateTextureFromSurface(_renderer,surfaceText);
 
     SDL_FreeSurface(surfaceText);
 
-    SDL_Rect rectangle{x, y, w, h};
-    SDL_RenderCopy(_renderer,textureText,NULL,&rectangle);
+    SDL_Rect rectangle{x, y, textWidth, textHeight};
+    SDL_RenderCopy(_renderer,textureText,nullptr,&rectangle);
 
     SDL_DestroyTexture(textureText);
+}
 
-    // Close our font subsystem
-    TTF_CloseFont(ourFont);
+Screen::~Screen() {
+    if(_renderer) {
+        SDL_DestroyRenderer(_renderer);
+        _renderer = nullptr;
+    }
+
+    if(_width) {
+        SDL_DestroyWindow(_window);
+        _window = nullptr;
+    }
+
+    SDL_Quit();
+
+    _depthBuffer.clear();
 }

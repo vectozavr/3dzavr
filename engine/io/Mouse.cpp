@@ -58,15 +58,21 @@ void Mouse::sendMouseEvent(const SDL_Event &event) {
 }
 
 void Mouse::init() {
-    delete _instance;
+    if(_instance) {
+       Mouse::free();
+    }
+
     _instance = new Mouse();
 
     Log::log("Mouse::init(): mouse was initialized");
 }
 
 void Mouse::free() {
-    delete _instance;
-    _instance = nullptr;
+    if(_instance) {
+        _instance->_tappedButtons.clear();
+        delete _instance;
+        _instance = nullptr;
+    }
 
     Log::log("Mouse::free(): mouse was freed");
 }

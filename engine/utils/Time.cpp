@@ -11,9 +11,11 @@ using namespace std::chrono;
 Time *Time::_instance = nullptr;
 
 void Time::init() {
-    delete _instance;
-    _instance = new Time();
+    if(_instance) {
+        Time::free();
+    }
 
+    _instance = new Time();
     Log::log("Time::init(): time was initialized");
 }
 
@@ -120,8 +122,12 @@ double Time::elapsedTimerSeconds(const std::string &timerName) {
 
 
 void Time::free() {
-    delete _instance;
-    _instance = nullptr;
+    if(_instance) {
+        _instance->_timers.clear();
+
+        delete _instance;
+        _instance = nullptr;
+    }
 
     Log::log("Time::free(): pointer to 'Time' was freed");
 }

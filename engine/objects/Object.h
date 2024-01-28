@@ -23,7 +23,6 @@ private:
 public:
     explicit ObjectTag(const std::string& name = "") : _name(name) {}
 
-    // Copy constructor
     ObjectTag(const ObjectTag& other) : _name(other._name) {}
 
     [[nodiscard]] std::string str() const { return _name; }
@@ -41,15 +40,15 @@ class Object {
 public:
     // TODO: maybe this structure should not be there
     struct IntersectionInformation final {
-        const Vec3D pointOfIntersection;
-        const Vec3D normal;
-        const double distanceToObject = std::numeric_limits<double>::infinity();
-        const ObjectTag objectName;
+        Vec3D pointOfIntersection;
+        Vec3D normal;
+        double distanceToObject = std::numeric_limits<double>::infinity();
+        ObjectTag objectName{};
         std::shared_ptr<Object> obj = nullptr;
-        const bool intersected = false;
-        const double k = 0;
-        const Color color = Consts::BLACK;
-        const Triangle triangle{};
+        bool intersected = false;
+        double k = 0;
+        Color color = Consts::BLACK;
+        Triangle triangle{};
     };
 private:
     bool checkIfAttached(Object *obj);
@@ -66,6 +65,8 @@ private:
     Vec3D _angle{0, 0, 0};
     Vec3D _angleLeftUpLookAt{0, 0, 0};
 
+
+    // TODO: maybe here we it is better to use weak_ptr..
     std::map<ObjectTag, std::shared_ptr<Object>> _attachedObjects;
 
 public:
@@ -123,7 +124,7 @@ public:
      */
     [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(model()); }
 
-    virtual ~Object();
+    ~Object();
 };
 
 #endif //MINECRAFT_3DZAVR_OBJECT_H

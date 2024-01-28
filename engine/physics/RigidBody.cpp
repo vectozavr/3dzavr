@@ -11,7 +11,7 @@
 #include <Consts.h>
 
 RigidBody::RigidBody(const ObjectTag& tag,
-                     const FileName &meshFile,
+                     const FilePath &meshFile,
                      const Vec3D &scale,
                      bool useSimpleBox) : Mesh(tag),
                      _hitBox(*this, useSimpleBox) {

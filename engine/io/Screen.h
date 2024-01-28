@@ -10,7 +10,6 @@
 #include <map>
 
 #include "SDL.h"
-//#include "SDL_ttf.h"
 
 #include "objects/geometry/Triangle.h"
 #include <utils/Time.h>
@@ -57,7 +56,7 @@ public:
     void drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
                              const Color &color, uint16_t thickness = 1, const Color &strokeColor = Consts::BLACK);
 
-    void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t fontsize = 12, const Color& color = Consts::BLACK);
+    void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize = 12, const Color& color = Consts::BLACK);
 
     void drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img);
 
@@ -76,6 +75,8 @@ public:
     void stopRender();
 
     void clearDepthBuffer();
+
+    ~Screen();
 };
 
 

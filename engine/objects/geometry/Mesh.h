@@ -46,7 +46,7 @@ public:
 
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const override;
 
-    ~Mesh() override;
+    ~Mesh();
 
     Mesh static Surface(const ObjectTag &tag, double width, double height, std::shared_ptr<Material> material = nullptr);
     Mesh static Cube(const ObjectTag &tag, double size = 1.0);

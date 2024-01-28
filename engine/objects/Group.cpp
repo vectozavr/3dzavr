@@ -30,7 +30,7 @@ Group::Group(const ObjectTag& tag, const Group& group) : Object(tag, group) {
     copyObjectsFromGroup(group);
 }
 
-Group::Group(const ObjectTag& tag, const FileName &mesh_file, const Vec3D &scale) : Object(tag) {
+Group::Group(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale) : Object(tag) {
     auto objects = ResourceManager::loadObject(tag, mesh_file);
     copyObjectsFromGroup(*objects);
 }
@@ -46,7 +46,7 @@ void Group::add(std::shared_ptr<Group> group) {
     Log::log("Group::add(): inserted group '" + group->name().str() + "'");
 }
 
-void Group::add(const ObjectTag& tag, const FileName &mesh_file, const Vec3D &scale) {
+void Group::add(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale) {
     auto objects = ResourceManager::loadObject(tag, mesh_file);
     objects->scale(scale);
     add(objects);
@@ -137,4 +137,8 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
     }
 
     return *minIntersection;
+}
+
+Group::~Group() {
+    _objects.clear();
 }

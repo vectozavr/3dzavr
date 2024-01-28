@@ -18,7 +18,7 @@ Image::Image(uint16_t width, uint16_t height) : _width(width), _height(height), 
     }
 }
 
-Image::CODE Image::save2png(const FileName &file_name, uint16_t bit_depth) {
+Image::CODE Image::save2png(const FilePath &file_name, uint16_t bit_depth) {
     if(!isValid()) {
         return ERROR;
     }
@@ -77,7 +77,7 @@ Color Image::get_pixel(uint16_t x, uint16_t y) const {
                  _row_pointers[y][4*x + 3]);
 }
 
-Image::Image(const FileName &filename) {
+Image::Image(const FilePath &filename) {
 
     FILE *fp = fopen(filename.str().c_str(), "rb");
 
@@ -178,8 +178,10 @@ Image::~Image() {
     // deallocate memory
     if(_row_pointers != nullptr) {
         for(int y = 0; y < _height; y++) {
-            free(_row_pointers[y]);
-            _row_pointers[y] = nullptr;
+            if(_row_pointers[y]) {
+                free(_row_pointers[y]);
+                _row_pointers[y] = nullptr;
+            }
         }
         free(_row_pointers);
         _row_pointers = nullptr;

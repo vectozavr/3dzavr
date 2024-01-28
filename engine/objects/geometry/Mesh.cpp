@@ -155,7 +155,7 @@ void Mesh::setTriangles(std::vector<Triangle>&& t) {
 }
 
 Mesh::~Mesh() {
-
+    _tris.clear();
 }
 
 Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &to) const {

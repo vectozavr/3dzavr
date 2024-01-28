@@ -106,3 +106,7 @@ void Camera::setup(int width, int height, double fov, double ZNear, double ZFar)
     _ready = true;
     Log::log("Camera::init(): camera successfully initialized.");
 }
+
+Camera::~Camera() {
+    _clipPlanes.clear();
+}

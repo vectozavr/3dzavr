@@ -16,7 +16,6 @@
 
 class World final {
 private:
-    std::map<ObjectTag, std::shared_ptr<DirectionalLight>> _lightSources;
     std::map<ObjectTag, std::shared_ptr<Group>> _groups;
     ObjectTag _sceneName = ObjectTag("default_scene_group");
 
@@ -33,7 +32,7 @@ public:
     bool remove(const ObjectTag &tag);
 
     std::shared_ptr<Group> loadObject(const ObjectTag &tag,
-                                      const FileName &meshFile,
+                                      const FilePath &meshFile,
                                       const Vec3D &scale = Vec3D{1, 1, 1});
 
     // std::vector<ObjectTag> skipTags is a vector of all objects we want to skip in ray casting
@@ -41,6 +40,8 @@ public:
 
     std::map<ObjectTag, std::shared_ptr<Group>>::iterator begin() { return _groups.begin(); }
     std::map<ObjectTag, std::shared_ptr<Group>>::iterator end() { return _groups.end(); }
+
+    ~World();
 };
 
 

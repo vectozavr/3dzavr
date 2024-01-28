@@ -7,8 +7,9 @@
 
 #include <filesystem>
 
-#include "objects/props/Color.h"
+#include <objects/props/Color.h>
 #include <linalg/Vec2D.h>
+#include <utils/FilePath.h>
 
 namespace Consts {
     const uint16_t STANDARD_SCREEN_WIDTH = 640;
@@ -47,6 +48,9 @@ namespace Consts {
 
     const Color WHITE = Color(255, 255, 255);
     const Color BLACK = Color(0, 0, 0);
+
+    // resources
+    const FilePath DEFAULT_FONT_FILENAME = FilePath("engine/resources/fonts/Roboto/Roboto-Light.ttf");
 }
 
 #endif //SHOOTER_CONSTS_H

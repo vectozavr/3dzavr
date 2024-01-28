@@ -43,7 +43,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
                 case SDL_QUIT:
                     screen->close();
                     exit();
-                    break;
+                    return;
                 case SDL_KEYDOWN:
                     Keyboard::sendKeyboardEvent(e);
                     break;
@@ -142,12 +142,12 @@ void Engine::printDebugInfo() const {
                            std::to_string(Time::fps()) + " fps";
 
 
-        screen->drawText("fps: " + std::to_string(Time::fps()), 10, 10, 25, 10);
-        screen->drawText("X: " + std::to_string((camera->position().x())), 10, 20, 50, 10);
-        screen->drawText("Y: " + std::to_string((camera->position().y())), 10, 30, 50, 10);
-        screen->drawText("Z: " + std::to_string((camera->position().z())), 10, 40, 50, 10);
-        screen->drawText("RY: " +std::to_string(camera->angle().y()), 10, 50, 50, 10);
-        screen->drawText("RL: " +std::to_string(camera->angleLeftUpLookAt().x()), 10, 60, 50, 10);
+        screen->drawText("fps: " + std::to_string(Time::fps()), 10, 10);
+        screen->drawText("X: " + std::to_string((camera->position().x())), 10, 30);
+        screen->drawText("Y: " + std::to_string((camera->position().y())), 10, 50);
+        screen->drawText("Z: " + std::to_string((camera->position().z())), 10, 70);
+        screen->drawText("RY: " +std::to_string(camera->angle().y()), 10, 90);
+        screen->drawText("RL: " +std::to_string(camera->angleLeftUpLookAt().x()), 10, 110);
 
         // timers:
         int timerWidth = screen->width()*2/3;
@@ -175,7 +175,7 @@ void Engine::printDebugInfo() const {
             screen->drawText(
                     timerName.substr(2, timerName.size()) + " (" +
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
-                    10, yPos + (1.5*height)*i, screen->width()/4 - 20, height, 12, Color(0, 0, 0, 150));
+                    10, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
 
             i++;
             timeSum += timer.elapsedSeconds();
@@ -186,7 +186,7 @@ void Engine::printDebugInfo() const {
                              Color( {(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
 
         screen->drawText("all other stuff (" + std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
-                         10, yPos + (1.5*height)*i, screen->width()/4 - 20, height, 12, Color(0, 0, 0, 150));
+                         10, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
 
     }
 }

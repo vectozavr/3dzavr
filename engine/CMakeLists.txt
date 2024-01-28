@@ -69,8 +69,10 @@ add_library(
         utils/EventHandler.cpp
         utils/ResourceManager.h
         utils/ResourceManager.cpp
-        utils/FileName.h
-        utils/FileName.cpp
+        utils/FilePath.h
+        utils/FilePath.cpp
+        utils/Font.h
+        utils/Font.cpp
         utils/ObjectController.h
         utils/ObjectController.cpp
 

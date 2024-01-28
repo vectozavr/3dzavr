@@ -11,7 +11,10 @@
 Keyboard *Keyboard::_instance = nullptr;
 
 void Keyboard::init() {
-    delete _instance;
+    if(_instance) {
+        Keyboard::free();
+    }
+
     _instance = new Keyboard();
 
     Log::log("Keyboard::init(): keyboard was initialized");
@@ -58,8 +61,13 @@ void Keyboard::sendKeyboardEvent(const SDL_Event &event) {
 }
 
 void Keyboard::free() {
-    delete _instance;
-    _instance = nullptr;
+    if(_instance) {
+        _instance->_keys.clear();
+        _instance->_tappedKeys.clear();
+        delete _instance;
+
+        _instance = nullptr;
+    }
 
     Log::log("Keyboard::free(): keyboard was freed");
 }

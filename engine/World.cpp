@@ -67,7 +67,7 @@ bool World::remove(const ObjectTag &tag) {
 }
 
 std::shared_ptr<Group> World::loadObject(const ObjectTag &tag,
-                                        const FileName &meshFile,
+                                        const FilePath &meshFile,
                                         const Vec3D &scale) {
     auto obj = ResourceManager::loadObject(tag, meshFile);
     obj->scale(scale);
@@ -152,4 +152,8 @@ void World::checkCollision(const ObjectTag &tag) {
 
         }
     }
+}
+
+World::~World() {
+    _groups.clear();
 }

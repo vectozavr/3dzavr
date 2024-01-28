@@ -14,18 +14,23 @@ ResourceManager *ResourceManager::_instance = nullptr;
 
 
 void ResourceManager::init() {
-    delete _instance;
+
+    if(_instance) {
+        ResourceManager::free();
+    }
+
     _instance = new ResourceManager();
 
     Log::log("ResourceManager::init(): resource manager was initialized");
 }
 
-std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(const FileName &mtl_file) {
+std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(const FilePath &mtlFile) {
+
     std::map<MaterialTag, std::shared_ptr<Material>> materials;
 
-    std::ifstream file(mtl_file.str());
+    std::ifstream file(mtlFile.str());
     if (!file.is_open()) {
-        Log::log("ResourceManager::loadMaterials(): cannot open '" + mtl_file.str() + "'");
+        Log::log("ResourceManager::loadMaterials(): cannot open '" + mtlFile.str() + "'");
         return materials;
     }
 
@@ -91,7 +96,7 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
         if (type == "map_kd") {
             std::string textureFileName;
             lineStream >> textureFileName;
-            texture = std::make_shared<Texture>(FileName(mtl_file.parent_path(), textureFileName));
+            texture = std::make_shared<Texture>(FilePath(mtlFile.parentPath(), textureFileName));
         }
 
         // Add a new material into the array of materials
@@ -114,14 +119,14 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
     return materials;
 }
 
-std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const FileName &objFile) {
+std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const FilePath &objFile) {
+
+    if (_instance == nullptr) {
+        return nullptr;
+    }
 
     std::shared_ptr<Group> objects = std::make_shared<Group>(tag);
     std::map<MaterialTag, std::shared_ptr<Material>> materials;
-
-    if (_instance == nullptr) {
-        return objects;
-    }
 
     // If objects is already loaded - return pointer to it
     auto it = _instance->_objects.find(objFile);
@@ -210,7 +215,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
 
             if(!mtlFileName.empty()) {
                 materials = ResourceManager::loadMaterials(
-                        FileName(objFile.parent_path(), mtlFileName));
+                        FilePath(objFile.parentPath(), mtlFileName));
             }
         }
 
@@ -246,6 +251,22 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     return objects;
 }
 
+std::shared_ptr<Font> ResourceManager::loadFont(const FilePath &fontFile) {
+
+    if (_instance == nullptr) {
+        return nullptr;
+    }
+
+    if(_instance->_fonts.contains(fontFile) && _instance->_fonts[fontFile]) {
+        return _instance->_fonts[fontFile];
+    }
+
+    std::shared_ptr<Font> font = std::make_shared<Font>(FontTag(fontFile.fileName()), fontFile);
+    _instance->_fonts.insert({fontFile, font});
+
+    return font;
+}
+
 void ResourceManager::unloadObjects() {
     if (_instance == nullptr) {
         return;
@@ -254,20 +275,39 @@ void ResourceManager::unloadObjects() {
     int objCounter = _instance->_objects.size();
     _instance->_objects.clear();
 
-    Log::log("ResourceManager::unloadObjects(): all " + std::to_string(objCounter) + " objects was unloaded");
+    Log::log("ResourceManager::unloadObjects(): all " + std::to_string(objCounter) + " objects were unloaded");
 }
 
-void ResourceManager::unloadAllResources() {
-    unloadObjects();
+void ResourceManager::unloadFonts() {
+    if (_instance == nullptr) {
+        return;
+    }
 
-    Log::log("ResourceManager::unloadAllResources(): all resources was unloaded");
+    int fontsCounter = _instance->_fonts.size();
+    _instance->_fonts.clear();
+
+    Log::log("ResourceManager::unloadFonts(): all " + std::to_string(fontsCounter) + " fonts were unloaded");
+}
+
+
+void ResourceManager::unloadAllResources() {
+    if (_instance == nullptr) {
+        return;
+    }
+
+    unloadObjects();
+    unloadFonts();
+
+    Log::log("ResourceManager::unloadAllResources(): all resources were unloaded");
 }
 
 void ResourceManager::free() {
-    unloadAllResources();
+    if(_instance) {
+        unloadAllResources();
 
-    delete _instance;
-    _instance = nullptr;
+        delete _instance;
+        _instance = nullptr;
+    }
 
     Log::log("ResourceManager::free(): pointer to 'ResourceManager' was freed");
 }

@@ -7,7 +7,7 @@
 
 #include "Texture.h"
 
-Texture::Texture(const FileName &filename) {
+Texture::Texture(const FilePath &filename) {
     auto texture = std::make_shared<Image>(filename);
     _texture.emplace_back(texture);
 

@@ -26,6 +26,8 @@ public:
     [[nodiscard]] std::vector<Vec3D>::iterator begin() { return _hitBox.begin(); }
 
     [[nodiscard]] std::vector<Vec3D>::iterator end() { return _hitBox.end(); }
+
+    ~HitBox();
 };
 
 

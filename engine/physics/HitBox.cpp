@@ -85,3 +85,7 @@ void HitBox::generateDetailed(const Mesh &mesh) {
         _hitBox.push_back(it);
     _hitBox.shrink_to_fit();
 }
+
+HitBox::~HitBox() {
+    _hitBox.clear();
+}

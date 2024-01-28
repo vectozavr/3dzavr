@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <io/Image.h>
-#include <utils/FileName.h>
+#include <utils/FilePath.h>
 
 class Texture {
 private:
@@ -17,7 +17,7 @@ private:
     std::vector<std::shared_ptr<Image>> _texture;
 
 public:
-    explicit Texture(const FileName& filename);
+    explicit Texture(const FilePath& filename);
 
     [[nodiscard]] Color get_pixel(uint16_t x, uint16_t y) const;
     [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv) const;
