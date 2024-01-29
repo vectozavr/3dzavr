@@ -12,7 +12,7 @@
 
 class Camera final : public Object {
 private:
-    std::vector<Plane> _clipPlanes{};
+    std::vector<std::shared_ptr<Plane>> _clipPlanes{};
     bool _ready = false;
     double _aspect = 0;
 

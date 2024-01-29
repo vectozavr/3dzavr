@@ -22,8 +22,8 @@ std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> Cam
     }
 
     // Model transform matrix: translate _tris in the origin of body.
-    Matrix4x4 M = mesh->model();
-    Matrix4x4 V = invModel();
+    Matrix4x4 M = mesh->fullModel();
+    Matrix4x4 V = fullInvModel();
 
     // We don't want to waste time re-allocating memory every time
     std::vector<Triangle> clippedTriangles, tempBuffer;
@@ -49,7 +49,7 @@ std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> Cam
         clippedTriangles.emplace_back(VMTriangle);
         for (auto &plane : _clipPlanes) {
             while (!clippedTriangles.empty()) {
-                std::vector<Triangle> clipResult = plane.clip(clippedTriangles.back());
+                std::vector<Triangle> clipResult = plane->clip(clippedTriangles.back());
                 clippedTriangles.pop_back();
                 for (auto &i : clipResult) {
                     tempBuffer.emplace_back(i);
@@ -93,15 +93,15 @@ void Camera::setup(int width, int height, double fov, double ZNear, double ZFar)
 
     // This is planes for clipping _tris.
     // Motivation: we are not interested in _tris that we cannot see.
-    _clipPlanes.emplace_back(Vec3D{0, 0, 1}, Vec3D{0, 0, ZNear}, ObjectTag("near")); // near plane
-    _clipPlanes.emplace_back(Vec3D{0, 0, -1}, Vec3D{0, 0, ZFar}, ObjectTag("far")); // far plane
+    _clipPlanes.emplace_back(std::make_shared<Plane>(Vec3D{0, 0, 1}, Vec3D{0, 0, ZNear}, ObjectTag("near"))); // near plane
+    _clipPlanes.emplace_back(std::make_shared<Plane>(Vec3D{0, 0, -1}, Vec3D{0, 0, ZFar}, ObjectTag("far"))); // far plane
 
     double thetta1 = Consts::PI * fov * 0.5 / 180.0;
     double thetta2 = atan(_aspect * tan(thetta1));
-    _clipPlanes.emplace_back(Vec3D{-cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectTag("left")); // left plane
-    _clipPlanes.emplace_back(Vec3D{cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectTag("right")); // right plane
-    _clipPlanes.emplace_back(Vec3D{0, cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectTag("down")); // down plane
-    _clipPlanes.emplace_back(Vec3D{0, -cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectTag("up")); // up plane
+    _clipPlanes.emplace_back(std::make_shared<Plane>(Vec3D{-cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectTag("left"))); // left plane
+    _clipPlanes.emplace_back(std::make_shared<Plane>(Vec3D{cos(thetta2), 0, sin(thetta2)}, Vec3D{0, 0, 0}, ObjectTag("right"))); // right plane
+    _clipPlanes.emplace_back(std::make_shared<Plane>(Vec3D{0, cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectTag("down"))); // down plane
+    _clipPlanes.emplace_back(std::make_shared<Plane>(Vec3D{0, -cos(thetta1), sin(thetta1)}, Vec3D{0, 0, 0}, ObjectTag("up"))); // up plane
 
     _ready = true;
     Log::log("Camera::init(): camera successfully initialized.");

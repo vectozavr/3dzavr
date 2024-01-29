@@ -10,14 +10,14 @@ Sphere::Sphere(double radius, const Vec3D &position, const ObjectTag& nameTag, c
     translateToPoint(position);
 }
 
-Object::IntersectionInformation Sphere::intersect(const Vec3D &from, const Vec3D &to) const {
+Object::IntersectionInformation Sphere::intersect(const Vec3D &from, const Vec3D &to) {
     double k = std::numeric_limits<double>::infinity();
     Vec3D norm{};
 
-    Matrix4x4 toModelMatrix = invModel();
+    Matrix4x4 toModelMatrix = fullInvModel();
 
-    Vec3D from_M = toModelMatrix*(from-position());
-    Vec3D to_M = toModelMatrix*(to-position());
+    Vec3D from_M = Vec3D(toModelMatrix*from.makePoint4D());
+    Vec3D to_M = Vec3D(toModelMatrix*to.makePoint4D());
 
     // This should be done in the coordinate system of the object
     Vec3D d = to_M-from_M;
@@ -32,17 +32,17 @@ Object::IntersectionInformation Sphere::intersect(const Vec3D &from, const Vec3D
 
     Vec3D point_M = from_M + d*k;
 
-    Matrix4x4 fromModelMatrix = model();
+    Matrix4x4 fromModelMatrix = fullModel();
 
-    Vec3D point = fromModelMatrix*point_M + position();
+    Vec3D point = Vec3D(fromModelMatrix*point_M.makePoint4D());
     double distance = (point - from).abs();
-    norm = (fromModelMatrix*norm).normalized();
+    norm = Vec3D(fromModelMatrix*norm.makePoint4D()).normalized();
 
     IntersectionInformation res = Object::IntersectionInformation{point,
                                            norm,
                                            distance,
                                            name(),
-                                           std::make_shared<Object>(*this),
+                                           shared_from_this(),
                                            (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity()),
                                            k,
                                            _color};

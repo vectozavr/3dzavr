@@ -26,7 +26,7 @@ Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
 
     double maxDistance = -std::numeric_limits<double>::max();
 
-    Vec3D transformedDirection = (invModel() * direction).normalized();
+    Vec3D transformedDirection = Vec3D(fullInvModel() * direction.makePoint4D()).normalized();
 
     for(auto & it : _hitBox) {
         double distance = it.dot(transformedDirection);
@@ -37,7 +37,7 @@ Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
         }
     }
 
-    return model() * maxPoint + position();
+    return Vec3D(fullModel() * maxPoint.makePoint4D());
 }
 
 Vec3D RigidBody::_support(std::shared_ptr<RigidBody> obj, const Vec3D &direction) {

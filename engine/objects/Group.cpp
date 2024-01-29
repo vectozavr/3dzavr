@@ -92,7 +92,7 @@ std::shared_ptr<Object> Group::object(const ObjectTag &tag) {
     return nullptr;
 }
 
-Object::IntersectionInformation Group::intersect(const Vec3D &from, const Vec3D &to) const {
+Object::IntersectionInformation Group::intersect(const Vec3D &from, const Vec3D &to) {
     std::unique_ptr<IntersectionInformation> minIntersection;
 
     for(auto& obj: _objects) {
@@ -127,8 +127,11 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
             intersection = std::make_shared<IntersectionInformation>(grObj->rayCast(from, to, skipTags));
         } else {
             // We work with the object (e.g. Mesh)
-            intersection = std::make_shared<IntersectionInformation>(obj.second->intersect(from, to));
-            intersection->obj = obj.second;
+
+            std::shared_ptr<Mesh> meshObj = std::dynamic_pointer_cast<Mesh>(obj.second);
+            if(meshObj) {
+                intersection = std::make_shared<IntersectionInformation>(meshObj->intersect(from, to));
+            }
         }
 
         if(intersection->distanceToObject < minIntersection->distanceToObject) {

@@ -28,7 +28,7 @@ public:
 
     [[nodiscard]] double distance(const Vec3D &point4D) const;
 
-    [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const override;
+    [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
 
     [[nodiscard]] std::vector<Triangle> clip(const Triangle &tri) const;
 

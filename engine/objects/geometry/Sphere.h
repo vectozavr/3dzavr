@@ -16,7 +16,7 @@ private:
 public:
     Sphere(double radius, const Vec3D& position, const ObjectTag& nameTag, const Color& color = Consts::WHITE_COLORS[0]);
 
-    [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const override;
+    [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
 };
 
 

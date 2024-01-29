@@ -44,7 +44,7 @@ public:
 
     [[nodiscard]] bool isVisible() const { return _visible; }
 
-    [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const override;
+    [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
 
     ~Mesh();
 

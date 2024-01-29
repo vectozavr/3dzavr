@@ -14,7 +14,6 @@ class Engine {
 private:
     std::string _name;
 
-    int _triPerSec = 0;
     bool _updateWorld = true;
     bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;
 

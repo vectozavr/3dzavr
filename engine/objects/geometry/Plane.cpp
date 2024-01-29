@@ -42,8 +42,8 @@ std::vector<Triangle> Plane::clip(const Triangle &tri) const {
     }
 
     if (insidePoints.size() == 1) {
-        auto intersect1 = intersect(insidePoints[0], outsidePoints[0]);
-        auto intersect2 = intersect(insidePoints[0], outsidePoints[1]);
+        auto intersect1 = const_cast<Plane*>(this)->intersect(insidePoints[0], outsidePoints[0]);
+        auto intersect2 = const_cast<Plane*>(this)->intersect(insidePoints[0], outsidePoints[1]);
 
         Vec3D textCoord1 = insideTexUV[0] + (outsideTexUV[0] - insideTexUV[0])*intersect1.k;
         Vec3D textCoord2 = insideTexUV[0] + (outsideTexUV[1] - insideTexUV[0])*intersect2.k;
@@ -57,8 +57,8 @@ std::vector<Triangle> Plane::clip(const Triangle &tri) const {
     }
 
     if (insidePoints.size() == 2) {
-        auto intersect1 = intersect(insidePoints[0], outsidePoints[0]);
-        auto intersect2 = intersect(insidePoints[1], outsidePoints[0]);
+        auto intersect1 = const_cast<Plane*>(this)->intersect(insidePoints[0], outsidePoints[0]);
+        auto intersect2 = const_cast<Plane*>(this)->intersect(insidePoints[1], outsidePoints[0]);
 
         Vec3D textCoord1 = insideTexUV[0] + (outsideTexUV[0] - insideTexUV[0])*intersect1.k;
         Vec3D textCoord2 = insideTexUV[1] + (outsideTexUV[0] - insideTexUV[1])*intersect2.k;
@@ -84,7 +84,7 @@ std::vector<Triangle> Plane::clip(const Triangle &tri) const {
     return result;
 }
 
-Object::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D &to) const {
+Object::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D &to) {
     double s_dot_n = from.dot(_normal);
     double k = std::numeric_limits<double>::infinity();
 
@@ -100,7 +100,7 @@ Object::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D 
                                            _normal,
                                            distance,
                                            name(),
-                                           std::make_shared<Object>(*this),
+                                           shared_from_this(),
                                            (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity()),
                                            k,
                                            _color};

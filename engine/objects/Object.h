@@ -36,7 +36,7 @@ public:
 };
 
 
-class Object {
+class Object : public std::enable_shared_from_this<Object> {
 public:
     // TODO: maybe this structure should not be there
     struct IntersectionInformation final {
@@ -65,9 +65,11 @@ private:
     Vec3D _angle{0, 0, 0};
     Vec3D _angleLeftUpLookAt{0, 0, 0};
 
+    // This is all attached objects
+    std::map<ObjectTag, std::weak_ptr<Object>> _attachedObjects;
 
-    // TODO: maybe here we it is better to use weak_ptr..
-    std::map<ObjectTag, std::shared_ptr<Object>> _attachedObjects;
+    // This is the object we are attached to
+    std::weak_ptr<Object> _attachedTo;
 
 public:
     explicit Object(const ObjectTag& tag) : _tag(tag) {};
@@ -100,7 +102,7 @@ public:
     void rotateLookAt(double rlAt);
 
     // This function depends on Object_Type: each Object should define how does the intersection work.
-    [[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const;
+    [[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to);
 
     [[nodiscard]] Vec3D left() const { return _transformMatrix.x().normalized(); }
     [[nodiscard]] Vec3D up() const { return _transformMatrix.y().normalized(); }
@@ -115,14 +117,22 @@ public:
 
     [[nodiscard]] ObjectTag name() const { return _tag; }
 
-    [[nodiscard]] Matrix4x4 model() const { return _transformMatrix; }
+    // model() returns the transform matrix of this object
+    [[nodiscard]] Matrix4x4 model() const;
     /*
-     * invModel() is a fast method to calculate the inverse.
+     * fullModel() returns the chain of transform matrices:
+     * _attachedTo full transform matrix * (current transform matrix)
+     */
+    [[nodiscard]] Matrix4x4 fullModel() const;
+
+    /*
+     * invModel() and fullInvModel() are fast methods to calculate the inverse.
      * When columns of the model() matrix are perpendicular to each other
      * invModel() will return the result of fast inverse.
      * Otherwise, it will calculate the full inverse (computationally less efficient).
      */
     [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(model()); }
+    [[nodiscard]] Matrix4x4 fullInvModel() const { return Matrix4x4::View(fullModel()); }
 
     ~Object();
 };

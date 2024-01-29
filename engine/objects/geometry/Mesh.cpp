@@ -158,7 +158,7 @@ Mesh::~Mesh() {
     _tris.clear();
 }
 
-Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &to) const {
+Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &to) {
 
     bool intersected = false;
     Vec3D point{};
@@ -167,16 +167,16 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
     Color color;
     Triangle triangle;
 
-    Matrix4x4 model = this->model();
+    Matrix4x4 model = this->fullModel();
     // It is computationally more efficient not to transform all object's triangles from model to global
     // coordinate system, but translate 'from' and 'to' vectors inside once and check triangles without performing
     // many matrix multiplication.
-    Matrix4x4 invModel = this->invModel();
+    Matrix4x4 invModel = this->fullInvModel();
 
     Vec3D v = (to - from).normalized();
-    Vec3D v_model = invModel*v;
-    Vec3D from_model = invModel*(from - position());
-    Vec3D to_model = invModel*(to - position());
+    Vec3D v_model = Vec3D(invModel*v.makePoint4D());
+    Vec3D from_model = Vec3D(invModel*from.makePoint4D());
+    Vec3D to_model = Vec3D(invModel*to.makePoint4D());
 
 
     for (auto &tri : triangles()) {
@@ -185,7 +185,8 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             continue;
         }
 
-        auto intersection = Plane(tri, ObjectTag("")).intersect(from_model, to_model);
+        auto trianglePlane = std::make_shared<Plane>(tri, ObjectTag(""));
+        auto intersection = trianglePlane->intersect(from_model, to_model);
 
         if (intersection.distanceToObject > 0 && tri.isPointInside(intersection.pointOfIntersection)) {
 
@@ -193,8 +194,8 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             // Due-to this effect if you scale some object in x times you will get distance in x times smaller.
             // That's why we need to perform distance calculation in the global coordinate system where metric
             // is the same for all objects.
-            Triangle globalTriangle = tri*model;
-            auto globalIntersection = Plane(globalTriangle, ObjectTag("")).intersect(from, to);
+            trianglePlane = std::make_shared<Plane>(tri*model, ObjectTag(""));
+            auto globalIntersection = trianglePlane->intersect(from, to);
             double globalDistance = (globalIntersection.pointOfIntersection - from).abs();
 
             if(globalDistance < minDistance) {
@@ -207,16 +208,15 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
         }
     }
 
-    double kx = (point - from).x()/(to-from).x();
-    double ky = (point - from).y()/(to-from).y();
+    double k = (point - from).abs()/(to-from).abs();
 
     return IntersectionInformation{point,
                                    norm,
                                    minDistance,
                                    name(),
-                                   nullptr,
+                                   shared_from_this(),
                                    intersected,
-                                   kx,
+                                   k,
                                    Color{},
                                    triangle};
 }

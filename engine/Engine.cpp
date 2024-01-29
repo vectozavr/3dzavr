@@ -64,9 +64,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
 
         Time::update();
 
-        Time::startTimer("d game update");
-        update();
-        Time::stopTimer("d game update");
+
 
         if(_updateWorld) {
             Time::startTimer("d animations");
@@ -107,6 +105,11 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
         screen->clearDepthBuffer();
         Time::stopTimer("d depthBuffer");
         Time::stopTimer("d all");
+
+
+        Time::startTimer("d game update");
+        update();
+        Time::stopTimer("d game update");
 
         printDebugInfo();
         screen->display();

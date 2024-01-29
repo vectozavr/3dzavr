@@ -16,41 +16,19 @@ bool ObjectTag::contains(const std::string& str) const {
 
 void Object::transform(const Matrix4x4 &t) {
     _transformMatrix = t * _transformMatrix;
-
-    for (auto &[attachedName, attachedObject] : _attachedObjects) {
-        // TODO: maybe it is better not to modify model matrices of _attachedObjects, but apply invModel
-        // of the parents during projection stage..
-        attachedObject->transformRelativePoint(position(), t);
-    }
 }
 
 void Object::transformRelativePoint(const Vec3D &point, const Matrix4x4 &transform) {
-
     // translate object in the new coordinate system (connected with point)
     _transformMatrix = Matrix4x4::Translation( -point) * _transformMatrix;
     // transform object in the new coordinate system
     _transformMatrix = transform * _transformMatrix;
     // translate object back in self connected coordinate system
     _transformMatrix = Matrix4x4::Translation(point) * _transformMatrix;
-
-    for (auto &[attachedName, attachedObject] : _attachedObjects) {
-        attachedObject->transformRelativePoint(point, transform);
-    }
 }
 
 void Object::translate(const Vec3D &dv) {
-
     transform(Matrix4x4::Translation(dv));
-
-    /*
-    _position = _position + dv;
-
-    for (auto &[attachedName, attachedObject] : _attachedObjects) {
-        if (!attachedObject.expired()) {
-            attachedObject.lock()->translate(dv);
-        }
-    }
-     */
 }
 
 void Object::scale(const Vec3D &s) {
@@ -59,7 +37,7 @@ void Object::scale(const Vec3D &s) {
 
 void Object::scaleInside(const Vec3D &s) {
     // Scale relative to the internal coordinate system
-    transform(model()*Matrix4x4::Scale(s)*invModel());
+    transform(_transformMatrix*Matrix4x4::Scale(s)*Matrix4x4::View(_transformMatrix));
 }
 
 void Object::rotate(const Vec3D &r) {
@@ -124,12 +102,12 @@ std::shared_ptr<Object> Object::attached(const ObjectTag &tag) {
     if (_attachedObjects.count(tag) == 0) {
         return nullptr;
     }
-    return _attachedObjects[tag];
+    return _attachedObjects[tag].lock();
 }
 
 bool Object::checkIfAttached(Object *obj) {
     for (const auto&[nameTag, attachedObject] : _attachedObjects) {
-        if (obj->name() == attachedObject->name() || attachedObject->checkIfAttached(obj)) {
+        if (!attachedObject.expired() && obj->name() == attachedObject.lock()->name() || attachedObject.lock()->checkIfAttached(obj)) {
             return true;
         }
     }
@@ -138,29 +116,65 @@ bool Object::checkIfAttached(Object *obj) {
 
 void Object::attach(std::shared_ptr<Object> object) {
     if (this != object.get()) {
-        if (!object->checkIfAttached(this)) {
-            _attachedObjects.emplace(object->name(), object);
+        if(object->_attachedTo.expired()) {
+            if (!object->checkIfAttached(this)) {
+                _attachedObjects.emplace(object->name(), object);
+                object->_attachedTo = weak_from_this();
+            } else {
+                throw std::invalid_argument{"Object::attach(): You created recursive attachment"};
+            }
         } else {
-            throw std::invalid_argument{"Object::attach: You tried to create infinite recursive call chains"};
+            throw std::invalid_argument{"Object::attach(): You cannot attach the object to two different objects"};
         }
     } else {
-        throw std::invalid_argument{"Object::attach: You cannot attach object to itself"};
+        throw std::invalid_argument{"Object::attach(): You cannot attach object to itself"};
     }
 }
 
 void Object::unattach(const ObjectTag &tag) {
+    if(_attachedObjects.contains(tag) && !_attachedObjects[tag].expired()) {
+        _attachedObjects[tag].lock()->_attachedTo.reset();
+    }
     _attachedObjects.erase(tag);
 }
 
-Object::IntersectionInformation Object::intersect(const Vec3D &from, const Vec3D &to) const {
+Matrix4x4 Object::model() const {
+    return _transformMatrix;
+}
+
+Matrix4x4 Object::fullModel() const {
+    if(_attachedTo.expired()) {
+        return model();
+    }
+
+    return _attachedTo.lock()->fullModel()*model();
+}
+
+Object::IntersectionInformation Object::intersect(const Vec3D &from, const Vec3D &to) {
     return IntersectionInformation{Vec3D(),
                                    Vec3D(),
                                    std::numeric_limits<double>::infinity(),
                                    ObjectTag(""),
-                                   std::make_shared<Object>(ObjectTag("")),
+                                   nullptr,
                                    false};
 }
 
 Object::~Object() {
+    if(!_attachedTo.expired()) {
+        _attachedTo.lock()->unattach(_tag);
+        _attachedTo.reset();
+    }
+
+    /*
+     * Here we unattach all objects (we cannot use unattach because it removes the object from the array)
+     * To do this we use iterator to go through all objects.
+     */
+    auto it = _attachedObjects.begin();
+    while (it != _attachedObjects.end()) {
+        if(!it->second.expired()) {
+            it->second.lock()->_attachedTo.reset();
+        }
+        it = _attachedObjects.erase(it);
+    }
     _attachedObjects.clear();
 }

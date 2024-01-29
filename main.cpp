@@ -3,14 +3,12 @@
 //
 
 #include <iostream>
-#include <cmath>
 
 #include <Engine.h>
 #include <io/Screen.h>
 #include "objects/geometry/Sphere.h"
 #include <utils/ObjectController.h>
 
-#include <animation/Animations.h>
 
 #include "objects/props/Texture.h"
 
@@ -28,34 +26,24 @@ private:
 
         obj = world->loadObject(ObjectTag("car1"), FilePath("resources/obj/car/Car.obj"));
         obj->translate(Vec3D(0, -3, 10));
-
-        /*
-        auto texture = std::make_shared<Texture>("obj/prototype-textures/png/concrete.png");
-        for(int i = -5; i < 5; i++) {
-            for(int j = -5; j < 5; j++) {
-                auto surface = std::make_shared<Mesh>(Mesh::Surface(
-                        ObjectTag("surface_" + std::to_string(i) + "_" + std::to_string(j)),
-                        10, 10));
-                surface->translate(Vec3D(10*i, -3, 10*j));
-                //world->add(surface);
-            }
-        }
-         */
     };
 
     void update() override {
         screen->setTitle("3dzavr, " + std::to_string(Time::fps()) + "fps");
 
+        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2, Consts::STANDARD_SCREEN_HEIGHT/2, 3, 3, Consts::BLACK);
+
         if(objSelected) {
             objController->update();
         } else {
             obj->rotateRelativePoint(obj->position(), Vec3D{0, 0.5*Time::deltaTime(), 0});
+
             cameraController->update();
         }
 
         // select object:
         if (Keyboard::isKeyTapped(SDLK_o)) {
-            auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt(), {ObjectTag{"plane"}});
+            auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt());
 
             if(rayCast.intersected) {
                 objSelected = true;
@@ -63,13 +51,12 @@ private:
                 objController = std::make_shared<ObjectController>(selectedObject);
                 Log::log("Object " + rayCast.objectName.str() + " selected.");
             }
-
-            std::cout << camera->model();
         }
 
         // deselect object:
         if (Keyboard::isKeyTapped(SDLK_p)) {
             objSelected = false;
+            selectedObject.reset();
         }
 
         // object scale x:
