@@ -37,7 +37,7 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
     // parameters of the material
     std::string matName;
     std::shared_ptr<Texture> texture = nullptr;
-    Vec3D ambient, diffuse, specular;
+    Color ambient, diffuse, specular;
     u_int16_t illum;
     bool readAmbient = false, readDiffuse = false, readSpecular = false, readIllum = false;
 
@@ -78,19 +78,19 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
         if (type == "ka") {
             double r, g, b;
             lineStream >> r >> g >> b;
-            ambient = Vec3D(r, g, b);
+            ambient = Color({r, g, b});
             readAmbient = true;
         }
         if (type == "kd") {
             double r, g, b;
             lineStream >> r >> g >> b;
-            diffuse = Vec3D(r, g, b);
+            diffuse = Color({r, g, b});
             readDiffuse = true;
         }
         if (type == "ks") {
             double r, g, b;
             lineStream >> r >> g >> b;
-            specular = Vec3D(r, g, b);
+            specular = Color({r, g, b});
             readSpecular = true;
         }
         if (type == "map_kd") {

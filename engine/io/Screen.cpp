@@ -201,8 +201,9 @@ void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Material> ma
             Vec3D abg = triangle.abgBarycCoord(Vec2D(x, y));
 
             if(abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0) {
-                Color color;
-                if(material) {
+                Color color = material ? material->ambient() : Consts::RED;
+
+                if(material && material->texture()) {
                     auto texture = material->texture();
 
                     Vec3D uv_hom = tc[0] + (tc[1] - tc[0])*abg.y() + (tc[2] - tc[0])*abg.z();

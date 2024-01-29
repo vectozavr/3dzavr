@@ -35,23 +35,22 @@ private:
     // std::shared_ptr<Texture> _diffusionMap = nullptr;
     // ...
 
-    // TODO: maybe these vectors should be of type Color
-    Vec3D _ambient, _diffuse, _specular;
+    Color _ambient, _diffuse, _specular;
     u_int16_t _illum;
 
 public:
     Material(const MaterialTag& tag,
              std::shared_ptr<Texture> texture,
-             const Vec3D& ambient,
-             const Vec3D& diffuse,
-             const Vec3D& specular,
+             const Color& ambient,
+             const Color& diffuse,
+             const Color& specular,
              u_int8_t illum) :
              _tag(tag), _texture(texture), _ambient(ambient), _diffuse(diffuse),
              _specular(specular), _illum(illum) {};
 
-    [[nodiscard]] Vec3D ambient() const { return _ambient; }
-    [[nodiscard]] Vec3D diffuse() const { return _diffuse; }
-    [[nodiscard]] Vec3D specular() const { return _specular; }
+    [[nodiscard]] Color ambient() const { return _ambient; }
+    [[nodiscard]] Color diffuse() const { return _diffuse; }
+    [[nodiscard]] Color specular() const { return _specular; }
     [[nodiscard]] u_int8_t illum() const { return _illum; }
 
     [[nodiscard]] std::shared_ptr<Texture> texture() const {return _texture;}

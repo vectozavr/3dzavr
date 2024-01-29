@@ -48,6 +48,9 @@ namespace Consts {
 
     const Color WHITE = Color(255, 255, 255);
     const Color BLACK = Color(0, 0, 0);
+    const Color RED = Color(255, 0, 0);
+    const Color GREEN = Color(0, 255, 0);
+    const Color BLUE = Color(0, 0, 255);
 
     // resources
     const FilePath DEFAULT_FONT_FILENAME = FilePath("engine/resources/fonts/Roboto/Roboto-Light.ttf");

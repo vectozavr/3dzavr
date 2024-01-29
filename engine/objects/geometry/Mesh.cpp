@@ -174,7 +174,7 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
     Matrix4x4 invModel = this->fullInvModel();
 
     Vec3D v = (to - from).normalized();
-    Vec3D v_model = Vec3D(invModel*v.makePoint4D());
+    Vec3D v_model = invModel*v;
     Vec3D from_model = Vec3D(invModel*from.makePoint4D());
     Vec3D to_model = Vec3D(invModel*to.makePoint4D());
 
@@ -208,15 +208,13 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
         }
     }
 
-    double k = (point - from).abs()/(to-from).abs();
-
     return IntersectionInformation{point,
                                    norm,
                                    minDistance,
                                    name(),
                                    shared_from_this(),
                                    intersected,
-                                   k,
+                                   (point - from).abs()/(to-from).abs(),
                                    Color{},
                                    triangle};
 }

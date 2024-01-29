@@ -17,7 +17,9 @@ private:
     std::shared_ptr<ObjectController> cameraController = nullptr;
     std::shared_ptr<ObjectController> objController = nullptr;
     std::shared_ptr<Object> selectedObject = nullptr;
+    std::shared_ptr<Mesh> redCube = nullptr;
     bool objSelected = false;
+    bool objInFocus = false;
 
     std::shared_ptr<Group> obj = nullptr;
 
@@ -26,6 +28,10 @@ private:
 
         obj = world->loadObject(ObjectTag("car1"), FilePath("resources/obj/car/Car.obj"));
         obj->translate(Vec3D(0, -3, 10));
+
+        redCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("RedCube"), 0.1));
+        redCube->setVisible(objInFocus);
+        world->add(redCube);
     };
 
     void update() override {
@@ -36,16 +42,21 @@ private:
         if(objSelected) {
             objController->update();
         } else {
-            obj->rotateRelativePoint(obj->position(), Vec3D{0, 0.5*Time::deltaTime(), 0});
+            //obj->rotateRelativePoint(obj->position(), Vec3D{0, 0.5*Time::deltaTime(), 0});
 
             cameraController->update();
         }
 
+        auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt(), {redCube->name()});
+        objInFocus = rayCast.intersected;
+        redCube->setVisible(objInFocus);
+        if(objInFocus) {
+            redCube->translateToPoint(rayCast.pointOfIntersection);
+        }
+
         // select object:
         if (Keyboard::isKeyTapped(SDLK_o)) {
-            auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt());
-
-            if(rayCast.intersected) {
+            if(objInFocus) {
                 objSelected = true;
                 selectedObject = rayCast.obj;
                 objController = std::make_shared<ObjectController>(selectedObject);
