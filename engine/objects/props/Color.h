@@ -6,6 +6,7 @@
 #define RAYTRACE3D_COLOR_H
 
 #include <array>
+#include <cstdint>
 
 class Color final {
 private:
@@ -15,6 +16,7 @@ public:
     Color(const Color &color);
 
     explicit Color(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255);
+    // TODO: rewrite this constructor
     explicit Color(const std::array<double, 4>& color);
 
     Color &operator=(const Color &color) = default;

@@ -173,7 +173,7 @@ void Engine::printDebugInfo() const {
             }
 
             screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
-                                        Color( {(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
+                                        Color( std::array<double, 4>{(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
 
             screen->drawText(
                     timerName.substr(2, timerName.size()) + " (" +
@@ -186,7 +186,7 @@ void Engine::printDebugInfo() const {
 
         int width = timerWidth * (totalTime - timeSum) / totalTime;
         screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
-                             Color( {(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
+                             Color( std::array<double, 4>{(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
 
         screen->drawText("all other stuff (" + std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
                          10, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));

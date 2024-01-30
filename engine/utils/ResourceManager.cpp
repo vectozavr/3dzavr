@@ -78,19 +78,19 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
         if (type == "ka") {
             double r, g, b;
             lineStream >> r >> g >> b;
-            ambient = Color({r, g, b});
+            ambient = Color(std::array<double, 4>{r, g, b});
             readAmbient = true;
         }
         if (type == "kd") {
             double r, g, b;
             lineStream >> r >> g >> b;
-            diffuse = Color({r, g, b});
+            diffuse = Color(std::array<double, 4>{r, g, b});
             readDiffuse = true;
         }
         if (type == "ks") {
             double r, g, b;
             lineStream >> r >> g >> b;
-            specular = Color({r, g, b});
+            specular = Color(std::array<double, 4>{r, g, b});
             readSpecular = true;
         }
         if (type == "map_kd") {

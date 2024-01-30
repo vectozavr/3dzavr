@@ -46,24 +46,27 @@ uint8_t Color::a() const {
 
 // Operations with Vec4D
 Color Color::operator+(const Color &color) const {
-    return Color({_c[0] + color._c[0],
-                  _c[1] + color._c[1],
-                  _c[2] + color._c[2],
-                  _c[3] + color._c[3]});
+    return Color(std::array<double, 4>{
+        _c[0] + color._c[0],
+        _c[1] + color._c[1],
+        _c[2] + color._c[2],
+        _c[3] + color._c[3]});
 }
 
 Color Color::operator-(const Color &color) const {
-    return Color({_c[0] - color._c[0],
-                  _c[1] - color._c[1],
-                  _c[2] - color._c[2],
-                  _c[3] - color._c[3]});
+    return Color(std::array<double, 4>{
+        _c[0] - color._c[0],
+        _c[1] - color._c[1],
+        _c[2] - color._c[2],
+        _c[3] - color._c[3]});
 }
 
 Color Color::operator*(double number) const {
-    return Color({_c[0]*number,
-                  _c[1]*number,
-                  _c[2]*number,
-                  _c[3]});
+    return Color(std::array<double, 4>{
+        _c[0]*number,
+        _c[1]*number,
+        _c[2]*number,
+        _c[3]});
 }
 
 Color Color::operator/(double number) const {
@@ -88,8 +91,9 @@ bool Color::operator==(const Color &color) const {
 }
 
 Color Color::operator*(const Color &color) const {
-    return Color({_c[0]*color._c[0],
-                  _c[1]*color._c[1],
-                  _c[2]*color._c[2],
-                  _c[3]*color._c[3]});
+    return Color(std::array<double, 4>{
+        _c[0]*color._c[0],
+        _c[1]*color._c[1],
+        _c[2]*color._c[2],
+        _c[3]*color._c[3]});
 }

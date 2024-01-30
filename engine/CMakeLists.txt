@@ -105,5 +105,13 @@ target_link_libraries(3DZAVR PUBLIC PNG::PNG)
 
 # SDL Library
 find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-target_link_libraries(3DZAVR PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf)
+# SDL_TTF (this one works for MacOS + Clang compiler)
+#find_package(SDL2_ttf REQUIRED)
+target_link_libraries(3DZAVR PUBLIC SDL2::SDL2)
+
+# SDL_TTF (this one works for Linux + GCC compiler)
+find_package(PkgConfig REQUIRED)
+pkg_search_module(SDL2TTF REQUIRED SDL2_ttf>=2.0.0)
+
+include_directories(${SDL2TTF_INCLUDE_DIRS})
+target_link_libraries(3DZAVR PUBLIC ${SDL2TTF_LIBRARIES})
