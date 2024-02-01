@@ -18,6 +18,7 @@ private:
     bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;
 
     void printDebugInfo() const;
+    void projectAndDrawGroup(std::shared_ptr<Group> group) const;
 
 protected:
     const std::shared_ptr<Screen> screen = std::make_shared<Screen>();

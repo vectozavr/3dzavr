@@ -5,8 +5,8 @@
 
 #include "Sphere.h"
 
-Sphere::Sphere(double radius, const Vec3D &position, const ObjectTag& nameTag, const Color& color)
-: Object(nameTag), _radius(radius), _color(color) {
+Sphere::Sphere(double radius, const Vec3D &position, const ObjectTag& tag)
+: Object(tag), _radius(radius) {
     translateToPoint(position);
 }
 
@@ -44,8 +44,11 @@ Object::IntersectionInformation Sphere::intersect(const Vec3D &from, const Vec3D
                                            name(),
                                            shared_from_this(),
                                            (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity()),
-                                           k,
-                                           _color};
+                                           k};
 
     return res;
+}
+
+Sphere::Sphere(const ObjectTag &tag, const Sphere &sphere) : Object(tag, sphere), _radius(sphere._radius) {
+
 }

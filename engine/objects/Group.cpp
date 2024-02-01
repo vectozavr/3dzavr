@@ -7,18 +7,8 @@
 #include "utils/ResourceManager.h"
 
 void Group::copyObjectsFromGroup(const Group& group) {
-    for (auto& [tag, obj] : group._objects) {
-        std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj);
-        if(grObj) {
-            // We work with Group
-            auto copedGroup = std::make_shared<Group>(*grObj);
-            add(copedGroup);
-        } else {
-            // We work with the object (e.g. Mesh)
-            // TODO: here we cast obj to the type Object. We need to fix it somehow..
-            auto copedObject = std::make_shared<Object>(*obj);
-            add(copedObject);
-        }
+    for (const auto& [tag, obj] : group._objects) {
+        add(obj->copy(tag));
     }
 }
 
@@ -36,14 +26,13 @@ Group::Group(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale
 }
 
 void Group::add(std::shared_ptr<Object> object) {
-    _objects.emplace(object->name(), object);
-    attach(object);
-    Log::log("Group::add(): inserted object '" + object->name().str() + "' in the group '" + name().str() + "'");
-}
-
-void Group::add(std::shared_ptr<Group> group) {
-    _objects.emplace(group->name(), group);
-    Log::log("Group::add(): inserted group '" + group->name().str() + "'");
+    if(!_objects.contains(object->name())) {
+        _objects.emplace(object->name(), object);
+        attach(object);
+        Log::log("Group::add(): inserted object '" + object->name().str() + "' in the group '" + name().str() + "'");
+    } else {
+        throw std::invalid_argument{"Group::add(): You cannot inserted 2 objects with the same name tag"};
+    }
 }
 
 void Group::add(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale) {
@@ -77,9 +66,9 @@ std::shared_ptr<Object> Group::object(const ObjectTag &tag) {
         return _objects.find(tag)->second;
     }
 
-    for(auto& obj : _objects) {
+    for(const auto& [name, obj] : _objects) {
 
-        std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj.second);
+        std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj);
         if(grObj) {
             auto res = grObj->object(tag);
             if (res) {
@@ -95,8 +84,8 @@ std::shared_ptr<Object> Group::object(const ObjectTag &tag) {
 Object::IntersectionInformation Group::intersect(const Vec3D &from, const Vec3D &to) {
     std::unique_ptr<IntersectionInformation> minIntersection;
 
-    for(auto& obj: _objects) {
-        auto intersection = obj.second->intersect(from, to);
+    for(const auto& [name, obj]: _objects) {
+        auto intersection = obj->intersect(from, to);
         if(intersection.distanceToObject < minIntersection->distanceToObject) {
             minIntersection = std::make_unique<IntersectionInformation>(intersection);
         }
@@ -113,13 +102,13 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
         return *minIntersection;
     }
 
-    for(const auto& obj: _objects) {
+    for(const auto& [tag, obj]: _objects) {
 
-        if(skipTags.contains(obj.first)) {
+        if(skipTags.contains(tag)) {
             continue;
         }
 
-        std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj.second);
+        std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj);
 
         std::shared_ptr<IntersectionInformation> intersection;
         if(grObj) {
@@ -127,11 +116,12 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
             intersection = std::make_shared<IntersectionInformation>(grObj->rayCast(from, to, skipTags));
         } else {
             // We work with the object (e.g. Mesh)
+            //std::shared_ptr<Mesh> meshObj = std::dynamic_pointer_cast<Mesh>(obj.second);
+            //if(meshObj) {
+            //    intersection = std::make_shared<IntersectionInformation>(meshObj->intersect(from, to));
+            //}
 
-            std::shared_ptr<Mesh> meshObj = std::dynamic_pointer_cast<Mesh>(obj.second);
-            if(meshObj) {
-                intersection = std::make_shared<IntersectionInformation>(meshObj->intersect(from, to));
-            }
+            intersection = std::make_shared<IntersectionInformation>(obj->intersect(from, to));
         }
 
         if(intersection->distanceToObject < minIntersection->distanceToObject) {
@@ -142,6 +132,11 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
     return *minIntersection;
 }
 
-Group::~Group() {
+void Group::clear() {
     _objects.clear();
 }
+
+Group::~Group() {
+    clear();
+}
+

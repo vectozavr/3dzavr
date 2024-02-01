@@ -219,16 +219,23 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
                                    triangle};
 }
 
-Mesh::Mesh(const Mesh &mesh) :
-Object(mesh), _material(mesh._material), _visible(mesh._visible) {
-    for (const auto& tr : mesh._tris) {
-        _tris.push_back(tr);
+void Mesh::copyTriangles(const Mesh &mesh, bool deepCopy) {
+    if(deepCopy) {
+        _tris.reserve(mesh._tris.size());
+        for (const auto& tr : mesh._tris) {
+            _tris.push_back(tr);
+        }
+    } else {
+        _tris = mesh._tris;
     }
 }
 
-Mesh::Mesh(const ObjectTag &tag, const Mesh &mesh) :
+Mesh::Mesh(const Mesh &mesh, bool deepCopy) :
+Object(mesh), _material(mesh._material), _visible(mesh._visible) {
+    copyTriangles(mesh, deepCopy);
+}
+
+Mesh::Mesh(const ObjectTag &tag, const Mesh &mesh, bool deepCopy) :
 Object(tag, mesh), _material(mesh._material), _visible(mesh._visible) {
-    for (const auto& tr : mesh._tris) {
-        _tris.push_back(tr);
-    }
+    copyTriangles(mesh, deepCopy);
 }

@@ -21,13 +21,16 @@ private:
     bool objSelected = false;
     bool objInFocus = false;
 
-    std::shared_ptr<Group> obj = nullptr;
-
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
 
-        obj = world->loadObject(ObjectTag("car1"), FilePath("resources/obj/car/Car.obj"));
-        obj->translate(Vec3D(0, -3, 10));
+        for (int i = 1; i <= 8; i++) {
+            auto car = world->loadObject(
+                    ObjectTag("car"+std::to_string(i)),
+                    FilePath("resources/obj/cars/car"+std::to_string(i)+"/Car"+std::to_string(i)+".obj"));
+            car->rotate(Vec3D{0, Consts::PI, 0});
+            car->translate(Vec3D(-13.5 + 3*i, -4, 13));
+        }
 
         redCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("RedCube"), 0.1));
         redCube->setVisible(objInFocus);
@@ -37,13 +40,11 @@ private:
     void update() override {
         screen->setTitle("3dzavr, " + std::to_string(Time::fps()) + "fps");
 
-        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2, Consts::STANDARD_SCREEN_HEIGHT/2, 3, 3, Consts::BLACK);
+        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2, Consts::STANDARD_SCREEN_HEIGHT/2, 2, 2, Color(0,0,0,0));
 
         if(objSelected) {
             objController->update();
         } else {
-            //obj->rotateRelativePoint(obj->position(), Vec3D{0, 0.5*Time::deltaTime(), 0});
-
             cameraController->update();
         }
 

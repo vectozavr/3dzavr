@@ -16,3 +16,6 @@ Color DirectionalLight::color() const {
 Vec3D DirectionalLight::direction() const {
     return _dir;
 }
+
+DirectionalLight::DirectionalLight(const ObjectTag &tag, const DirectionalLight &directionalLight) :
+Object(tag, directionalLight), _dir(directionalLight._dir), _color(directionalLight._color) {}

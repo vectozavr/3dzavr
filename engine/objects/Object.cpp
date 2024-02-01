@@ -116,15 +116,15 @@ bool Object::checkIfAttached(Object *obj) {
 
 void Object::attach(std::shared_ptr<Object> object) {
     if (this != object.get()) {
-        if(object->_attachedTo.expired()) {
+        if(!object->_attachedTo) {
             if (!object->checkIfAttached(this)) {
                 _attachedObjects.emplace(object->name(), object);
-                object->_attachedTo = weak_from_this();
+                object->_attachedTo = this;
             } else {
                 throw std::invalid_argument{"Object::attach(): You created recursive attachment"};
             }
         } else {
-            throw std::invalid_argument{"Object::attach(): You cannot attach the object to two different objects"};
+            throw std::invalid_argument{"Object::attach(): You cannot attach the object twice: unattach it first"};
         }
     } else {
         throw std::invalid_argument{"Object::attach(): You cannot attach object to itself"};
@@ -133,7 +133,7 @@ void Object::attach(std::shared_ptr<Object> object) {
 
 void Object::unattach(const ObjectTag &tag) {
     if(_attachedObjects.contains(tag) && !_attachedObjects[tag].expired()) {
-        _attachedObjects[tag].lock()->_attachedTo.reset();
+        _attachedObjects[tag].lock()->_attachedTo = nullptr;
     }
     _attachedObjects.erase(tag);
 }
@@ -143,11 +143,11 @@ Matrix4x4 Object::model() const {
 }
 
 Matrix4x4 Object::fullModel() const {
-    if(_attachedTo.expired()) {
+    if(!_attachedTo) {
         return model();
     }
 
-    return _attachedTo.lock()->fullModel()*model();
+    return _attachedTo->fullModel()*model();
 }
 
 Object::IntersectionInformation Object::intersect(const Vec3D &from, const Vec3D &to) {
@@ -160,9 +160,9 @@ Object::IntersectionInformation Object::intersect(const Vec3D &from, const Vec3D
 }
 
 Object::~Object() {
-    if(!_attachedTo.expired()) {
-        _attachedTo.lock()->unattach(_tag);
-        _attachedTo.reset();
+    if(_attachedTo) {
+        _attachedTo->unattach(_tag);
+        _attachedTo = nullptr;
     }
 
     /*
@@ -172,7 +172,7 @@ Object::~Object() {
     auto it = _attachedObjects.begin();
     while (it != _attachedObjects.end()) {
         if(!it->second.expired()) {
-            it->second.lock()->_attachedTo.reset();
+            it->second.lock()->_attachedTo = nullptr;
         }
         it = _attachedObjects.erase(it);
     }

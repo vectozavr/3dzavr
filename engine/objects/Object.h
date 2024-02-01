@@ -69,7 +69,7 @@ private:
     std::map<ObjectTag, std::weak_ptr<Object>> _attachedObjects;
 
     // This is the object we are attached to
-    std::weak_ptr<Object> _attachedTo;
+    Object* _attachedTo = nullptr;
 
 public:
     explicit Object(const ObjectTag& tag) : _tag(tag) {};
@@ -78,6 +78,7 @@ public:
                                     _transformMatrix(object._transformMatrix),
                                     _angle(object._angle),
                                     _angleLeftUpLookAt(object._angleLeftUpLookAt) {};
+
     Object(const ObjectTag& tag, const Object &object) :
                                     _tag(tag),
                                     _transformMatrix(object._transformMatrix),
@@ -100,6 +101,10 @@ public:
     void rotateLeft(double rl);
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);
+
+    virtual std::shared_ptr<Object> copy(const ObjectTag& tag) const {
+        return std::make_shared<Object>(tag, *this);
+    }
 
     // This function depends on Object_Type: each Object should define how does the intersection work.
     [[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to);

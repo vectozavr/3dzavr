@@ -63,6 +63,7 @@ private:
 public:
     explicit RigidBody(const ObjectTag& tag) : Mesh(tag) {};
     RigidBody(const RigidBody &rigidBody) = default;
+    RigidBody(const ObjectTag& tag, const RigidBody &rigidBody);
     explicit RigidBody(const Mesh &mesh, bool useSimpleBox = true);
     RigidBody(const ObjectTag& tag,
               const FilePath &meshFile,
@@ -97,7 +98,11 @@ public:
     collisionCallBack() const { return _collisionCallBack; }
 
     void setCollisionCallBack(const std::function<void(const ObjectTag &tag,
-                                                       std::shared_ptr<RigidBody>)> &f) { _collisionCallBack = f; }
+                                                       std::shared_ptr<RigidBody>)> &f) { _collisionCallBack = f; };
+
+    std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
+        return std::make_shared<RigidBody>(tag, *this);
+    }
 };
 
 

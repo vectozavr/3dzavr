@@ -13,9 +13,14 @@ private:
     Color _color;
 public:
     DirectionalLight(const ObjectTag& tag, const Vec3D& direction, const Color& color = Consts::WHITE);
+    DirectionalLight(const ObjectTag& tag, const DirectionalLight& directionalLight);
 
     [[nodiscard]] Color color() const;
     [[nodiscard]] Vec3D direction() const;
+
+    std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
+        return std::make_shared<DirectionalLight>(tag, *this);
+    }
 };
 
 

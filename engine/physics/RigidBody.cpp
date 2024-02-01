@@ -348,3 +348,11 @@ void RigidBody::addVelocity(const Vec3D &velocity) {
 void RigidBody::setAcceleration(const Vec3D &acceleration) {
     _acceleration = acceleration;
 }
+
+RigidBody::RigidBody(const ObjectTag &tag, const RigidBody &rigidBody) :
+Mesh(tag, rigidBody),
+_velocity(rigidBody._velocity), _acceleration(rigidBody._acceleration), _hasCollision(rigidBody._hasCollision),
+_isCollider(rigidBody._isCollider), _isTrigger(rigidBody._isTrigger), _hitBox(rigidBody._hitBox),
+_inCollision(rigidBody._inCollision), _collisionNormal(rigidBody._collisionNormal) {
+
+}

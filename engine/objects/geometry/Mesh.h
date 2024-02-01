@@ -22,12 +22,14 @@ private:
 
     Mesh &operator*=(const Matrix4x4 &matrix4X4);
 
+    void copyTriangles(const Mesh& mesh, bool deepCopy);
+
 public:
     explicit Mesh(const ObjectTag& nameTag) : Object(nameTag) {};
 
     Mesh &operator=(const Mesh &mesh) = delete;
-    Mesh(const Mesh &mesh);
-    Mesh(const ObjectTag& tag, const Mesh &mesh);
+    Mesh(const Mesh &mesh, bool deepCopy = false);
+    Mesh(const ObjectTag& tag, const Mesh &mesh, bool deepCopy = false);
 
     explicit Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, std::shared_ptr<Material> material = nullptr);
 
@@ -47,6 +49,10 @@ public:
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
 
     ~Mesh();
+
+    std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
+        return std::make_shared<Mesh>(tag, *this);
+    }
 
     Mesh static Surface(const ObjectTag &tag, double width, double height, std::shared_ptr<Material> material = nullptr);
     Mesh static Cube(const ObjectTag &tag, double size = 1.0);

@@ -16,19 +16,15 @@
 
 class World final {
 private:
-    std::map<ObjectTag, std::shared_ptr<Group>> _groups;
-    ObjectTag _sceneName = ObjectTag("default_scene_group");
-
+    std::shared_ptr<Group> _objects = std::make_shared<Group>(ObjectTag("Main_Scene(World)"));
     void checkCollision(const ObjectTag &tag);
 public:
-    World();
-
     void update();
 
     std::shared_ptr<Object> object(const ObjectTag &tag);
+    [[nodiscard]] std::shared_ptr<Group> objects() const { return _objects; }
 
     void add(std::shared_ptr<Object> object);
-    void add(std::shared_ptr<Group> group);
     bool remove(const ObjectTag &tag);
 
     std::shared_ptr<Group> loadObject(const ObjectTag &tag,
@@ -38,8 +34,8 @@ public:
     // std::vector<ObjectTag> skipTags is a vector of all objects we want to skip in ray casting
     Object::IntersectionInformation rayCast(const Vec3D &from, const Vec3D &to, const std::set<ObjectTag> &skipTags = {});
 
-    std::map<ObjectTag, std::shared_ptr<Group>>::iterator begin() { return _groups.begin(); }
-    std::map<ObjectTag, std::shared_ptr<Group>>::iterator end() { return _groups.end(); }
+    std::map<ObjectTag, std::shared_ptr<Object>>::iterator begin() { return _objects->begin(); }
+    std::map<ObjectTag, std::shared_ptr<Object>>::iterator end() { return _objects->end(); }
 
     ~World();
 };

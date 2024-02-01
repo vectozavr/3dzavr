@@ -20,6 +20,31 @@ Engine::Engine() {
     ResourceManager::init();
 }
 
+void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
+    for(const auto& [objTag, obj] : *group) {
+        std::shared_ptr<Mesh> subMesh = std::dynamic_pointer_cast<Mesh>(obj);
+        if(subMesh) {
+            // project triangles to the camera plane
+            Time::startTimer("d projections");
+            auto projected = camera->project(subMesh);
+            Time::pauseTimer("d projections");
+
+            // draw projected triangles
+            Time::startTimer("d rasterization");
+            for (auto &t : projected) {
+                screen->drawTriangle(*t.first, t.second);
+            }
+            Time::pauseTimer("d rasterization");
+            continue;
+        }
+        std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
+        if(subGroup) {
+            // We need to recursively continue to draw subgroup
+            projectAndDrawGroup(subGroup);
+        }
+    }
+}
+
 void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::string &name, const Color& background) {
 
     _name = name;
@@ -64,8 +89,6 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
 
         Time::update();
 
-
-
         if(_updateWorld) {
             Time::startTimer("d animations");
             Timeline::update();
@@ -76,26 +99,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
             Time::stopTimer("d collisions");
         }
 
-        for (const auto &[groupTag, group] : *world) {
-            for(const auto& [objTag, obj] : *group) {
-                // TODO: add support for groups of groups of objects (recursive call of the projection function)
-
-                std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(obj);
-                if(mesh) {
-                    // project triangles to the camera plane
-                    Time::startTimer("d projections");
-                    auto projected = camera->project(mesh);
-                    Time::pauseTimer("d projections");
-
-                    // draw projected triangles
-                    Time::startTimer("d rasterization");
-                    for (auto &t : projected) {
-                        screen->drawTriangle(*t.first, t.second);
-                    }
-                    Time::pauseTimer("d rasterization");
-                }
-            }
-        }
+        projectAndDrawGroup(world->objects());
 
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");
@@ -104,12 +108,12 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
         // draw triangles on the screen
         screen->clearDepthBuffer();
         Time::stopTimer("d depthBuffer");
-        Time::stopTimer("d all");
-
 
         Time::startTimer("d game update");
         update();
         Time::stopTimer("d game update");
+
+        Time::stopTimer("d all");
 
         printDebugInfo();
         screen->display();

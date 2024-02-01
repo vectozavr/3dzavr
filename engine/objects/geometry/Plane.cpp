@@ -6,13 +6,18 @@
 #include "Plane.h"
 
 Plane::Plane(const Triangle &tri, const ObjectTag& nameTag, const Color& color) :
-Object(nameTag), _normal(tri.norm()), _point(tri[0]), _color(color) {}
+Object(nameTag), _normal(tri.norm()), _point(tri[0]) {}
 
 Plane::Plane(const Vec3D &N, const Vec3D &P, const ObjectTag& nameTag, const Color& color) :
-Object(nameTag), _normal(N.normalized()), _point(P), _color(color) {}
+Object(nameTag), _normal(N.normalized()), _point(P) {}
 
 double Plane::distance(const Vec3D &point) const {
     return point.dot(_normal) - _point.dot(_normal);
+}
+
+Plane::Plane(const ObjectTag &tag, const Plane &plane) :
+Object(tag, plane), _point(plane._point), _normal(plane._normal) {
+
 }
 
 std::vector<Triangle> Plane::clip(const Triangle &tri) const {
@@ -102,6 +107,5 @@ Object::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D 
                                            name(),
                                            shared_from_this(),
                                            (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity()),
-                                           k,
-                                           _color};
+                                           k};
 }

@@ -137,7 +137,6 @@ void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, ui
     //SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
     //SDL_RenderDrawLine(_renderer, (int)from.x(), (int)from.y(), (int)to.x(), (int)to.y());
 
-
     if(to.x() < from.x()) {
         return drawLine(to, from, color, thickness);
     }
@@ -184,9 +183,9 @@ void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, ui
 
 void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Material> material) {
     // Drawing edge
-    //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), triangle.colors()[0]);
-    //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), triangle.colors()[1]);
-    //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), triangle.colors()[2]);
+    //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Consts::BLACK);
+    //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
+    //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
     // Filling inside
     int x_min = (int)std::min({(double)_width, triangle[0].x(), triangle[1].x(), triangle[2].x()});
@@ -237,6 +236,26 @@ void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Material> ma
     }
 }
 
+void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
+// Filling inside
+    int x_min = (int)std::min({(double)_width, triangle[0].x(), triangle[1].x(), triangle[2].x()});
+    int x_max = (int)std::max({0.0, triangle[0].x(), triangle[1].x(), triangle[2].x()}) + 1;
+    int y_min = (int)std::min({(double)_height, triangle[0].y(), triangle[1].y(), triangle[2].y()});
+    int y_max = (int)std::max({0.0, triangle[0].y(), triangle[1].y(), triangle[2].y()}) + 1;
+
+    auto tc = triangle.textureCoordinates();
+
+    for(int y = y_min; y <= y_max; y++) {
+        for(int x = x_min; x <= x_max; x++) {
+            Vec3D abg = triangle.abgBarycCoord(Vec2D(x, y));
+            if(abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0) {
+                double z = triangle[0].z()*abg.x() + triangle[1].z()*abg.y() + triangle[2].z()*abg.z();
+                drawPixel(x, y, z, color);
+            }
+        }
+    }
+}
+
 void Screen::setTitle(const std::string &title) {
     _title = title;
     SDL_SetWindowTitle(_window, title.c_str());
@@ -266,18 +285,8 @@ void Screen::clearDepthBuffer() {
 }
 
 void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color) {
-    // TODO: implement this function
-    /*
-     * This is an old version of this function
-     * that relied on the color functionality that was deleted.
-    drawTriangle(Triangle({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)},
-                          {},
-                          {color, color, color}));
-
-    drawTriangle(Triangle({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)},
-                          {},
-                          {color, color, color}));
-                          */
+    drawTriangle(Triangle({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)}), color);
+    drawTriangle(Triangle({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)}), color);
 }
 
 void Screen::drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color,

@@ -131,8 +131,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     // If objects is already loaded - return pointer to it
     auto it = _instance->_objects.find(objFile);
     if (it != _instance->_objects.end()) {
-        objects = std::make_shared<Group>(*it->second);
-        return objects;
+        return std::make_shared<Group>(tag, *it->second);
     }
 
     std::ifstream file(objFile.str());
@@ -248,7 +247,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     // If success - remember and return vector of objects pointer
     _instance->_objects.emplace(objFile, objects);
 
-    return objects;
+    return std::make_shared<Group>(tag, *objects);
 }
 
 std::shared_ptr<Font> ResourceManager::loadFont(const FilePath &fontFile) {

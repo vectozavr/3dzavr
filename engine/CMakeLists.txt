@@ -98,20 +98,23 @@ add_library(
 
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
+include_directories(/usr/local/include)
+
 # LibPNG library
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 target_link_libraries(3DZAVR PUBLIC PNG::PNG)
 
-# SDL Library
+# SDL Library (works for Linux and MacOS)
 find_package(SDL2 REQUIRED)
-# SDL_TTF (this one works for MacOS + Clang compiler)
-#find_package(SDL2_ttf REQUIRED)
 target_link_libraries(3DZAVR PUBLIC SDL2::SDL2)
 
-# SDL_TTF (this one works for Linux + GCC compiler)
-find_package(PkgConfig REQUIRED)
-pkg_search_module(SDL2TTF REQUIRED SDL2_ttf>=2.0.0)
+# SDL_TTF (works for MacOS)
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(3DZAVR PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf)
 
-include_directories(${SDL2TTF_INCLUDE_DIRS})
-target_link_libraries(3DZAVR PUBLIC ${SDL2TTF_LIBRARIES})
+# SDL_TTF (works for Linux)
+#find_package(PkgConfig REQUIRED)
+#pkg_search_module(SDL2TTF REQUIRED SDL2_ttf)
+#include_directories(${SDL2TTF_INCLUDE_DIRS})
+#target_link_libraries(3DZAVR PUBLIC ${SDL2TTF_LIBRARIES})
