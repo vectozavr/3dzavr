@@ -27,6 +27,7 @@ public:
 
     bool remove(const ObjectTag &tag);
     void clear();
+    [[nodiscard]] uint16_t size() const {return _objects.size(); }
     std::shared_ptr<Object> object(const ObjectTag &tag);
 
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator begin() { return _objects.begin(); }

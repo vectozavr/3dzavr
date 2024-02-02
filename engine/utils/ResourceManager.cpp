@@ -6,6 +6,7 @@
 #include <fstream>
 #include <memory>
 #include <map>
+#include <cmath>
 
 #include <utils/ResourceManager.h>
 #include <utils/Log.h>
@@ -128,6 +129,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     std::shared_ptr<Group> objects = std::make_shared<Group>(tag);
     std::map<MaterialTag, std::shared_ptr<Material>> materials;
 
+
     // If objects is already loaded - return pointer to it
     auto it = _instance->_objects.find(objFile);
     if (it != _instance->_objects.end()) {
@@ -144,7 +146,50 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     std::vector<Vec3D> vt{};
     std::vector<Triangle> tris{};
     std::string objName, materialName;
-    std::string prevType;
+
+    std::string prevCommand;
+    std::string readCommands;
+
+    // On each step we will check did we read all the information to be able to create a new material
+    auto addObject = [objects, &materials, &objName, &materialName, &tris, &readCommands] {
+        if((!objName.empty() || !materialName.empty()) && !tris.empty() && !readCommands.empty()) {
+            objects->add(std::make_shared<Mesh>(
+                    ObjectTag(objName + "_" + materialName + "_" + std::to_string(objects->size())), tris,
+                    materials[MaterialTag(materialName)]));
+
+            // When we read all data and created a new Mesh
+            // we have to clear the fields and start reading over again
+
+            tris.clear();
+            objName = "";
+            materialName = "";
+
+            readCommands = "";
+        }
+    };
+
+    auto wrapCoordinate = [](double coord) {
+        double wrapped = std::fmod(coord, 1.0);
+        if (wrapped < 0) {
+            wrapped += 1.0;
+        }
+        return wrapped;
+    };
+
+    auto mirrorClampCoordinate = [](double coord) {
+        if (coord >= 0.0 && coord <= 1.0) {
+            // If the coordinate is within the [0, 1] range, use it as is.
+            return coord;
+        } else {
+            // Calculate the mirrored coordinate
+            double mirrored = std::fmod(std::abs(coord), 2.0);
+            if (mirrored > 1.0) {
+                mirrored = 2.0 - mirrored;
+            }
+            // Clamp the mirrored coordinate to [0, 1] range.
+            return std::max(0.0, std::min(mirrored, 1.0));
+        }
+    };
 
     while (!file.eof()) {
         std::string line;
@@ -160,6 +205,15 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         std::transform(type.begin(), type.end(), type.begin(),
                        [](unsigned char c) { return std::tolower(c); });
 
+
+        if(type != prevCommand) {
+            readCommands += prevCommand + "|";
+        }
+
+        if(readCommands.find(type) != std::string::npos) {
+            addObject();
+        }
+
         // Starting of the new object
         if (type == "o" || type == "g") {
             lineStream >> objName;
@@ -174,7 +228,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         if (type == "vt") {
             double x, y;
             lineStream >> x >> y;
-            vt.emplace_back(x, y, 1.0);
+            vt.emplace_back(mirrorClampCoordinate(x), mirrorClampCoordinate(y), 1.0);
         }
 
         // Add a new face
@@ -223,23 +277,11 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
             lineStream >> materialName;
         }
 
-        // Add a new material into the array of materials
-        // TODO: we add object when the previous command was f and the next one is not f, but not all .obj files are structured in a such way
-        if((prevType == "f" && type != "f") || file.eof()) {
-            objects->add(std::make_shared<Mesh>(
-                    ObjectTag(objName), tris,
-                    materials[MaterialTag(materialName)]));
+        prevCommand = type;
 
-            // When we read all data and created a new Mesh
-            // we have to clear the fields and start reading over again
-            v.clear();
-            vt.clear();
-            tris.clear();
-            objName = "";
-            materialName = "";
+        if(file.eof()) {
+            addObject();
         }
-
-        prevType = type;
     }
 
     file.close();

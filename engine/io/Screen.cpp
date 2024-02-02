@@ -207,7 +207,7 @@ void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Material> ma
 
                     Vec3D uv_hom = tc[0] + (tc[1] - tc[0])*abg.y() + (tc[2] - tc[0])*abg.z();
 
-                    // Dehomogenite UV coordinates
+                    // de-homogenize UV coordinates
                     Vec2D uv_dehom(uv_hom.x()/uv_hom.z(), uv_hom.y()/uv_hom.z());
 
                     // TODO: move calculations of derivatives somewhere from here: it becomes messy

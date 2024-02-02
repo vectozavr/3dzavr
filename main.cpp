@@ -24,16 +24,18 @@ private:
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
 
-        /*
+
         for (int i = 1; i <= 8; i++) {
             auto car = world->loadObject(
                     ObjectTag("car"+std::to_string(i)),
                     FilePath("resources/obj/cars/car"+std::to_string(i)+"/Car"+std::to_string(i)+".obj"));
             car->rotate(Vec3D{0, Consts::PI, 0});
             car->translate(Vec3D(-13.5 + 3*i, -4, 13));
-        }*/
+        }
 
-        auto village = world->loadObject(ObjectTag("PastVillage"), FilePath("resources/obj/PastVillage/untitled.obj"));
+        //auto village = world->loadObject(ObjectTag("PastVillage"), FilePath("resources/obj/PastVillage/PastVillage.obj"));
+        //village->scale(Vec3D{0.01, 0.01, 0.01});
+
 
         redCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("RedCube"), 0.1));
         redCube->setVisible(objInFocus);

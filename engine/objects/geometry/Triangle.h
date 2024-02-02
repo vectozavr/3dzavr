@@ -15,6 +15,10 @@
 class Triangle final {
 private:
     std::array<Vec4D, 3> _points;
+    /*
+     * Texture coordinates are in 3D because we need to work with its 3th component
+     * during de-homogenization procedure for correct perspective projection (see Screen::drawTriangle() for example)
+     */
     std::array<Vec3D, 3> _textureCoordinates;
 
     Vec3D _normal;
@@ -42,7 +46,6 @@ public:
 
     [[nodiscard]] std::array<Vec4D, 3> points() const {return _points; }
     [[nodiscard]] std::array<Vec3D, 3> textureCoordinates() const { return _textureCoordinates; }
-    void setColor(const Color& newColor);
 
     [[nodiscard]] double distance(const Vec3D &vec) const { return norm().dot(Vec3D(_points[0]) - vec); }
 
