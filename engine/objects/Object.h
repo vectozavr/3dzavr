@@ -85,7 +85,6 @@ public:
                                     _angle(object._angle),
                                     _angleLeftUpLookAt(object._angleLeftUpLookAt) {}
 
-    // TODO: implement rotations using quaternions (?)
     void transform(const Matrix4x4 &t);
     void transformRelativePoint(const Vec3D &point, const Matrix4x4 &transform);
     void translate(const Vec3D &dv);

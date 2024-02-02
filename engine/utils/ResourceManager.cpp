@@ -224,6 +224,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         }
 
         // Add a new material into the array of materials
+        // TODO: we add object when the previous command was f and the next one is not f, but not all .obj files are structured in a such way
         if((prevType == "f" && type != "f") || file.eof()) {
             objects->add(std::make_shared<Mesh>(
                     ObjectTag(objName), tris,

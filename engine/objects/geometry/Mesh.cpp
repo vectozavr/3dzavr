@@ -208,13 +208,16 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
         }
     }
 
+
+    double k = (to-from).x() > Consts::EPS ? (point - from).x()/(to-from).x() : (point - from).y()/(to-from).y();
+
     return IntersectionInformation{point,
                                    norm,
                                    minDistance,
                                    name(),
                                    shared_from_this(),
                                    intersected,
-                                   (point - from).abs()/(to-from).abs(),
+                                   k,
                                    Color{},
                                    triangle};
 }

@@ -112,19 +112,12 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
 
         std::shared_ptr<IntersectionInformation> intersection;
         if(grObj) {
-            // We work with Group
             intersection = std::make_shared<IntersectionInformation>(grObj->rayCast(from, to, skipTags));
         } else {
-            // We work with the object (e.g. Mesh)
-            //std::shared_ptr<Mesh> meshObj = std::dynamic_pointer_cast<Mesh>(obj.second);
-            //if(meshObj) {
-            //    intersection = std::make_shared<IntersectionInformation>(meshObj->intersect(from, to));
-            //}
-
             intersection = std::make_shared<IntersectionInformation>(obj->intersect(from, to));
         }
 
-        if(intersection->distanceToObject < minIntersection->distanceToObject) {
+        if(intersection->distanceToObject < minIntersection->distanceToObject && intersection->k > 0) {
             minIntersection = intersection;
         }
     }

@@ -32,8 +32,6 @@ public:
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator begin() { return _objects.begin(); }
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator end() { return _objects.end(); }
 
-    //[[nodiscard]] std::map<ObjectTag, std::shared_ptr<Object>> objects() const { return _objects; }
-
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
     [[nodiscard]] IntersectionInformation rayCast(const Vec3D &from, const Vec3D &to,
                                                   const std::set<ObjectTag> &skipTags = {}) const;
