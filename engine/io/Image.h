@@ -17,6 +17,7 @@
 class Image {
 public:
     enum CODE {SUCCESS, FILE_OPEN_ERROR, PNG_STRUCT_ERROR, INFO_STRUCT_ERROR, ERROR};
+    enum CLAMP_MODE {REPEAT, MIRRORED_REPEAT, CLAMP_TO_EDGE};
 private:
     uint16_t _width;
     uint16_t _height;
@@ -37,7 +38,7 @@ public:
 
     void set_pixel(uint16_t x, uint16_t y, const Color& color);
     [[nodiscard]] Color get_pixel(uint16_t x, uint16_t y) const;
-    [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, bool bottomUp = true) const;
+    [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode = REPEAT, bool bottomUp = true) const;
     [[nodiscard]] std::shared_ptr<Image> downSampled() const;
 
     CODE save2png(const FilePath& file_name, uint16_t bit_depth = 8);

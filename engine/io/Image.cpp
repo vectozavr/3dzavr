@@ -144,7 +144,49 @@ Image::Image(const FilePath &filename) {
     _valid = true;
 }
 
-Color Image::get_pixel_from_UV(const Vec2D& uv, bool bottomUp) const {
+auto repeatClamp = [](double coord) {
+    double wrapped = std::fmod(coord, 1.0);
+    if (wrapped < 0) {
+        wrapped += 1.0;
+    }
+    return wrapped;
+};
+
+auto mirrorClamp = [](double coord) {
+    if (coord >= 0.0 && coord <= 1.0) {
+        // If the coordinate is within the [0, 1] range, use it as is.
+        return coord;
+    } else {
+        // Calculate the mirrored coordinate
+        double mirrored = std::fmod(std::abs(coord), 2.0);
+        if (mirrored > 1.0) {
+            mirrored = 2.0 - mirrored;
+        }
+        // Clamp the mirrored coordinate to [0, 1] range.
+        return std::max(0.0, std::min(mirrored, 1.0));
+    }
+};
+
+double clampToEdge(double coord) {
+    // Clamp the coordinate to the nearest edge in the [0, 1] range
+    return std::max(0.0, std::min(coord, 1.0));
+}
+
+Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) const {
+
+    Vec2D clampedUV(uv);
+
+    switch (mode) {
+        case REPEAT:
+            clampedUV = Vec2D(repeatClamp(clampedUV.x()), repeatClamp(clampedUV.y()));
+            break;
+        case MIRRORED_REPEAT:
+            clampedUV = Vec2D(mirrorClamp(clampedUV.x()), mirrorClamp(clampedUV.y()));
+            break;
+        case CLAMP_TO_EDGE:
+            clampedUV = Vec2D(clampToEdge(clampedUV.x()), clampToEdge(clampedUV.y()));
+            break;
+    }
 
     /*
      * In most systems, U = 0 corresponds to the left edge of the
@@ -160,7 +202,7 @@ Color Image::get_pixel_from_UV(const Vec2D& uv, bool bottomUp) const {
          *
          */
 
-        return get_pixel((uint16_t)(uv.x()*_width), (uint16_t)((1-uv.y())*_height));
+        return get_pixel((uint16_t)(clampedUV.x()*_width), (uint16_t)((1-clampedUV.y())*_height));
     } else {
         /*
          * Top-down approach
@@ -170,7 +212,7 @@ Color Image::get_pixel_from_UV(const Vec2D& uv, bool bottomUp) const {
          *
          */
 
-        return get_pixel((uint16_t)(uv.x()*_width), (uint16_t)(uv.y()*_height));
+        return get_pixel((uint16_t)(clampedUV.x()*_width), (uint16_t)(clampedUV.y()*_height));
     }
 }
 

@@ -168,29 +168,6 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         }
     };
 
-    auto wrapCoordinate = [](double coord) {
-        double wrapped = std::fmod(coord, 1.0);
-        if (wrapped < 0) {
-            wrapped += 1.0;
-        }
-        return wrapped;
-    };
-
-    auto mirrorClampCoordinate = [](double coord) {
-        if (coord >= 0.0 && coord <= 1.0) {
-            // If the coordinate is within the [0, 1] range, use it as is.
-            return coord;
-        } else {
-            // Calculate the mirrored coordinate
-            double mirrored = std::fmod(std::abs(coord), 2.0);
-            if (mirrored > 1.0) {
-                mirrored = 2.0 - mirrored;
-            }
-            // Clamp the mirrored coordinate to [0, 1] range.
-            return std::max(0.0, std::min(mirrored, 1.0));
-        }
-    };
-
     while (!file.eof()) {
         std::string line;
         std::getline(file, line);
@@ -228,7 +205,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         if (type == "vt") {
             double x, y;
             lineStream >> x >> y;
-            vt.emplace_back(mirrorClampCoordinate(x), mirrorClampCoordinate(y), 1.0);
+            vt.emplace_back(x, y, 1.0);
         }
 
         // Add a new face
