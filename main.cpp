@@ -24,14 +24,14 @@ private:
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
 
-        /*
+
         for (int i = 1; i <= 8; i++) {
             auto car = world->loadObject(
                     ObjectTag("car"+std::to_string(i)),
                     FilePath("resources/obj/cars/car"+std::to_string(i)+"/Car"+std::to_string(i)+".obj"));
             car->rotate(Vec3D{0, Consts::PI, 0});
             car->translate(Vec3D(-13.5 + 3*i, -4, 13));
-        }*/
+        }
 
         //auto Dust = world->loadObject(ObjectTag("Dust"), FilePath("resources/obj/Dust/dust_map.obj"));
 
@@ -57,7 +57,9 @@ private:
             cameraController->update();
         }
 
+
         auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt(), {redCube->name()});
+
         objInFocus = rayCast.intersected;
         redCube->setVisible(objInFocus);
         if(objInFocus) {

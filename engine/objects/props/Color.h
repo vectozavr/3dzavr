@@ -16,7 +16,7 @@ public:
     Color(const Color &color);
 
     explicit Color(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255);
-    // TODO: rewrite this constructor
+    // TODO: rewrite this constructor somehow. It is not good to write Color(std::vector{0,0,0,0}); every time..
     explicit Color(const std::array<double, 4>& color);
 
     Color &operator=(const Color &color) = default;

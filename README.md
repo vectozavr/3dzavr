@@ -1,5 +1,12 @@
 ## 3Dzavr SDL
 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://choosealicense.com/licenses/mit/)
+[![Community Discord](https://img.shields.io/discord/788056426324426782)](https://discord.gg/zJUxVWZnkZ)
+![Commits](https://img.shields.io/github/last-commit/Vectozavr/3dzavr/sdl_version)
+![Issues](https://img.shields.io/github/issues/Vectozavr/3dzavr)
+![Repo size](https://img.shields.io/github/repo-size/Vectozavr/3dzavr)
+![version](https://img.shields.io/github/v/tag/Vectozavr/3dzavr)
+
 #### About:
 
 3Dzavr is a 3D engine that uses SDL as multimedia framework.

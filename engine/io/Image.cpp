@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <cmath>
 #include "linalg/Vec3D.h"
 #include "Image.h"
 
@@ -113,7 +114,7 @@ Image::Image(const FilePath &filename) {
     if(color_type == PNG_COLOR_TYPE_PALETTE)
         png_set_palette_to_rgb(png);
 
-    //// PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
+    // PNG_COLOR_TYPE_GRAY_ALPHA is always 8 or 16bit depth.
     if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
         png_set_expand_gray_1_2_4_to_8(png);
 

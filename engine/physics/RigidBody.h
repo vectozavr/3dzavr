@@ -31,6 +31,12 @@ struct NextSimplex final {
     const bool finishSearching;
 };
 
+// TODO: implement RigidBody collision detection and resolution for SDL version
+// TODO: implement simulation of Rigid Body objects: forces, acceleration, momentum (to be able to simulate boxes, balls and etc)
+// TODO: implement support of restrictions for Rigid Body objects and connections between several Rigid Body.
+// TODO: implement Rag-Doll support for Rigid Body objects (bones, connections, constraints, skeleton and humanoids)
+
+
 class RigidBody : public Mesh {
 private:
     Vec3D _velocity{0, 0, 0};

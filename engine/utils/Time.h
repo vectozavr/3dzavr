@@ -52,13 +52,12 @@ public:
 
     static void free();
 
+    // TODO: I am not sure if it is the best possible system of timers. Maybe this should be refactored..
     static void startTimer(const std::string& timerName);
     static void stopTimer(const std::string& timerName);
     static void pauseTimer(const std::string& timerName);
-
     [[nodiscard]] static double elapsedTimerMilliseconds(const std::string& timerName);
     [[nodiscard]] static double elapsedTimerSeconds(const std::string& timerName);
-
     [[nodiscard]] static std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> timers();
 };
 

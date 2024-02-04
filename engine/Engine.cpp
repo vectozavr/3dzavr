@@ -21,6 +21,12 @@ Engine::Engine() {
 }
 
 void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
+
+    /*
+     * TODO: we spend too much time on iteration through all of the objects in the scene.
+     * Maybe we can exclude some objects on the early stage based on the space separation.
+     */
+
     for(const auto& [objTag, obj] : *group) {
         std::shared_ptr<Mesh> subMesh = std::dynamic_pointer_cast<Mesh>(obj);
         if(subMesh) {

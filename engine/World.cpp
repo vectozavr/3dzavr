@@ -54,7 +54,7 @@ void World::checkCollision(const ObjectTag &tag) {
 
     /*
      * TODO: this is not efficient to iterate throughout all objects in the world..
-     * The solution might be to use space separation.
+     * The solution might be to use space separation (BSP-trees of something else)
      */
 
     // TODO: we need to check collision of all RigidBody inside all groups

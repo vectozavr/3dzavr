@@ -10,15 +10,28 @@
 #include "objects/Camera.h"
 #include <World.h>
 
+/*
+ * TODO: implement network system for the SDL version. That might be based on the SDL_net module:
+ * https://wiki.libsdl.org/SDL2_net/FrontPage
+ * https://wiki.libsdl.org/SDL2_net/CategoryAPI
+ */
+
+/*
+ * TODO: implement different types of lighting: Point Lights, Spot Lights, Directional Lights, Area Lights
+ * see examples on https://docs.unity3d.com/Manual/Lighting.html
+ */
+
+
+
 class Engine {
 private:
     std::string _name;
-
     bool _updateWorld = true;
-    bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;
-
-    void printDebugInfo() const;
     void projectAndDrawGroup(std::shared_ptr<Group> group) const;
+
+    // For debug purposes
+    bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;
+    void printDebugInfo() const;
 
 protected:
     const std::shared_ptr<Screen> screen = std::make_shared<Screen>();
