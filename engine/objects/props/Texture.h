@@ -25,8 +25,8 @@ public:
     // For resampling
     [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, double area) const;
 
-    [[nodiscard]] u_int16_t width() const {return _texture.front()->width(); }
-    [[nodiscard]] u_int16_t height() const {return _texture.front()->height(); }
+    [[nodiscard]] uint16_t width() const {return _texture.front()->width(); }
+    [[nodiscard]] uint16_t height() const {return _texture.front()->height(); }
 };
 
 

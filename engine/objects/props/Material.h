@@ -36,7 +36,7 @@ private:
     // ...
 
     Color _ambient, _diffuse, _specular;
-    u_int16_t _illum;
+    uint16_t _illum;
 
 public:
     Material(const MaterialTag& tag,
@@ -44,14 +44,14 @@ public:
              const Color& ambient,
              const Color& diffuse,
              const Color& specular,
-             u_int8_t illum) :
+             uint8_t illum) :
              _tag(tag), _texture(texture), _ambient(ambient), _diffuse(diffuse),
              _specular(specular), _illum(illum) {};
 
     [[nodiscard]] Color ambient() const { return _ambient; }
     [[nodiscard]] Color diffuse() const { return _diffuse; }
     [[nodiscard]] Color specular() const { return _specular; }
-    [[nodiscard]] u_int8_t illum() const { return _illum; }
+    [[nodiscard]] uint8_t illum() const { return _illum; }
 
     [[nodiscard]] std::shared_ptr<Texture> texture() const {return _texture;}
 

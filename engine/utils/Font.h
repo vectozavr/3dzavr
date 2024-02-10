@@ -36,11 +36,11 @@ private:
     const FilePath _fileName;
 
     // Here we store this font for different fontsize
-    std::map<u_int16_t, TTF_Font*> _fonts;
+    std::map<uint16_t, TTF_Font*> _fonts;
 public:
     Font(const FontTag& tag, const FilePath& fileName);
 
-    TTF_Font* getFont(u_int16_t fontSize=14);
+    TTF_Font* getFont(uint16_t fontSize=14);
 
     ~Font();
 };

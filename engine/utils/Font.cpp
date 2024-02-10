@@ -16,7 +16,7 @@ Font::Font(const FontTag& tag, const FilePath& fileName) : _tag(tag), _fileName(
 
 }
 
-TTF_Font* Font::getFont(u_int16_t fontSize) {
+TTF_Font* Font::getFont(uint16_t fontSize) {
 
     if(_fonts.contains(fontSize) && _fonts[fontSize]) {
         return _fonts[fontSize];
