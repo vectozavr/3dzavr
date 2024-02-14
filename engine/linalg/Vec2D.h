@@ -15,32 +15,41 @@ private:
 
 public:
     Vec2D() = default;
-
     Vec2D(const Vec2D &vec);
-
     explicit Vec2D(const Vec4D &point4D);
-
     explicit Vec2D(double x, double y = 0.0);
 
     Vec2D &operator=(const Vec2D &) = default;
 
-    [[nodiscard]] double x() const { return _arr_point[0]; }
-    [[nodiscard]] double y() const { return _arr_point[1]; }
+    [[nodiscard]] inline double x() const { return _arr_point[0]; }
+    [[nodiscard]] inline double y() const { return _arr_point[1]; }
 
-    [[nodiscard]] Vec2D operator-() const;
+    [[nodiscard]] Vec2D operator-() const &;
+    [[nodiscard]] Vec2D &operator-() &&;
 
     // Boolean operations
     bool operator==(const Vec2D &vec) const;
     bool operator!=(const Vec2D &vec) const;
 
-    [[nodiscard]] Vec2D operator+(const Vec2D &vec) const;
-    [[nodiscard]] Vec2D operator-(const Vec2D &vec) const;
+    // Operations with Vec2D
+    Vec2D &operator+=(const Vec2D &vec);
+    [[nodiscard]] Vec2D operator+(const Vec2D &vec) const &;
+    [[nodiscard]] Vec2D &operator+(const Vec2D &vec) &&;
+
+    Vec2D &operator-=(const Vec2D &vec);
+    [[nodiscard]] Vec2D operator-(const Vec2D &vec) const &;
+    [[nodiscard]] Vec2D &operator-(const Vec2D &vec) &&;
 
     [[nodiscard]] double dot(const Vec2D &vec) const; // Returns dot product
 
     // Operations with numbers
-    [[nodiscard]] Vec2D operator*(double number) const;
-    [[nodiscard]] Vec2D operator/(double number) const;
+    Vec2D &operator/=(double number);
+    [[nodiscard]] Vec2D operator/(double number) const &;
+    [[nodiscard]] Vec2D &operator/(double number) &&;
+
+    Vec2D &operator*=(double number);
+    [[nodiscard]] Vec2D operator*(double number) const &;
+    [[nodiscard]] Vec2D &operator*(double number) &&;
 
     // Other useful methods
     [[nodiscard]] double sqrAbs() const; // Returns squared vector length

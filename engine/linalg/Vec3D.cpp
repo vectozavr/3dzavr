@@ -26,9 +26,18 @@ Vec3D::Vec3D(double x, double y, double z) {
     _arr_point[2] = z;
 }
 
-Vec3D Vec3D::operator-() const {
+
+Vec3D Vec3D::operator-() const &{
     return Vec3D(-x(), -y(), -z());
 }
+
+Vec3D &Vec3D::operator-() &&{
+    _arr_point[0] = -_arr_point[0];
+    _arr_point[1] = -_arr_point[1];
+    _arr_point[2] = -_arr_point[2];
+    return *this;
+}
+
 
 bool Vec3D::operator==(const Vec3D &vec) const {
     return (*this - vec).sqrAbs() < Consts::EPS;
@@ -39,27 +48,88 @@ bool Vec3D::operator!=(const Vec3D &vec) const {
 }
 
 // Operations with Vec3D
-Vec3D Vec3D::operator+(const Vec3D &vec) const {
-    return Vec3D(x() + vec.x(), y() + vec.y(), z() + vec.z());
+
+Vec3D &Vec3D::operator+=(const Vec3D &vec) {
+    _arr_point[0] += vec._arr_point[0];
+    _arr_point[1] += vec._arr_point[1];
+    _arr_point[2] += vec._arr_point[2];
+    return *this;
 }
 
-Vec3D Vec3D::operator-(const Vec3D &vec) const {
-    return *this + -vec;
+Vec3D &Vec3D::operator-=(const Vec3D &vec) {
+    _arr_point[0] -= vec._arr_point[0];
+    _arr_point[1] -= vec._arr_point[1];
+    _arr_point[2] -= vec._arr_point[2];
+    return *this;
 }
 
-Vec3D Vec3D::operator*(double number) const {
-    return Vec3D(x() * number, y() * number, z() * number);
+Vec3D &Vec3D::operator*=(double number) {
+    _arr_point[0] *= number;
+    _arr_point[1] *= number;
+    _arr_point[2] *= number;
+    return *this;
 }
 
-Vec3D Vec3D::operator/(double number) const {
-    if (std::abs(number) > Consts::EPS) {
-        return *this * (1.0 / number);
-    } else {
-        throw std::domain_error{"Vec3D::operator/(double number): division by zero"};
+Vec3D &Vec3D::operator/=(double number) {
+#ifndef NDEBUG
+    if (std::abs(number) <= Consts::EPS) {
+        throw std::domain_error{"Color::operator/(double number): division by zero"};
     }
+#endif
+    _arr_point[0] /= number;
+    _arr_point[1] /= number;
+    _arr_point[2] /= number;
+    return *this;
+}
+
+
+Vec3D Vec3D::operator+(const Vec3D &vec) const &{
+    Vec3D res = *this;
+    res += vec;
+    return res;
+}
+
+Vec3D Vec3D::operator-(const Vec3D &vec) const &{
+    Vec3D res = *this;
+    res -= vec;
+    return res;
+}
+
+Vec3D Vec3D::operator*(double number) const &{
+    Vec3D res = *this;
+    res *= number;
+    return res;
+}
+
+Vec3D Vec3D::operator/(double number) const &{
+    Vec3D res = *this;
+    res /= number;
+    return res;
+}
+
+
+Vec3D &Vec3D::operator+(const Vec3D &vec) &&{
+    *this += vec;
+    return *this;
+}
+
+Vec3D &Vec3D::operator-(const Vec3D &vec) &&{
+    *this -= vec;
+    return *this;
+}
+
+Vec3D &Vec3D::operator*(double number) &&{
+    *this *= number;
+    return *this;
+}
+
+Vec3D &Vec3D::operator/(double number) &&{
+    *this /= number;
+    return *this;
 }
 
 // Other useful methods
+
 double Vec3D::sqrAbs() const {
     return x() * x() + y() * y() + z() * z();
 }

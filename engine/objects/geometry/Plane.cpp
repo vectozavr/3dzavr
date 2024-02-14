@@ -12,7 +12,7 @@ Plane::Plane(const Vec3D &N, const Vec3D &P, const ObjectTag& nameTag, const Col
 Object(nameTag), _normal(N.normalized()), _point(P) {}
 
 double Plane::distance(const Vec3D &point) const {
-    return point.dot(_normal) - _point.dot(_normal);
+    return (point - _point).dot(_normal);
 }
 
 Plane::Plane(const ObjectTag &tag, const Plane &plane) :
