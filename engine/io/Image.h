@@ -22,7 +22,7 @@ private:
     uint16_t _width;
     uint16_t _height;
 
-    png_bytep* _row_pointers = nullptr;
+    png_bytep _data = nullptr;
 
     bool _valid = false;
 public:
@@ -32,6 +32,9 @@ public:
     Image(const Image& img) = delete;
     Image& operator=(const Image &img) = delete;
 
+    Image(Image&& img) noexcept;
+    Image& operator=(Image&& img) noexcept;
+
     [[nodiscard]] uint16_t width() const { return _width; };
     [[nodiscard]] uint16_t height() const { return _height; };
     [[nodiscard]] bool isValid() const { return _valid; };
@@ -39,7 +42,7 @@ public:
     void set_pixel(uint16_t x, uint16_t y, const Color& color);
     [[nodiscard]] Color get_pixel(uint16_t x, uint16_t y) const;
     [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode = REPEAT, bool bottomUp = true) const;
-    [[nodiscard]] std::shared_ptr<Image> downSampled() const;
+    [[nodiscard]] Image downSampled() const;
 
     CODE save2png(const FilePath& file_name, uint16_t bit_depth = 8);
 
