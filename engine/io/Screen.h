@@ -21,8 +21,10 @@ class Screen final {
 private:
     SDL_Renderer* _renderer = nullptr;
     SDL_Window* _window = nullptr;
+    SDL_Texture* _screenTexture = nullptr;
 
-    std::vector<std::vector<float>> _depthBuffer;
+    std::vector<float> _depthBuffer;
+    std::vector<uint32_t> _pixelBuffer;
 
     uint16_t _width;
     uint16_t _height;
@@ -36,7 +38,8 @@ private:
 
     bool _isOpen = false;
 
-    void initDepthBuffer();
+    void drawPixelUnsafe(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer and checks
+    void drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color); // With using depth buffer without checks
 
 public:
     Screen& operator=(const Screen& scr) = delete;
@@ -75,10 +78,8 @@ public:
     void startRender();
     void stopRender();
 
-    void clearDepthBuffer();
-
     ~Screen();
 };
 
 
-#endif //INC_3DZAVR_SCREEN_H
+#endif //ENGINE_SCREEN_H

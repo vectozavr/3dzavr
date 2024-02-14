@@ -27,36 +27,20 @@ void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const std::string
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(_width*Consts::SCREEN_SCALE, _height*Consts::SCREEN_SCALE, 0, &_window, &_renderer);
-
-    SDL_RenderSetScale(_renderer, Consts::SCREEN_SCALE, Consts::SCREEN_SCALE);
+    SDL_RenderSetLogicalSize(_renderer, _width, _height);
 
     SDL_SetRenderDrawColor(_renderer, background.r(), background.g(), background.b(), background.a());
     SDL_RenderClear(_renderer);
 
     SDL_ShowCursor(SDL_DISABLE);
 
-    initDepthBuffer();
+    _screenTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, _width, _height);
+    _pixelBuffer.resize(_width * _height);
+    _depthBuffer.resize(_width * _height);
 
     // Initialize SDL_ttf
     if ( TTF_Init() < 0 ) {
         Log::log("Screen::open(): error initializing SDL_ttf: " + std::string(TTF_GetError()));
-    }
-}
-
-void Screen::initDepthBuffer() {
-    _depthBuffer.clear();
-    if(_height != 0 && _width != 0) {
-        _depthBuffer.reserve(_width);
-        for(uint16_t i = 0; i < _width; i++) {
-            std::vector<float> column;
-            column.reserve(_height);
-            for(uint16_t j = 0; j < _height; j++) {
-                column.push_back(1);
-            }
-            column.shrink_to_fit();
-            _depthBuffer.push_back(column);
-        }
-        _depthBuffer.shrink_to_fit();
     }
 }
 
@@ -73,7 +57,8 @@ void Screen::display() {
     }
 
     if(_isOpen) {
-        SDL_SetRenderDrawColor(_renderer, _background.r(), _background.g(), _background.b(), _background.a());
+        SDL_UpdateTexture(_screenTexture, NULL, _pixelBuffer.data(), _width * 4);
+        SDL_RenderCopy(_renderer, _screenTexture, NULL, NULL);
         SDL_RenderPresent(_renderer);
         SDL_WarpMouseInWindow(_window, (float)width()/2*Consts::SCREEN_SCALE, (float)height()/2*Consts::SCREEN_SCALE);
     }
@@ -111,24 +96,37 @@ void Screen::stopRender() {
 }
 
 void Screen::clear() {
-    SDL_RenderClear(_renderer);
+    std::fill(_depthBuffer.begin(), _depthBuffer.end(), 1.0f);
+    std::fill(_pixelBuffer.begin(), _pixelBuffer.end(), 0xFFFFFFFFU);
 }
 
 void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
-    SDL_RenderDrawPoint(_renderer, x, y);
+    uint32_t c = color.r() << 24 | color.g() << 16 | color.b() << 8 | color.a();
+    _pixelBuffer[y * _width + x] = c;
 }
 
 void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    if(z < _depthBuffer[x][y]) {
-        drawPixel(x, y, color);
-        _depthBuffer[x][y] = z;
+    if(z < _depthBuffer[y * _width + x]) {
+        drawPixelUnsafe(x, y, color);
+        _depthBuffer[y * _width + x] = z;
+    }
+}
+
+inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
+    uint32_t c = color.r() << 24 | color.g() << 16 | color.b() << 8 | color.a();
+    _pixelBuffer[y * _width + x] = c;
+}
+
+inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
+    if (z < _depthBuffer[y * _width + x]) {
+        drawPixelUnsafe(x, y, color);
+        _depthBuffer[y * _width + x] = z;
     }
 }
 
@@ -265,25 +263,6 @@ bool Screen::isOpen() const {
     return _isOpen;
 }
 
-void Screen::close() {
-    _isOpen = false;
-
-    SDL_DestroyRenderer(_renderer);
-    SDL_DestroyWindow(_window);
-    SDL_Quit();
-
-    _renderer = nullptr;
-    _window = nullptr;
-}
-
-void Screen::clearDepthBuffer() {
-    for (auto& row : _depthBuffer) {
-        for(auto& el : row) {
-            el = 1;
-        }
-    }
-}
-
 void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color) {
     drawTriangle(Triangle({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)}), color);
     drawTriangle(Triangle({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)}), color);
@@ -319,21 +298,42 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
                                                     text.c_str(),
                                                     {color.r(),color.g(),color.b(), color.a()});
 
-    int textWidth = 0;
-    int textHeight = 0;
-    TTF_SizeText(ourFont, text.c_str(), &textWidth, &textHeight);
+    uint16_t textWidth = std::min(surfaceText->w, _width - x);
+    uint16_t textHeight = std::min(surfaceText->h, _height - y);
+    uint16_t pitch = surfaceText->pitch;
+    uint8_t* pixels = reinterpret_cast<uint8_t*>(surfaceText->pixels);
+    uint32_t c = color.r() << 24 | color.g() << 16 | color.b() << 8 | color.a();
 
-    SDL_Texture* textureText = SDL_CreateTextureFromSurface(_renderer,surfaceText);
+    for (uint16_t i = 0; i < textHeight; i++) {
+        for (uint16_t j = 0; j < textWidth; j++) {
+            if (pixels[i * pitch + j]) {
+                _pixelBuffer[(i + y) * _width + (j + x)] = c;
+            }
+        }
+    }
 
     SDL_FreeSurface(surfaceText);
+}
 
-    SDL_Rect rectangle{x, y, textWidth, textHeight};
-    SDL_RenderCopy(_renderer,textureText,nullptr,&rectangle);
+void Screen::close() {
+    _isOpen = false;
 
-    SDL_DestroyTexture(textureText);
+    SDL_DestroyTexture(_screenTexture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
+    SDL_Quit();
+
+    _screenTexture = nullptr;
+    _renderer = nullptr;
+    _window = nullptr;
 }
 
 Screen::~Screen() {
+    if (_screenTexture) {
+        SDL_DestroyTexture(_screenTexture);
+        _screenTexture = nullptr;
+    }
+
     if(_renderer) {
         SDL_DestroyRenderer(_renderer);
         _renderer = nullptr;
@@ -345,6 +345,4 @@ Screen::~Screen() {
     }
 
     SDL_Quit();
-
-    _depthBuffer.clear();
 }

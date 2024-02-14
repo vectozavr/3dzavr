@@ -91,7 +91,9 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
         // While printing debug info we will take into account only timer names witch start with 'd '
         Time::startTimer("d all");
 
+        Time::startTimer("d clear");
         screen->clear();
+        Time::stopTimer("d clear");
 
         Time::update();
 
@@ -109,11 +111,6 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
 
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");
-
-        Time::startTimer("d depthBuffer");
-        // draw triangles on the screen
-        screen->clearDepthBuffer();
-        Time::stopTimer("d depthBuffer");
 
         Time::startTimer("d game update");
         update();
