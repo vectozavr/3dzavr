@@ -38,7 +38,7 @@ void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
             // draw projected triangles
             Time::startTimer("d rasterization");
             for (auto &t : projected) {
-                screen->drawTriangle(*t.first, t.second);
+                screen->drawTriangle(*t.first, t.second.get());
             }
             Time::pauseTimer("d rasterization");
             continue;

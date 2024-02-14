@@ -54,7 +54,7 @@ public:
     void drawPixel(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer
     void drawPixel(uint16_t x, uint16_t y, double z, const Color& color); // With using depth buffer
     void drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness = 1);
-    void drawTriangle(const Triangle &triangle, std::shared_ptr<Material> material = nullptr);
+    void drawTriangle(const Triangle &triangle, Material* material = nullptr);
     void drawTriangle(const Triangle &triangle, const Color &color);
     void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color);
     void drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
