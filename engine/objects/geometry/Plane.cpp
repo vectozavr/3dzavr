@@ -20,16 +20,16 @@ Object(tag, plane), _point(plane._point), _normal(plane._normal) {
 
 }
 
-std::vector<Triangle> Plane::clip(const Triangle &tri) const {
+stack_vector<Triangle, 2> Plane::clip(const Triangle &tri) const {
 
-    std::vector<Triangle> result;
+    stack_vector<Triangle, 2> result;
 
     // points coordinated
-    std::vector<Vec3D> insidePoints;
-    std::vector<Vec3D> outsidePoints;
+    stack_vector<Vec3D, 3> insidePoints;
+    stack_vector<Vec3D, 3> outsidePoints;
     // texture coordinates
-    std::vector<Vec3D> insideTexUV;
-    std::vector<Vec3D> outsideTexUV;
+    stack_vector<Vec3D, 3> insideTexUV;
+    stack_vector<Vec3D, 3> outsideTexUV;
     auto textureCoord = tri.textureCoordinates();
 
     double distances[3] = {distance(Vec3D(tri[0])),

@@ -49,7 +49,7 @@ std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> Cam
         clippedTriangles.emplace_back(VMTriangle);
         for (auto &plane : _clipPlanes) {
             while (!clippedTriangles.empty()) {
-                std::vector<Triangle> clipResult = plane->clip(clippedTriangles.back());
+                stack_vector<Triangle, 2> clipResult = plane->clip(clippedTriangles.back());
                 clippedTriangles.pop_back();
                 for (auto &i : clipResult) {
                     tempBuffer.emplace_back(i);

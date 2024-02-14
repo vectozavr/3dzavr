@@ -75,6 +75,7 @@ add_library(
         utils/Font.cpp
         utils/ObjectController.h
         utils/ObjectController.cpp
+        utils/stack_vector.h
 
         animation/Animation.h
         animation/Animation.cpp
