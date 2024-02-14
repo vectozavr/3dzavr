@@ -76,6 +76,8 @@ add_library(
         utils/ObjectController.h
         utils/ObjectController.cpp
         utils/stack_vector.h
+        utils/math.h
+        utils/math.cpp
 
         animation/Animation.h
         animation/Animation.cpp

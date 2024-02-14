@@ -3,9 +3,9 @@
 //
 
 #include <cmath>
-#include <iostream>
 
 #include "Texture.h"
+#include <utils/math.h>
 
 Texture::Texture(const FilePath &filename) {
     auto texture = std::make_shared<Image>(filename);
@@ -27,16 +27,15 @@ Color Texture::get_pixel_from_UV(const Vec2D &uv) const {
 }
 
 Color Texture::get_pixel_from_UV(const Vec2D &uv, double area) const {
-
-    auto D = std::log2(area);
+    uint64_t limit = 1ULL << (_texture.size() - 1);
     uint16_t K;
 
-    if(D <= 1) {
+    if (area < 2) {
         K = 0;
-    } else if(D > (double)_texture.size() - 1.0) {
-        K = _texture.size() - 1;
+    } else if (area < limit) {
+        K = static_cast<uint16_t>(log2_u64(area)) - 1;
     } else {
-        K  = (uint16_t)D - 1;
+        K = _texture.size() - 1;
     }
 
     return _texture[K]->get_pixel_from_UV(uv);
