@@ -258,12 +258,21 @@ Image Image::downSampled() const {
 
     for (size_t y = 0; y < newHeight; y++) {
         for(size_t x = 0; x < newWidth; x++) {
-            Color sumColor =
-                    get_pixel(x*2, y*2) +
-                    get_pixel(x*2+1, y*2) +
-                    get_pixel(x*2, y*2+1) +
-                    get_pixel(x*2+1, y*2+1);
-            newImage.set_pixel(x, y, sumColor/4);
+            uint16_t r, g, b, a;
+            Color tmpColor = get_pixel(x * 2, y * 2);
+            r = tmpColor.r(); g = tmpColor.g(); b = tmpColor.b(); a = tmpColor.a();
+
+            tmpColor = get_pixel(x * 2 + 1, y * 2);
+            r += tmpColor.r(); g += tmpColor.g(); b += tmpColor.b(); a += tmpColor.a();
+
+            tmpColor = get_pixel(x * 2, y * 2 + 1);
+            r += tmpColor.r(); g += tmpColor.g(); b += tmpColor.b(); a += tmpColor.a();
+
+            tmpColor = get_pixel(x * 2 + 1, y * 2 + 1);
+            r += tmpColor.r(); g += tmpColor.g(); b += tmpColor.b(); a += tmpColor.a();
+
+            tmpColor = Color(r / 4, g / 4, b / 4, a / 4);
+            newImage.set_pixel(x, y, tmpColor);
         }
     }
 

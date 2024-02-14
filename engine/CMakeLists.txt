@@ -29,7 +29,6 @@ add_library(
         objects/DirectionalLight.cpp
 
         objects/props/Color.h
-        objects/props/Color.cpp
         objects/props/Texture.h
         objects/props/Texture.cpp
         objects/props/Material.h
