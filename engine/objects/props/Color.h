@@ -17,6 +17,13 @@ public:
         std::copy(other._c.begin(), other._c.end(), _c.begin());
     }
 
+    explicit Color(uint32_t c) : _c({
+        static_cast<unsigned char>((c >> 24) & 0xFF),
+        static_cast<unsigned char>((c >> 16) & 0xFF),
+        static_cast<unsigned char>((c >> 8) & 0xFF),
+        static_cast<unsigned char>(c & 0xFF)
+    }) {}
+
     explicit Color(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t a = 255) : _c({r, g, b, a}) {}
 
     explicit Color(const std::array<uint8_t, 4> &color) : _c(color) {}
@@ -27,6 +34,8 @@ public:
     [[nodiscard]] inline uint8_t g() const { return _c[1]; }
     [[nodiscard]] inline uint8_t b() const { return _c[2]; }
     [[nodiscard]] inline uint8_t a() const { return _c[3]; }
+
+    [[nodiscard]] inline uint32_t rgba() const { return (_c[0] << 24) | (_c[1] << 16) | (_c[2] << 8) | _c[3]; }
 
     // Operations with colors
     [[nodiscard]] inline bool operator==(const Color &other) const { return _c == other._c; }

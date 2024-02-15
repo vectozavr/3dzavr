@@ -365,7 +365,7 @@ void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
     }
 }
 
-void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize, const Color& color) {
+void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize, const Color& src) {
     TTF_Font* ourFont = ResourceManager::loadFont(Consts::DEFAULT_FONT_FILENAME)->getFont(fontsize);
 
     // Confirm that it was loaded
@@ -375,18 +375,28 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
 
     SDL_Surface* surfaceText = TTF_RenderText_Solid(ourFont,
                                                     text.c_str(),
-                                                    {color.r(),color.g(),color.b(), color.a()});
+                                                    {255, 255, 255, 255});
 
     uint16_t textWidth = std::min(surfaceText->w, _width - x);
     uint16_t textHeight = std::min(surfaceText->h, _height - y);
     uint16_t pitch = surfaceText->pitch;
-    uint8_t* pixels = reinterpret_cast<uint8_t*>(surfaceText->pixels);
-    uint32_t c = color.r() << 24 | color.g() << 16 | color.b() << 8 | color.a();
+    uint8_t *pixels = reinterpret_cast<uint8_t *>(surfaceText->pixels);
+
+    // default SDL blend mode:
+    // dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
+    // dstA = srcA + (dstA * (1-srcA))
 
     for (uint16_t i = 0; i < textHeight; i++) {
         for (uint16_t j = 0; j < textWidth; j++) {
             if (pixels[i * pitch + j]) {
-                _pixelBuffer[(i + y) * _width + (j + x)] = c;
+                size_t offset = (i + y) * _width + (j + x);
+                Color dst(_pixelBuffer[offset]);
+                Color res((static_cast<int>(src.r()) * src.a() + static_cast<int>(dst.r()) * (255 - src.a())) / 255,
+                          (static_cast<int>(src.g()) * src.a() + static_cast<int>(dst.g()) * (255 - src.a())) / 255,
+                          (static_cast<int>(src.b()) * src.a() + static_cast<int>(dst.b()) * (255 - src.a())) / 255,
+                          src.a() + dst.a() * (255 - src.a())
+                );
+                _pixelBuffer[offset] = res.rgba();
             }
         }
     }
