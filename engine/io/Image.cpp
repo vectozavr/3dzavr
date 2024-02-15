@@ -2,6 +2,7 @@
 // Created by Ivan Ilin on 21/09/2023.
 //
 
+#include <algorithm>
 #include <fstream>
 #include <cmath>
 #include "linalg/Vec3D.h"
@@ -167,11 +168,7 @@ void Image::set_pixel(uint16_t x, uint16_t y, const Color& color) {
     _data[offset + 3] = color.a();
 }
 
-Color Image::get_pixel(uint16_t x, uint16_t y) const {
-    // x and y should be in range of the image size
-    x = std::min<uint16_t>(_width - 1, x);
-    y = std::min<uint16_t>(_height - 1, y);
-
+inline Color Image::get_pixel_unsafe(uint16_t x, uint16_t y) const {
     size_t offset = (y * _width + x) * 4;
     return Color(_data[offset + 0],
                  _data[offset + 1],
@@ -179,47 +176,62 @@ Color Image::get_pixel(uint16_t x, uint16_t y) const {
                  _data[offset + 3]);
 }
 
-double repeatClamp(double coord) {
-    double wrapped = std::fmod(coord, 1.0);
+Color Image::get_pixel(uint16_t x, uint16_t y) const {
+    // x and y should be in range of the image size
+    x = std::min<uint16_t>(_width - 1, x);
+    y = std::min<uint16_t>(_height - 1, y);
+    return get_pixel_unsafe(x, y);
+}
+
+uint16_t repeatClamp(int64_t coord, uint16_t limit) {
+    int16_t wrapped = coord % limit;
     if (wrapped < 0) {
-        wrapped += 1.0;
+        wrapped += limit;
     }
     return wrapped;
 };
 
-double mirrorClamp(double coord) {
-    if (coord >= 0.0 && coord <= 1.0) {
-        // If the coordinate is within the [0, 1] range, use it as is.
+uint16_t mirrorClamp(int64_t coord, uint16_t limit) {
+    if (coord >= 0 && coord < limit) {
+        // If the coordinate is within the [0, 1) range, use it as is.
         return coord;
     } else {
         // Calculate the mirrored coordinate
-        double mirrored = std::fmod(std::abs(coord), 2.0);
-        if (mirrored > 1.0) {
-            mirrored = 2.0 - mirrored;
+        uint16_t double_limit = limit * 2;
+        int16_t mirrored = coord % double_limit;
+        if (mirrored < 0) {
+            mirrored += double_limit;
         }
-        // Clamp the mirrored coordinate to [0, 1] range.
-        return std::max(0.0, std::min(mirrored, 1.0));
+        if (mirrored > limit) {
+            mirrored = double_limit - mirrored;
+        }
+        // Clamp the mirrored coordinate to [0, 1) range.
+        return std::min<uint16_t>(mirrored, limit - 1);
     }
 };
 
-double clampToEdge(double coord) {
-    // Clamp the coordinate to the nearest edge in the [0, 1] range
-    return std::max(0.0, std::min(coord, 1.0));
+uint16_t clampToEdge(int64_t coord, uint16_t limit) {
+    // Clamp the coordinate to the nearest edge in the [0, 1) range
+    return std::clamp<uint16_t>(coord, 0, limit - 1);
 }
 
 Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) const {
 
-    Vec2D clampedUV(uv);
+    int64_t scaledUV[2] = { static_cast<int64_t>(uv.x() * _width), static_cast<int64_t>(uv.y() * _height) };
+    uint16_t clampedUV[2];
 
     switch (mode) {
         case REPEAT:
-            clampedUV = Vec2D(repeatClamp(clampedUV.x()), repeatClamp(clampedUV.y()));
+            clampedUV[0] = repeatClamp(scaledUV[0], _width);
+            clampedUV[1] = repeatClamp(scaledUV[1], _height);
             break;
         case MIRRORED_REPEAT:
-            clampedUV = Vec2D(mirrorClamp(clampedUV.x()), mirrorClamp(clampedUV.y()));
+            clampedUV[0] = mirrorClamp(scaledUV[0], _width);
+            clampedUV[1] = mirrorClamp(scaledUV[1], _height);
             break;
         case CLAMP_TO_EDGE:
-            clampedUV = Vec2D(clampToEdge(clampedUV.x()), clampToEdge(clampedUV.y()));
+            clampedUV[0] = clampToEdge(scaledUV[0], _width);
+            clampedUV[1] = clampToEdge(scaledUV[1], _height);
             break;
     }
 
@@ -237,7 +249,7 @@ Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) 
          *
          */
 
-        return get_pixel((uint16_t)(clampedUV.x()*_width), (uint16_t)((1-clampedUV.y())*_height));
+        return get_pixel_unsafe(clampedUV[0], _height - 1 - clampedUV[1]);
     } else {
         /*
          * Top-down approach
@@ -247,7 +259,7 @@ Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) 
          *
          */
 
-        return get_pixel((uint16_t)(clampedUV.x()*_width), (uint16_t)(clampedUV.y()*_height));
+        return get_pixel_unsafe(clampedUV[0], clampedUV[1]);
     }
 }
 

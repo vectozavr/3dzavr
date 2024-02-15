@@ -40,6 +40,7 @@ public:
     [[nodiscard]] bool isValid() const { return _valid; };
 
     void set_pixel(uint16_t x, uint16_t y, const Color& color);
+    [[nodiscard]] Color get_pixel_unsafe(uint16_t x, uint16_t y) const;
     [[nodiscard]] Color get_pixel(uint16_t x, uint16_t y) const;
     [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode = REPEAT, bool bottomUp = true) const;
     [[nodiscard]] Image downSampled() const;
