@@ -33,7 +33,7 @@ void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const std::string
 
     SDL_SetRenderDrawColor(_renderer, background.r(), background.g(), background.b(), background.a());
     SDL_RenderClear(_renderer);
-
+    SDL_SetRelativeMouseMode(SDL_TRUE);
     SDL_ShowCursor(SDL_DISABLE);
 
     _screenTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, _width, _height);
@@ -62,7 +62,6 @@ void Screen::display() {
         SDL_UpdateTexture(_screenTexture, NULL, _pixelBuffer.data(), _width * 4);
         SDL_RenderCopy(_renderer, _screenTexture, NULL, NULL);
         SDL_RenderPresent(_renderer);
-        SDL_WarpMouseInWindow(_window, (float)width()/2*Consts::SCREEN_SCALE, (float)height()/2*Consts::SCREEN_SCALE);
     }
 }
 

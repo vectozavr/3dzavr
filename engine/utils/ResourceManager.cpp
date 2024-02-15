@@ -2,6 +2,7 @@
 // Created by Neirokan on 09.05.2020
 //
 
+#include <algorithm>
 #include <sstream>
 #include <fstream>
 #include <memory>
@@ -39,7 +40,7 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
     std::string matName;
     std::shared_ptr<Texture> texture = nullptr;
     Color ambient, diffuse, specular;
-    u_int16_t illum;
+    uint16_t illum;
     bool readAmbient = false, readDiffuse = false, readSpecular = false, readIllum = false;
 
     // On each step we will check did we read all the information to be able to create a new material

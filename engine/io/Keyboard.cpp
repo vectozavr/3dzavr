@@ -26,8 +26,10 @@ bool Keyboard::isKeyPressed(SDL_Keycode key) {
         return false;
     }
 
-    if(_instance->_keys.find(key)->second) {
-        return _instance->_keys[key];
+    auto it = _instance->_keys.find(key);
+
+    if (it != _instance->_keys.end()) {
+        return it->second;
     }
 
     return false;

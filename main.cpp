@@ -113,4 +113,5 @@ public:
 int main(int argc, char *argv[]) {
     Test test;
     test.create();
+    return 0;
 }
