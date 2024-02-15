@@ -32,7 +32,7 @@ void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const std::string
 
     SDL_SetRenderDrawColor(_renderer, background.r(), background.g(), background.b(), background.a());
     SDL_RenderClear(_renderer);
-
+    SDL_SetRelativeMouseMode(SDL_TRUE);
     SDL_ShowCursor(SDL_DISABLE);
 
     initDepthBuffer();
@@ -75,7 +75,6 @@ void Screen::display() {
     if(_isOpen) {
         SDL_SetRenderDrawColor(_renderer, _background.r(), _background.g(), _background.b(), _background.a());
         SDL_RenderPresent(_renderer);
-        SDL_WarpMouseInWindow(_window, (float)width()/2*Consts::SCREEN_SCALE, (float)height()/2*Consts::SCREEN_SCALE);
     }
 }
 
