@@ -29,7 +29,6 @@ add_library(
         objects/DirectionalLight.cpp
 
         objects/props/Color.h
-        objects/props/Color.cpp
         objects/props/Texture.h
         objects/props/Texture.cpp
         objects/props/Material.h
@@ -75,6 +74,9 @@ add_library(
         utils/Font.cpp
         utils/ObjectController.h
         utils/ObjectController.cpp
+        utils/stack_vector.h
+        utils/math.h
+        utils/math.cpp
 
         animation/Animation.h
         animation/Animation.cpp

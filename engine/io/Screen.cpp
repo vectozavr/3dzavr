@@ -2,6 +2,7 @@
 // Created by Иван Ильин on 14.01.2021.
 //
 
+#include <algorithm>
 #include <utility>
 #include <cmath>
 
@@ -10,6 +11,7 @@
 #include <io/Screen.h>
 #include <utils/Time.h>
 #include <utils/Log.h>
+#include <utils/stack_vector.h>
 #include <utils/ResourceManager.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
@@ -27,36 +29,20 @@ void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const std::string
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(_width*Consts::SCREEN_SCALE, _height*Consts::SCREEN_SCALE, 0, &_window, &_renderer);
-
-    SDL_RenderSetScale(_renderer, Consts::SCREEN_SCALE, Consts::SCREEN_SCALE);
+    SDL_RenderSetLogicalSize(_renderer, _width, _height);
 
     SDL_SetRenderDrawColor(_renderer, background.r(), background.g(), background.b(), background.a());
     SDL_RenderClear(_renderer);
     SDL_SetRelativeMouseMode(SDL_TRUE);
     SDL_ShowCursor(SDL_DISABLE);
 
-    initDepthBuffer();
+    _screenTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, _width, _height);
+    _pixelBuffer.resize(_width * _height);
+    _depthBuffer.resize(_width * _height);
 
     // Initialize SDL_ttf
     if ( TTF_Init() < 0 ) {
         Log::log("Screen::open(): error initializing SDL_ttf: " + std::string(TTF_GetError()));
-    }
-}
-
-void Screen::initDepthBuffer() {
-    _depthBuffer.clear();
-    if(_height != 0 && _width != 0) {
-        _depthBuffer.reserve(_width);
-        for(uint16_t i = 0; i < _width; i++) {
-            std::vector<float> column;
-            column.reserve(_height);
-            for(uint16_t j = 0; j < _height; j++) {
-                column.push_back(1);
-            }
-            column.shrink_to_fit();
-            _depthBuffer.push_back(column);
-        }
-        _depthBuffer.shrink_to_fit();
     }
 }
 
@@ -73,7 +59,8 @@ void Screen::display() {
     }
 
     if(_isOpen) {
-        SDL_SetRenderDrawColor(_renderer, _background.r(), _background.g(), _background.b(), _background.a());
+        SDL_UpdateTexture(_screenTexture, NULL, _pixelBuffer.data(), _width * 4);
+        SDL_RenderCopy(_renderer, _screenTexture, NULL, NULL);
         SDL_RenderPresent(_renderer);
     }
 }
@@ -110,24 +97,35 @@ void Screen::stopRender() {
 }
 
 void Screen::clear() {
-    SDL_RenderClear(_renderer);
+    std::fill(_depthBuffer.begin(), _depthBuffer.end(), 1.0f);
+    std::fill(_pixelBuffer.begin(), _pixelBuffer.end(), 0xFFFFFFFFU);
 }
 
 void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
-    SDL_RenderDrawPoint(_renderer, x, y);
+    _pixelBuffer[y * _width + x] = color.rgba();
 }
 
 void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    if(z < _depthBuffer[x][y]) {
-        drawPixel(x, y, color);
-        _depthBuffer[x][y] = z;
+    if(z < _depthBuffer[y * _width + x]) {
+        drawPixelUnsafe(x, y, color);
+        _depthBuffer[y * _width + x] = z;
+    }
+}
+
+inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
+    _pixelBuffer[y * _width + x] = color.rgba();
+}
+
+inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
+    if (z < _depthBuffer[y * _width + x]) {
+        drawPixelUnsafe(x, y, color);
+        _depthBuffer[y * _width + x] = z;
     }
 }
 
@@ -180,77 +178,154 @@ void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, ui
     drawPixel(to_x, to_y, color);
 }
 
-void Screen::drawTriangle(const Triangle &triangle, std::shared_ptr<Material> material) {
+inline bool isGoodAbg(const Vec3D& abg) {
+    return abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0;
+}
+
+bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int& x_line_min, int& x_line_max) {
+    stack_vector<double, 4> offsets = stack_vector<double, 4>();
+    if (isGoodAbg(abg)) {
+        offsets.push_back(0);
+    }
+    double modifier;
+    modifier = -abg.x() / abg_dx.x();
+    if (!std::isnan(modifier) && modifier > 0) {
+        offsets.push_back(modifier);
+    }
+    modifier = -abg.y() / abg_dx.y();
+    if (!std::isnan(modifier) && modifier > 0) {
+        offsets.push_back(modifier);
+    }
+    modifier = -abg.z() / abg_dx.z();
+    if (!std::isnan(modifier) && modifier > 0) {
+        offsets.push_back(modifier);
+    }
+
+    std::sort(offsets.begin(), offsets.end(), std::greater{});
+
+    while (!offsets.empty() && !isGoodAbg(abg + abg_dx * ceil(offsets.back()))) offsets.pop_back();
+    if (offsets.empty()) return false;
+    x_line_min = std::clamp<int>(x_min + std::ceil(offsets.back()), x_min, x_max);
+    offsets.pop_back();
+
+    while (!offsets.empty() && !isGoodAbg(abg + abg_dx * floor(offsets.back()))) offsets.pop_back();
+    if (offsets.empty()) {
+        x_line_max = x_line_min;
+    } else {
+        x_line_max = std::clamp<int>(x_min + std::floor(offsets.back()), x_min, x_max);
+    }
+    return true;
+}
+
+void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     // Drawing edge
     //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Consts::BLACK);
     //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
     // Filling inside
-    int x_min = (int)std::min({(double)_width, triangle[0].x(), triangle[1].x(), triangle[2].x()});
-    int x_max = (int)std::max({0.0, triangle[0].x(), triangle[1].x(), triangle[2].x()}) + 1;
-    int y_min = (int)std::min({(double)_height, triangle[0].y(), triangle[1].y(), triangle[2].y()});
-    int y_max = (int)std::max({0.0, triangle[0].y(), triangle[1].y(), triangle[2].y()}) + 1;
+    int x_min = std::clamp<int>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    int y_min = std::clamp<int>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    int x_max = std::clamp<int>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    int y_max = std::clamp<int>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+
+    if (x_min > x_max || y_min > y_max) return;
 
     auto tc = triangle.textureCoordinates();
+    auto texture = material ? material->texture() : nullptr;
+    Color color = material ? material->ambient() : Consts::RED;
 
-    for(int y = y_min; y <= y_max; y++) {
-        for(int x = x_min; x <= x_max; x++) {
-            Vec3D abg = triangle.abgBarycCoord(Vec2D(x, y));
+    // calculate for start coords to increase precision
+    Vec3D abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
+    Vec3D abg_dx = triangle.abgBarycCoord(Vec2D(x_min + 1, y_min));
+    Vec3D abg_dy = triangle.abgBarycCoord(Vec2D(x_min, y_min + 1));
+    abg_dx = abg_dx - abg_origin;
+    abg_dy = abg_dy - abg_origin;
 
-            if(abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0) {
-                Color color = material ? material->ambient() : Consts::RED;
+    Vec3D uv_hom_origin, uv_hom_dx, uv_hom_dy;
 
-                if(material && material->texture()) {
-                    auto texture = material->texture();
+    if (texture) {
+        uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
 
-                    Vec3D uv_hom = tc[0] + (tc[1] - tc[0])*abg.y() + (tc[2] - tc[0])*abg.z();
+        // Derivative in X
+        Vec3D abg_xp = abg_origin + abg_dx;
+        Vec3D uv_hom_xp = tc[0] + (tc[1] - tc[0]) * abg_xp.y() + (tc[2] - tc[0]) * abg_xp.z();
+        uv_hom_dx = uv_hom_xp - uv_hom_origin;
 
-                    // de-homogenize UV coordinates
-                    Vec2D uv_dehom(uv_hom.x()/uv_hom.z(), uv_hom.y()/uv_hom.z());
+        // Derivative in Y
+        Vec3D abg_yp = abg_origin + abg_dy;
+        Vec3D uv_hom_yp = tc[0] + (tc[1] - tc[0]) * abg_yp.y() + (tc[2] - tc[0]) * abg_yp.z();
+        uv_hom_dy = uv_hom_yp - uv_hom_origin;
+    }
 
-                    // TODO: move calculations of derivatives somewhere from here: it becomes messy
-                    // Derivative in X
-                    Vec3D abg_xp = triangle.abgBarycCoord(Vec2D(x+1, y));
-                    Vec3D uv_hom_xp = tc[0] + (tc[1] - tc[0])*abg_xp.y() + (tc[2] - tc[0])*abg_xp.z();
-                    Vec2D uv_dehom_xp(uv_hom_xp.x()/uv_hom_xp.z(), uv_hom_xp.y()/uv_hom_xp.z());
+    for (int y = y_min; y <= y_max; y++) {
+        Vec3D abg = abg_origin;
+        Vec3D uv_hom = uv_hom_origin;
+        abg_origin += abg_dy;
+        uv_hom_origin += uv_hom_dy;
 
-                    // Derivative in Y
-                    Vec3D abg_yp = triangle.abgBarycCoord(Vec2D(x, y+1));
-                    Vec3D uv_hom_yp = tc[0] + (tc[1] - tc[0])*abg_yp.y() + (tc[2] - tc[0])*abg_yp.z();
-                    Vec2D uv_dehom_yp(uv_hom_yp.x()/uv_hom_yp.z(), uv_hom_yp.y()/uv_hom_yp.z());
+        int x_cur_min, x_cur_max;
+        if (!lineLimits(abg, abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
 
-                    // Derivative in XY combined [Jacobian]
-                    Vec2D du(texture->width()*(uv_dehom_xp - uv_dehom).x(), texture->width()*(uv_dehom_yp - uv_dehom).x());
-                    Vec2D dv(texture->height()*(uv_dehom_xp - uv_dehom).y(), texture->height()*(uv_dehom_yp - uv_dehom).y());
+        abg += abg_dx * (x_cur_min - x_min);
+        uv_hom += uv_hom_dx * (x_cur_min - x_min);
 
-                    color = texture->get_pixel_from_UV(uv_dehom, du.abs()+dv.abs());
-                }
+        for (int x = x_cur_min; x <= x_cur_max; x++) {
+            if (texture) {
+                // de-homogenize UV coordinates
+                Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
 
-                double z = triangle[0].z()*abg.x() + triangle[1].z()*abg.y() + triangle[2].z()*abg.z();
+                // TODO: move calculations of derivatives somewhere from here: it becomes messy
+                // Derivative in X
+                Vec3D uv_hom_xp = uv_hom + uv_hom_dx;
+                Vec2D uv_dehom_xp = Vec2D(uv_hom_xp.x() / uv_hom_xp.z(), uv_hom_xp.y() / uv_hom_xp.z()) - uv_dehom;
 
-                drawPixel(x, y, z, color);
+                // Derivative in Y
+                Vec3D uv_hom_yp = uv_hom + uv_hom_dy;
+                Vec2D uv_dehom_yp = Vec2D(uv_hom_yp.x() / uv_hom_yp.z(), uv_hom_yp.y() / uv_hom_yp.z()) - uv_dehom;
+
+                // Derivative in XY combined [Jacobian]
+                Vec2D du(texture->width() * uv_dehom_xp.x(), texture->width() * uv_dehom_yp.x());
+                Vec2D dv(texture->height() * uv_dehom_xp.y(), texture->height() * uv_dehom_yp.y());
+
+                double area = du.abs() + dv.abs();
+
+                color = texture->get_pixel_from_UV(uv_dehom, area);
             }
+            double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
+            drawPixelUnsafe(x, y, z, color);
+            abg += abg_dx;
+            uv_hom += uv_hom_dx;
         }
     }
 }
 
 void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
-// Filling inside
-    int x_min = (int)std::min({(double)_width, triangle[0].x(), triangle[1].x(), triangle[2].x()});
-    int x_max = (int)std::max({0.0, triangle[0].x(), triangle[1].x(), triangle[2].x()}) + 1;
-    int y_min = (int)std::min({(double)_height, triangle[0].y(), triangle[1].y(), triangle[2].y()});
-    int y_max = (int)std::max({0.0, triangle[0].y(), triangle[1].y(), triangle[2].y()}) + 1;
+    // Filling inside
+    int x_min = std::clamp<int>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    int y_min = std::clamp<int>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    int x_max = std::clamp<int>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    int y_max = std::clamp<int>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
 
-    auto tc = triangle.textureCoordinates();
+    if (x_min > x_max || y_min > y_max) return;
 
-    for(int y = y_min; y <= y_max; y++) {
-        for(int x = x_min; x <= x_max; x++) {
-            Vec3D abg = triangle.abgBarycCoord(Vec2D(x, y));
-            if(abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0) {
-                double z = triangle[0].z()*abg.x() + triangle[1].z()*abg.y() + triangle[2].z()*abg.z();
-                drawPixel(x, y, z, color);
-            }
+    Vec3D abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
+    Vec3D abg_dx = triangle.abgBarycCoord(Vec2D(x_min + 1, y_min));
+    Vec3D abg_dy = triangle.abgBarycCoord(Vec2D(x_min, y_min + 1));
+    abg_dx = abg_dx - abg_origin;
+    abg_dy = abg_dy - abg_origin;
+
+    for (int y = y_min; y <= y_max; y++) {
+        Vec3D abg = abg_origin;
+        abg_origin += abg_dy;
+
+        int x_cur_min, x_cur_max;
+        if (!lineLimits(abg, abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
+
+        for (int x = x_cur_min; x <= x_cur_max; x++) {
+            double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
+            drawPixelUnsafe(x, y, z, color);
+            abg += abg_dx;
         }
     }
 }
@@ -262,25 +337,6 @@ void Screen::setTitle(const std::string &title) {
 
 bool Screen::isOpen() const {
     return _isOpen;
-}
-
-void Screen::close() {
-    _isOpen = false;
-
-    SDL_DestroyRenderer(_renderer);
-    SDL_DestroyWindow(_window);
-    SDL_Quit();
-
-    _renderer = nullptr;
-    _window = nullptr;
-}
-
-void Screen::clearDepthBuffer() {
-    for (auto& row : _depthBuffer) {
-        for(auto& el : row) {
-            el = 1;
-        }
-    }
 }
 
 void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color) {
@@ -306,7 +362,7 @@ void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
     }
 }
 
-void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize, const Color& color) {
+void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize, const Color& src) {
     TTF_Font* ourFont = ResourceManager::loadFont(Consts::DEFAULT_FONT_FILENAME)->getFont(fontsize);
 
     // Confirm that it was loaded
@@ -316,23 +372,54 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
 
     SDL_Surface* surfaceText = TTF_RenderText_Solid(ourFont,
                                                     text.c_str(),
-                                                    {color.r(),color.g(),color.b(), color.a()});
+                                                    {255, 255, 255, 255});
 
-    int textWidth = 0;
-    int textHeight = 0;
-    TTF_SizeText(ourFont, text.c_str(), &textWidth, &textHeight);
+    uint16_t textWidth = std::min(surfaceText->w, _width - x);
+    uint16_t textHeight = std::min(surfaceText->h, _height - y);
+    uint16_t pitch = surfaceText->pitch;
+    uint8_t *pixels = reinterpret_cast<uint8_t *>(surfaceText->pixels);
 
-    SDL_Texture* textureText = SDL_CreateTextureFromSurface(_renderer,surfaceText);
+    // default SDL blend mode:
+    // dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
+    // dstA = srcA + (dstA * (1-srcA))
+
+    for (uint16_t i = 0; i < textHeight; i++) {
+        for (uint16_t j = 0; j < textWidth; j++) {
+            if (pixels[i * pitch + j]) {
+                size_t offset = (i + y) * _width + (j + x);
+                Color dst(_pixelBuffer[offset]);
+                Color res((static_cast<int>(src.r()) * src.a() + static_cast<int>(dst.r()) * (255 - src.a())) / 255,
+                          (static_cast<int>(src.g()) * src.a() + static_cast<int>(dst.g()) * (255 - src.a())) / 255,
+                          (static_cast<int>(src.b()) * src.a() + static_cast<int>(dst.b()) * (255 - src.a())) / 255,
+                          src.a() + dst.a() * (255 - src.a())
+                );
+                _pixelBuffer[offset] = res.rgba();
+            }
+        }
+    }
 
     SDL_FreeSurface(surfaceText);
+}
 
-    SDL_Rect rectangle{x, y, textWidth, textHeight};
-    SDL_RenderCopy(_renderer,textureText,nullptr,&rectangle);
+void Screen::close() {
+    _isOpen = false;
 
-    SDL_DestroyTexture(textureText);
+    SDL_DestroyTexture(_screenTexture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
+    SDL_Quit();
+
+    _screenTexture = nullptr;
+    _renderer = nullptr;
+    _window = nullptr;
 }
 
 Screen::~Screen() {
+    if (_screenTexture) {
+        SDL_DestroyTexture(_screenTexture);
+        _screenTexture = nullptr;
+    }
+
     if(_renderer) {
         SDL_DestroyRenderer(_renderer);
         _renderer = nullptr;
@@ -344,6 +431,4 @@ Screen::~Screen() {
     }
 
     SDL_Quit();
-
-    _depthBuffer.clear();
 }

@@ -38,7 +38,7 @@ void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
             // draw projected triangles
             Time::startTimer("d rasterization");
             for (auto &t : projected) {
-                screen->drawTriangle(*t.first, t.second);
+                screen->drawTriangle(*t.first, t.second.get());
             }
             Time::pauseTimer("d rasterization");
             continue;
@@ -91,7 +91,9 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
         // While printing debug info we will take into account only timer names witch start with 'd '
         Time::startTimer("d all");
 
+        Time::startTimer("d clear");
         screen->clear();
+        Time::stopTimer("d clear");
 
         Time::update();
 
@@ -109,11 +111,6 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::stri
 
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");
-
-        Time::startTimer("d depthBuffer");
-        // draw triangles on the screen
-        screen->clearDepthBuffer();
-        Time::stopTimer("d depthBuffer");
 
         Time::startTimer("d game update");
         update();
@@ -183,7 +180,7 @@ void Engine::printDebugInfo() const {
             }
 
             screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
-                                        Color( std::array<double, 4>{(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
+                                        Color(width * 255 / timerWidth, 255 - width * 255 / timerWidth, 0, 255));
 
             screen->drawText(
                     timerName.substr(2, timerName.size()) + " (" +
@@ -196,7 +193,7 @@ void Engine::printDebugInfo() const {
 
         int width = timerWidth * (totalTime - timeSum) / totalTime;
         screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
-                             Color( std::array<double, 4>{(float)(width) / timerWidth, (1.0f - (float)(width) / timerWidth), 0, 1}));
+                             Color(width * 255 / timerWidth, 255 - width * 255 / timerWidth, 0, 255));
 
         screen->drawText("all other stuff (" + std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
                          10, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));

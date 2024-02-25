@@ -14,7 +14,7 @@ class Texture {
 private:
     // For resampling purposes we store resampled versions of the image
     // up until 1x1 image (avg color of the whole texture)
-    std::vector<std::shared_ptr<Image>> _texture;
+    std::vector<Image> _texture;
 
 public:
     explicit Texture(const FilePath& filename);
@@ -25,8 +25,8 @@ public:
     // For resampling
     [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv, double area) const;
 
-    [[nodiscard]] uint16_t width() const {return _texture.front()->width(); }
-    [[nodiscard]] uint16_t height() const {return _texture.front()->height(); }
+    [[nodiscard]] uint16_t width() const { return _texture.front().width(); }
+    [[nodiscard]] uint16_t height() const { return _texture.front().height(); }
 };
 
 

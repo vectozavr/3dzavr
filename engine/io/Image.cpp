@@ -2,80 +2,23 @@
 // Created by Ivan Ilin on 21/09/2023.
 //
 
+#include <algorithm>
 #include <fstream>
 #include <cmath>
 #include "linalg/Vec3D.h"
 #include "Image.h"
 
 Image::Image(uint16_t width, uint16_t height) : _width(width), _height(height), _valid(true) {
-
     if(width != 0 && height != 0) {
-        _row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * _height);
-        for(int y = 0; y < _height; y++) {
-            _row_pointers[y] = (png_byte*)malloc(_width*4);
-        }
+        _data = new png_byte[_height * _width * 4];
     } else {
         _valid = false;
     }
 }
 
-Image::CODE Image::save2png(const FilePath &file_name, uint16_t bit_depth) {
-    if(!isValid()) {
-        return ERROR;
-    }
-
-    FILE * fp2 = fopen(file_name.str().c_str(), "wb");
-    if (!fp2) {
-        return FILE_OPEN_ERROR;
-    }
-
-    // Create png struct pointer
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-    if (!png_ptr){
-        // dealing with error
-        return PNG_STRUCT_ERROR;
-    }
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr) {
-        png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
-        // dealing with error
-        return INFO_STRUCT_ERROR;
-    }
-
-    // Set png info like width, height, bit depth and color type
-    // in this example, I assumed grayscale image. You can change image type easily
-    png_init_io(png_ptr, fp2);
-    png_set_IHDR(png_ptr, info_ptr, _width, _height, bit_depth, \
-    PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, \
-    PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-
-    // Write png file
-    png_write_info(png_ptr, info_ptr);
-    png_write_image(png_ptr, _row_pointers);
-    png_write_end(png_ptr, info_ptr);
-    png_destroy_write_struct(&png_ptr, &info_ptr);
-
-    return SUCCESS;
-}
-
-void Image::set_pixel(uint16_t x, uint16_t y, const Color& color) {
-    _row_pointers[y][4*x + 0] = color.r();
-    _row_pointers[y][4*x + 1] = color.g();
-    _row_pointers[y][4*x + 2] = color.b();
-    _row_pointers[y][4*x + 3] = color.a();
-}
-
-Color Image::get_pixel(uint16_t x, uint16_t y) const {
-    // x and y should be in range of the image size
-    x = x < 0 ? 0 : x;
-    x = x >= _width ? _width-1 : x;
-    y = y < 0 ? 0 : y;
-    y = y >= _height ? _height-1 : y;
-
-    return Color(_row_pointers[y][4*x + 0],
-                 _row_pointers[y][4*x + 1],
-                 _row_pointers[y][4*x + 2],
-                 _row_pointers[y][4*x + 3]);
+Image::Image(Image&& other) noexcept : _width(other._width), _height(other._height), _valid(other._valid), _data(other._data) {
+    other._valid = false;
+    other._data = nullptr;
 }
 
 Image::Image(const FilePath &filename) {
@@ -133,11 +76,16 @@ Image::Image(const FilePath &filename) {
 
     png_read_update_info(png, info);
 
-    _row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * _height);
-    for(int y = 0; y < _height; y++) {
-        _row_pointers[y] = (png_byte*)malloc(png_get_rowbytes(png,info));
+    size_t real = png_get_rowbytes(png, info);
+    if (real != 4 * _width) abort();
+
+    _data = new png_byte[_height * _width * 4];
+    png_bytepp tmp_rows = new png_bytep[_height];
+    for(size_t y = 0; y < _height; y++) {
+        tmp_rows[y] = _data + y * _width * 4;
     }
-    png_read_image(png, _row_pointers);
+    png_read_image(png, tmp_rows);
+    delete[] tmp_rows;
 
     fclose(fp);
 
@@ -145,47 +93,145 @@ Image::Image(const FilePath &filename) {
     _valid = true;
 }
 
-auto repeatClamp = [](double coord) {
-    double wrapped = std::fmod(coord, 1.0);
+Image::~Image() {
+    // deallocate memory
+    if (_data != nullptr) {
+        delete[] _data;
+    }
+    _data = nullptr;
+    _valid = false;
+}
+
+Image& Image::operator=(Image&& other) noexcept {
+    _valid = other._valid;
+    other._valid = false;
+
+    if (_data != nullptr) delete[] _data;
+    _data = other._data;
+    other._data = nullptr;
+    return *this;
+}
+
+
+
+Image::CODE Image::save2png(const FilePath &file_name, uint16_t bit_depth) {
+    if(!isValid()) {
+        return ERROR;
+    }
+
+    FILE * fp2 = fopen(file_name.str().c_str(), "wb");
+    if (!fp2) {
+        return FILE_OPEN_ERROR;
+    }
+
+    // Create png struct pointer
+    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (!png_ptr){
+        // dealing with error
+        return PNG_STRUCT_ERROR;
+    }
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+        // dealing with error
+        return INFO_STRUCT_ERROR;
+    }
+
+    png_bytepp tmp_rows = new png_bytep[_height];
+    for (size_t y = 0; y < _height; y++) {
+        tmp_rows[y] = _data + y * _width * 4;
+    }
+
+    // Set png info like width, height, bit depth and color type
+    // in this example, I assumed grayscale image. You can change image type easily
+    png_init_io(png_ptr, fp2);
+    png_set_IHDR(png_ptr, info_ptr, _width, _height, bit_depth, \
+    PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, \
+    PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+    // Write png file
+    png_write_info(png_ptr, info_ptr);
+    png_write_image(png_ptr, tmp_rows);
+    png_write_end(png_ptr, info_ptr);
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+
+    delete[] tmp_rows;
+
+    return SUCCESS;
+}
+
+void Image::set_pixel(uint16_t x, uint16_t y, const Color& color) {
+    size_t offset = (y * _width + x) * 4;
+    _data[offset + 0] = color.r();
+    _data[offset + 1] = color.g();
+    _data[offset + 2] = color.b();
+    _data[offset + 3] = color.a();
+}
+
+inline Color Image::get_pixel_unsafe(uint16_t x, uint16_t y) const {
+    size_t offset = (y * _width + x) * 4;
+    return Color(_data[offset + 0],
+                 _data[offset + 1],
+                 _data[offset + 2],
+                 _data[offset + 3]);
+}
+
+Color Image::get_pixel(uint16_t x, uint16_t y) const {
+    // x and y should be in range of the image size
+    x = std::min<uint16_t>(_width - 1, x);
+    y = std::min<uint16_t>(_height - 1, y);
+    return get_pixel_unsafe(x, y);
+}
+
+uint16_t repeatClamp(int64_t coord, uint16_t limit) {
+    int16_t wrapped = coord % limit;
     if (wrapped < 0) {
-        wrapped += 1.0;
+        wrapped += limit;
     }
     return wrapped;
 };
 
-auto mirrorClamp = [](double coord) {
-    if (coord >= 0.0 && coord <= 1.0) {
-        // If the coordinate is within the [0, 1] range, use it as is.
+uint16_t mirrorClamp(int64_t coord, uint16_t limit) {
+    if (coord >= 0 && coord < limit) {
+        // If the coordinate is within the [0, 1) range, use it as is.
         return coord;
     } else {
         // Calculate the mirrored coordinate
-        double mirrored = std::fmod(std::abs(coord), 2.0);
-        if (mirrored > 1.0) {
-            mirrored = 2.0 - mirrored;
+        uint16_t double_limit = limit * 2;
+        int16_t mirrored = coord % double_limit;
+        if (mirrored < 0) {
+            mirrored += double_limit;
         }
-        // Clamp the mirrored coordinate to [0, 1] range.
-        return std::max(0.0, std::min(mirrored, 1.0));
+        if (mirrored > limit) {
+            mirrored = double_limit - mirrored;
+        }
+        // Clamp the mirrored coordinate to [0, 1) range.
+        return std::min<uint16_t>(mirrored, limit - 1);
     }
 };
 
-double clampToEdge(double coord) {
-    // Clamp the coordinate to the nearest edge in the [0, 1] range
-    return std::max(0.0, std::min(coord, 1.0));
+uint16_t clampToEdge(int64_t coord, uint16_t limit) {
+    // Clamp the coordinate to the nearest edge in the [0, 1) range
+    return std::clamp<uint16_t>(coord, 0, limit - 1);
 }
 
 Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) const {
 
-    Vec2D clampedUV(uv);
+    int64_t scaledUV[2] = { static_cast<int64_t>(uv.x() * _width), static_cast<int64_t>(uv.y() * _height) };
+    uint16_t clampedUV[2];
 
     switch (mode) {
         case REPEAT:
-            clampedUV = Vec2D(repeatClamp(clampedUV.x()), repeatClamp(clampedUV.y()));
+            clampedUV[0] = repeatClamp(scaledUV[0], _width);
+            clampedUV[1] = repeatClamp(scaledUV[1], _height);
             break;
         case MIRRORED_REPEAT:
-            clampedUV = Vec2D(mirrorClamp(clampedUV.x()), mirrorClamp(clampedUV.y()));
+            clampedUV[0] = mirrorClamp(scaledUV[0], _width);
+            clampedUV[1] = mirrorClamp(scaledUV[1], _height);
             break;
         case CLAMP_TO_EDGE:
-            clampedUV = Vec2D(clampToEdge(clampedUV.x()), clampToEdge(clampedUV.y()));
+            clampedUV[0] = clampToEdge(scaledUV[0], _width);
+            clampedUV[1] = clampToEdge(scaledUV[1], _height);
             break;
     }
 
@@ -203,7 +249,7 @@ Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) 
          *
          */
 
-        return get_pixel((uint16_t)(clampedUV.x()*_width), (uint16_t)((1-clampedUV.y())*_height));
+        return get_pixel_unsafe(clampedUV[0], _height - 1 - clampedUV[1]);
     } else {
         /*
          * Top-down approach
@@ -213,39 +259,32 @@ Color Image::get_pixel_from_UV(const Vec2D& uv, CLAMP_MODE mode, bool bottomUp) 
          *
          */
 
-        return get_pixel((uint16_t)(clampedUV.x()*_width), (uint16_t)(clampedUV.y()*_height));
+        return get_pixel_unsafe(clampedUV[0], clampedUV[1]);
     }
 }
 
-Image::~Image() {
-    // deallocate memory
-    if(_row_pointers != nullptr) {
-        for(int y = 0; y < _height; y++) {
-            if(_row_pointers[y]) {
-                free(_row_pointers[y]);
-                _row_pointers[y] = nullptr;
-            }
-        }
-        free(_row_pointers);
-        _row_pointers = nullptr;
-    }
+Image Image::downSampled() const {
+    auto newWidth = std::max<uint16_t>(_width/2, 1);
+    auto newHeight = std::max<uint16_t>(_height/2, 1);
+    Image newImage = Image(newWidth, newHeight);
 
-    _valid = false;
-}
+    for (size_t y = 0; y < newHeight; y++) {
+        for(size_t x = 0; x < newWidth; x++) {
+            uint16_t r, g, b, a;
+            Color tmpColor = get_pixel(x * 2, y * 2);
+            r = tmpColor.r(); g = tmpColor.g(); b = tmpColor.b(); a = tmpColor.a();
 
-std::shared_ptr<Image> Image::downSampled() const {
-    auto newWidth = (uint16_t)std::max(_width/2.0, 1.0);
-    auto newHeight = (uint16_t)std::max(_height/2.0, 1.0);
-    std::shared_ptr<Image> newImage = std::make_shared<Image>(newWidth, newHeight);
+            tmpColor = get_pixel(x * 2 + 1, y * 2);
+            r += tmpColor.r(); g += tmpColor.g(); b += tmpColor.b(); a += tmpColor.a();
 
-    for(int x = 0; x < newWidth; x++) {
-        for(int y = 0; y < newHeight; y++) {
-            Color sumColor =
-                    get_pixel(x*2, y*2) +
-                    get_pixel(x*2+1, y*2) +
-                    get_pixel(x*2, y*2+1) +
-                    get_pixel(x*2+1, y*2+1);
-            newImage->set_pixel(x, y, sumColor/4);
+            tmpColor = get_pixel(x * 2, y * 2 + 1);
+            r += tmpColor.r(); g += tmpColor.g(); b += tmpColor.b(); a += tmpColor.a();
+
+            tmpColor = get_pixel(x * 2 + 1, y * 2 + 1);
+            r += tmpColor.r(); g += tmpColor.g(); b += tmpColor.b(); a += tmpColor.a();
+
+            tmpColor = Color(r / 4, g / 4, b / 4, a / 4);
+            newImage.set_pixel(x, y, tmpColor);
         }
     }
 

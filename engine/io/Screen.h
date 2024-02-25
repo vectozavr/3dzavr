@@ -21,8 +21,10 @@ class Screen final {
 private:
     SDL_Renderer* _renderer = nullptr;
     SDL_Window* _window = nullptr;
+    SDL_Texture* _screenTexture = nullptr;
 
-    std::vector<std::vector<float>> _depthBuffer;
+    std::vector<float> _depthBuffer;
+    std::vector<uint32_t> _pixelBuffer;
 
     uint16_t _width;
     uint16_t _height;
@@ -36,7 +38,8 @@ private:
 
     bool _isOpen = false;
 
-    void initDepthBuffer();
+    void drawPixelUnsafe(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer and checks
+    void drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color); // With using depth buffer without checks
 
 public:
     Screen& operator=(const Screen& scr) = delete;
@@ -51,7 +54,7 @@ public:
     void drawPixel(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer
     void drawPixel(uint16_t x, uint16_t y, double z, const Color& color); // With using depth buffer
     void drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness = 1);
-    void drawTriangle(const Triangle &triangle, std::shared_ptr<Material> material = nullptr);
+    void drawTriangle(const Triangle &triangle, Material* material = nullptr);
     void drawTriangle(const Triangle &triangle, const Color &color);
     void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color);
     void drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
@@ -75,10 +78,8 @@ public:
     void startRender();
     void stopRender();
 
-    void clearDepthBuffer();
-
     ~Screen();
 };
 
 
-#endif //INC_3DZAVR_SCREEN_H
+#endif //ENGINE_SCREEN_H

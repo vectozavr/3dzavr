@@ -12,7 +12,7 @@ Plane::Plane(const Vec3D &N, const Vec3D &P, const ObjectTag& nameTag, const Col
 Object(nameTag), _normal(N.normalized()), _point(P) {}
 
 double Plane::distance(const Vec3D &point) const {
-    return point.dot(_normal) - _point.dot(_normal);
+    return (point - _point).dot(_normal);
 }
 
 Plane::Plane(const ObjectTag &tag, const Plane &plane) :
@@ -20,16 +20,16 @@ Object(tag, plane), _point(plane._point), _normal(plane._normal) {
 
 }
 
-std::vector<Triangle> Plane::clip(const Triangle &tri) const {
+stack_vector<Triangle, 2> Plane::clip(const Triangle &tri) const {
 
-    std::vector<Triangle> result;
+    stack_vector<Triangle, 2> result;
 
     // points coordinated
-    std::vector<Vec3D> insidePoints;
-    std::vector<Vec3D> outsidePoints;
+    stack_vector<Vec3D, 3> insidePoints;
+    stack_vector<Vec3D, 3> outsidePoints;
     // texture coordinates
-    std::vector<Vec3D> insideTexUV;
-    std::vector<Vec3D> outsideTexUV;
+    stack_vector<Vec3D, 3> insideTexUV;
+    stack_vector<Vec3D, 3> outsideTexUV;
     auto textureCoord = tri.textureCoordinates();
 
     double distances[3] = {distance(Vec3D(tri[0])),

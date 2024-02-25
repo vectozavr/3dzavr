@@ -8,6 +8,7 @@
 #include "linalg/Vec4D.h"
 #include "Triangle.h"
 #include "objects/Object.h"
+#include "utils/stack_vector.h"
 
 
 class Plane final : public Object {
@@ -28,7 +29,7 @@ public:
 
     [[nodiscard]] double distance(const Vec3D &point4D) const;
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
-    [[nodiscard]] std::vector<Triangle> clip(const Triangle &tri) const;
+    [[nodiscard]] stack_vector<Triangle, 2> clip(const Triangle &tri) const;
     [[nodiscard]] Vec3D N() const { return _normal; }
     [[nodiscard]] Vec3D P() const { return _point; }
 
