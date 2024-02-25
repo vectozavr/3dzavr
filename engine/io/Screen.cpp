@@ -105,8 +105,7 @@ void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    uint32_t c = color.r() << 24 | color.g() << 16 | color.b() << 8 | color.a();
-    _pixelBuffer[y * _width + x] = c;
+    _pixelBuffer[y * _width + x] = color.rgba();
 }
 
 void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
@@ -120,8 +119,7 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
 }
 
 inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
-    uint32_t c = color.r() << 24 | color.g() << 16 | color.b() << 8 | color.a();
-    _pixelBuffer[y * _width + x] = c;
+    _pixelBuffer[y * _width + x] = color.rgba();
 }
 
 inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {

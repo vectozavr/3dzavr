@@ -29,17 +29,26 @@ public:
 private:
     size_type _size = 0;
     alignas(value_type) uint8_t _buff[N * sizeof(value_type)];
-std::vector<int> a;
+
 public:
     stack_vector() = default;
 
     stack_vector(const stack_vector& other) : _size(other._size) {
-        pointer arr1 = reinterpret_cast<pointer>(_buff);
-        pointer arr2 = reinterpret_cast<pointer>(_buff);
+        auto arr1 = reinterpret_cast<pointer>(_buff);
+        auto arr2 = reinterpret_cast<const_pointer>(other._buff);
         for (size_type i = 0; i < _size; i++) {
             arr1[i] = value_type(arr2[i]);
         }
     };
+
+    // Create a vector consisting of copies of at most N first elements from [first,last).
+    template<typename InputIterator>
+    stack_vector(InputIterator first, InputIterator last) {
+        auto arr = reinterpret_cast<pointer>(_buff);
+        for (size_type i = 0; i < N && first != last; i++, first++) {
+            arr[i] = value_type(*first);
+        }
+    }
 
     ~stack_vector() {
         clear();
