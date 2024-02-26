@@ -18,10 +18,13 @@ public:
 
     Vec4D &operator=(const Vec4D &) = default;
 
-    [[nodiscard]] inline double x() const { return _arr_point[0]; }
-    [[nodiscard]] inline double y() const { return _arr_point[1]; }
-    [[nodiscard]] inline double z() const { return _arr_point[2]; }
-    [[nodiscard]] inline double w() const { return _arr_point[3]; }
+    [[nodiscard]] inline const double& x() const { return _arr_point[0]; }
+    [[nodiscard]] inline const double& y() const { return _arr_point[1]; }
+    [[nodiscard]] inline const double& z() const { return _arr_point[2]; }
+    [[nodiscard]] inline const double& w() const { return _arr_point[3]; }
+
+    [[nodiscard]] inline double& operator[](std::size_t i) { return _arr_point[i]; }
+    [[nodiscard]] inline const double& operator[](std::size_t i) const { return _arr_point[i]; }
 
     [[nodiscard]] Vec4D operator-() const &;
     [[nodiscard]] Vec4D &operator-() &&;

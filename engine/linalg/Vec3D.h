@@ -21,9 +21,12 @@ public:
 
     Vec3D &operator=(const Vec3D &) = default;
 
-    [[nodiscard]] inline double x() const { return _arr_point[0]; }
-    [[nodiscard]] inline double y() const { return _arr_point[1]; }
-    [[nodiscard]] inline double z() const { return _arr_point[2]; }
+    [[nodiscard]] inline const double& x() const { return _arr_point[0]; }
+    [[nodiscard]] inline const double& y() const { return _arr_point[1]; }
+    [[nodiscard]] inline const double& z() const { return _arr_point[2]; }
+
+    [[nodiscard]] inline double& operator[](std::size_t i) { return _arr_point[i]; }
+    [[nodiscard]] inline const double& operator[](std::size_t i) const { return _arr_point[i]; }
 
     [[nodiscard]] Vec3D operator-() const &;
     [[nodiscard]] Vec3D &operator-() &&;

@@ -33,19 +33,19 @@ public:
 
     Triangle &operator=(const Triangle &) = default;
 
-    [[nodiscard]] const Vec4D& operator[](int i) const;
+    [[nodiscard]] inline const Vec4D& operator[](int i) const { return _points[i]; }
 
-    [[nodiscard]] Vec3D position() const { return Vec3D(_points[0] + _points[1] + _points[2])/3; }
+    [[nodiscard]] inline Vec3D position() const { return Vec3D(_points[0] + _points[1] + _points[2])/3; }
 
-    [[nodiscard]] Vec3D norm() const;
+    [[nodiscard]] inline Vec3D norm() const { return _normal; }
 
     // Operations with Matrix4x4
     [[nodiscard]] Triangle operator*(const Matrix4x4 &matrix4X4) const;
 
     [[nodiscard]] bool isPointInside(const Vec3D &point) const;
 
-    [[nodiscard]] std::array<Vec4D, 3> points() const {return _points; }
-    [[nodiscard]] std::array<Vec3D, 3> textureCoordinates() const { return _textureCoordinates; }
+    [[nodiscard]] inline const std::array<Vec4D, 3>& points() const {return _points; }
+    [[nodiscard]] inline const std::array<Vec3D, 3>& textureCoordinates() const { return _textureCoordinates; }
 
     [[nodiscard]] double distance(const Vec3D &vec) const { return norm().dot(Vec3D(_points[0]) - vec); }
 
@@ -55,4 +55,4 @@ public:
 };
 
 
-#endif //INC_3DZAVR_TRIANGLE_H
+#endif //ENGINE_TRIANGLE_H
