@@ -52,6 +52,6 @@ public:
     [[nodiscard]] Vec4D normalized() const; // Returns normalized vector without changing
 };
 
-#include "Vec4D.cpp"
+#include "Vec4D.inl"
 
 #endif //ENGINE_VEC4D_H

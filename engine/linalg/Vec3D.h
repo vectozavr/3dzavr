@@ -60,6 +60,6 @@ public:
     static Vec3D Random();
 };
 
-#include "Vec3D.cpp"
+#include "Vec3D.inl"
 
 #endif //ENGINE_VEC3D_H

@@ -55,6 +55,6 @@ public:
     [[nodiscard]] Vec2D normalized() const; // Returns normalized vector without changing
 };
 
-#include "Vec2D.cpp"
+#include "Vec2D.inl"
 
 #endif //ENGINE_VEC2D_H

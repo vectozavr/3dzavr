@@ -56,6 +56,6 @@ public:
     Matrix4x4 static ScreenSpace(int width, int height);
 };
 
-#include "Matrix4x4.cpp"
+#include "Matrix4x4.inl"
 
 #endif //ENGINE_MATRIX4X4_H
