@@ -12,13 +12,13 @@ Image::Image(uint16_t width, uint16_t height) : _width(width), _height(height), 
     if(width != 0 && height != 0) {
         _data = new png_byte[_height * _width * 4];
     } else {
-        _valid = false;
+        invalidate();
     }
 }
 
 Image::Image(Image&& other) noexcept : _width(other._width), _height(other._height), _valid(other._valid), _data(other._data) {
-    other._valid = false;
     other._data = nullptr;
+    other.invalidate();
 }
 
 Image::Image(const FilePath &filename) {
@@ -26,7 +26,7 @@ Image::Image(const FilePath &filename) {
     FILE *fp = fopen(filename.str().c_str(), "rb");
 
     if (!fp) {
-        _valid = false;
+        invalidate();
         return;
     }
 
@@ -94,21 +94,24 @@ Image::Image(const FilePath &filename) {
 }
 
 Image::~Image() {
-    // deallocate memory
+    invalidate();
+}
+
+void Image::invalidate() {
     if (_data != nullptr) {
         delete[] _data;
     }
     _data = nullptr;
     _valid = false;
+    _width = _height = 0;
 }
 
 Image& Image::operator=(Image&& other) noexcept {
-    _valid = other._valid;
-    other._valid = false;
-
     if (_data != nullptr) delete[] _data;
+    _valid = other._valid;
     _data = other._data;
     other._data = nullptr;
+    other.invalidate();
     return *this;
 }
 

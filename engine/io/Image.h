@@ -25,6 +25,8 @@ private:
     png_bytep _data = nullptr;
 
     bool _valid = false;
+
+    void invalidate();
 public:
     explicit Image(uint16_t width = Consts::STANDARD_SCREEN_WIDTH, uint16_t height = Consts::STANDARD_SCREEN_HEIGHT);
     explicit Image(const FilePath &filename);
