@@ -28,8 +28,7 @@ public:
     [[nodiscard]] inline double& operator[](std::size_t i) { return _arr_point[i]; }
     [[nodiscard]] inline const double& operator[](std::size_t i) const { return _arr_point[i]; }
 
-    [[nodiscard]] Vec3D operator-() const &;
-    [[nodiscard]] Vec3D &operator-() &&;
+    [[nodiscard]] Vec3D operator-() const;
 
     // Boolean operations
     bool operator==(const Vec3D &vec) const;
@@ -37,24 +36,20 @@ public:
 
     // Operations with Vec3D
     Vec3D &operator+=(const Vec3D &vec);
-    [[nodiscard]] Vec3D operator+(const Vec3D &vec) const &;
-    [[nodiscard]] Vec3D &operator+(const Vec3D &vec) &&;
+    [[nodiscard]] Vec3D operator+(const Vec3D &vec) const;
 
     Vec3D &operator-=(const Vec3D &vec);
-    [[nodiscard]] Vec3D operator-(const Vec3D &vec) const &;
-    [[nodiscard]] Vec3D &operator-(const Vec3D &vec) &&;
+    [[nodiscard]] Vec3D operator-(const Vec3D &vec) const;
 
     [[nodiscard]] double dot(const Vec3D &vec) const; // Returns dot product
     [[nodiscard]] Vec3D cross(const Vec3D &vec) const; // Returns cross product
 
     // Operations with numbers
     Vec3D &operator*=(double number);
-    [[nodiscard]] Vec3D operator*(double number) const &;
-    [[nodiscard]] Vec3D &operator*(double number) &&;
+    [[nodiscard]] Vec3D operator*(double number) const;
 
     Vec3D &operator/=(double number);
-    [[nodiscard]] Vec3D operator/(double number) const &;
-    [[nodiscard]] Vec3D &operator/(double number) &&;
+    [[nodiscard]] Vec3D operator/(double number) const;
 
     // Other useful methods
     [[nodiscard]] double sqrAbs() const; // Returns squared vector length
@@ -65,5 +60,6 @@ public:
     static Vec3D Random();
 };
 
+#include "Vec3D.cpp"
 
 #endif //ENGINE_VEC3D_H

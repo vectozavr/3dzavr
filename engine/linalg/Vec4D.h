@@ -26,8 +26,7 @@ public:
     [[nodiscard]] inline double& operator[](std::size_t i) { return _arr_point[i]; }
     [[nodiscard]] inline const double& operator[](std::size_t i) const { return _arr_point[i]; }
 
-    [[nodiscard]] Vec4D operator-() const &;
-    [[nodiscard]] Vec4D &operator-() &&;
+    [[nodiscard]] Vec4D operator-() const;
 
     // Boolean operations
     bool operator==(const Vec4D &vec) const;
@@ -35,26 +34,24 @@ public:
 
     // Operations with Vec4D
     Vec4D &operator+=(const Vec4D &vec);
-    [[nodiscard]] Vec4D operator+(const Vec4D &vec) const &;
-    [[nodiscard]] Vec4D &operator+(const Vec4D &vec) &&;
+    [[nodiscard]] Vec4D operator+(const Vec4D &vec) const;
 
     Vec4D &operator-=(const Vec4D &vec);
-    [[nodiscard]] Vec4D operator-(const Vec4D &vec) const &;
-    [[nodiscard]] Vec4D &operator-(const Vec4D &vec) &&;
+    [[nodiscard]] Vec4D operator-(const Vec4D &vec) const;
 
     // Operations with numbers
     Vec4D &operator*=(double number);
-    [[nodiscard]] Vec4D operator*(double number) const &;
-    [[nodiscard]] Vec4D &operator*(double number) &&;
+    [[nodiscard]] Vec4D operator*(double number) const;
 
     Vec4D &operator/=(double number);
-    [[nodiscard]] Vec4D operator/(double number) const &;
-    [[nodiscard]] Vec4D &operator/(double number) &&;
+    [[nodiscard]] Vec4D operator/(double number) const;
 
     // Other useful methods
     [[nodiscard]] double sqrAbs() const; // Returns squared vector length
     [[nodiscard]] double abs() const; // Returns vector length
     [[nodiscard]] Vec4D normalized() const; // Returns normalized vector without changing
 };
+
+#include "Vec4D.cpp"
 
 #endif //ENGINE_VEC4D_H

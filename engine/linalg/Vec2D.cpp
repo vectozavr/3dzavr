@@ -3,69 +3,53 @@
 //
 
 #include <cmath>
+#include <stdexcept>
 
-#include <linalg/Vec2D.h>
-#include <Consts.h>
+#include <ScalarConsts.h>
 
-Vec2D::Vec2D(const Vec2D &vec) {
-    _arr_point[0] = vec.x();
-    _arr_point[1] = vec.y();
-}
+inline Vec2D::Vec2D(const Vec2D &vec) : _arr_point{vec[0], vec[1]} {}
 
-Vec2D::Vec2D(double x, double y) {
-    _arr_point[0] = x;
-    _arr_point[1] = y;
-}
+inline Vec2D::Vec2D(const Vec4D &vec) : _arr_point{vec[0], vec[1]} {}
 
-Vec2D::Vec2D(const Vec4D &point4D) {
-    _arr_point[0] = point4D.x();
-    _arr_point[1] = point4D.y();
-}
+inline Vec2D::Vec2D(double x, double y) : _arr_point{x, y} {}
 
-
-Vec2D Vec2D::operator-() const &{
+inline Vec2D Vec2D::operator-() const {
     return Vec2D(-x(), -y());
 }
 
-Vec2D &Vec2D::operator-() &&{
-    _arr_point[0] = -_arr_point[0];
-    _arr_point[1] = -_arr_point[1];
-    return *this;
-}
 
-
-bool Vec2D::operator==(const Vec2D &vec) const {
+inline bool Vec2D::operator==(const Vec2D &vec) const {
     return (*this - vec).sqrAbs() < Consts::EPS;
 }
 
-bool Vec2D::operator!=(const Vec2D &vec) const {
+inline bool Vec2D::operator!=(const Vec2D &vec) const {
     return !(*this == vec);
 }
 
 // Operations with Vec2D
 
-Vec2D &Vec2D::operator+=(const Vec2D &vec) {
+inline Vec2D& Vec2D::operator+=(const Vec2D &vec) {
     _arr_point[0] += vec._arr_point[0];
     _arr_point[1] += vec._arr_point[1];
     return *this;
 }
 
-Vec2D &Vec2D::operator-=(const Vec2D &vec) {
+inline Vec2D& Vec2D::operator-=(const Vec2D &vec) {
     _arr_point[0] -= vec._arr_point[0];
     _arr_point[1] -= vec._arr_point[1];
     return *this;
 }
 
-Vec2D &Vec2D::operator*=(double number) {
+inline Vec2D& Vec2D::operator*=(double number) {
     _arr_point[0] *= number;
     _arr_point[1] *= number;
     return *this;
 }
 
-Vec2D &Vec2D::operator/=(double number) {
+inline Vec2D& Vec2D::operator/=(double number) {
 #ifndef NDEBUG
     if (std::abs(number) <= Consts::EPS) {
-        throw std::domain_error{"Color::operator/(double number): division by zero"};
+        throw std::domain_error{"Vec2D::operator/(double number): division by zero"};
     }
 #endif
     _arr_point[0] /= number;
@@ -74,62 +58,41 @@ Vec2D &Vec2D::operator/=(double number) {
 }
 
 
-Vec2D Vec2D::operator+(const Vec2D &vec) const &{
+inline Vec2D Vec2D::operator+(const Vec2D &vec) const {
     Vec2D res = *this;
     res += vec;
     return res;
 }
 
-Vec2D Vec2D::operator-(const Vec2D &vec) const &{
+inline Vec2D Vec2D::operator-(const Vec2D &vec) const {
     Vec2D res = *this;
     res -= vec;
     return res;
 }
 
-Vec2D Vec2D::operator*(double number) const &{
+inline Vec2D Vec2D::operator*(double number) const {
     Vec2D res = *this;
     res *= number;
     return res;
 }
 
-Vec2D Vec2D::operator/(double number) const &{
+inline Vec2D Vec2D::operator/(double number) const {
     Vec2D res = *this;
     res /= number;
     return res;
 }
 
-
-Vec2D &Vec2D::operator+(const Vec2D &vec) &&{
-    *this += vec;
-    return *this;
-}
-
-Vec2D &Vec2D::operator-(const Vec2D &vec) &&{
-    *this -= vec;
-    return *this;
-}
-
-Vec2D &Vec2D::operator*(double number) &&{
-    *this *= number;
-    return *this;
-}
-
-Vec2D &Vec2D::operator/(double number) &&{
-    *this /= number;
-    return *this;
-}
-
 // Other useful methods
 
-double Vec2D::sqrAbs() const {
+inline double Vec2D::sqrAbs() const {
     return x() * x() + y() * y();
 }
 
-double Vec2D::abs() const {
+inline double Vec2D::abs() const {
     return sqrt(sqrAbs());
 }
 
-Vec2D Vec2D::normalized() const {
+inline Vec2D Vec2D::normalized() const {
     double vecAbs = sqrAbs();
     if (vecAbs > Consts::EPS) {
         return *this / sqrt(vecAbs);
@@ -138,6 +101,6 @@ Vec2D Vec2D::normalized() const {
     }
 }
 
-double Vec2D::dot(const Vec2D &vec) const {
+inline double Vec2D::dot(const Vec2D &vec) const {
     return vec.x() * x() + vec.y() * y();
 }

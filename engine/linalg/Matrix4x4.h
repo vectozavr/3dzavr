@@ -17,7 +17,7 @@ private:
 
 public:
     Matrix4x4() = default;
-    explicit Matrix4x4(const std::array<std::array<double, 4>, 4>& matrix): _arr(matrix) {};
+    explicit Matrix4x4(const std::array<std::array<double, 4>, 4>& matrix) : _arr(matrix) {};
 
     Matrix4x4 &operator=(const Matrix4x4 &matrix4X4) = default;
 
@@ -56,5 +56,6 @@ public:
     Matrix4x4 static ScreenSpace(int width, int height);
 };
 
+#include "Matrix4x4.cpp"
 
-#endif //INC_3DZAVR_MATRIX4X4_H
+#endif //ENGINE_MATRIX4X4_H
