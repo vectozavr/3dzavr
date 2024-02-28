@@ -203,18 +203,61 @@ bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int
 
     std::sort(offsets.begin(), offsets.end(), std::greater{});
 
-    while (!offsets.empty() && !isGoodAbg(abg + abg_dx * ceil(offsets.back()))) offsets.pop_back();
-    if (offsets.empty()) return false;
-    x_line_min = std::clamp<int>(x_min + std::ceil(offsets.back()), x_min, x_max);
-    offsets.pop_back();
-
-    while (!offsets.empty() && !isGoodAbg(abg + abg_dx * floor(offsets.back()))) offsets.pop_back();
-    if (offsets.empty()) {
-        x_line_max = x_line_min;
-    } else {
-        x_line_max = std::clamp<int>(x_min + std::floor(offsets.back()), x_min, x_max);
+    while (offsets.size() >= 2) {
+        modifier = (offsets[offsets.size() - 1] + offsets[offsets.size() - 2]) / 2;
+        if (isGoodAbg(abg + abg_dx * modifier)) {
+            break;
+        } else {
+            offsets.pop_back();
+        }
     }
+    if (offsets.size() < 2) {
+        return false;
+    }
+
+    x_line_min = std::clamp<int>(x_min + std::ceil(offsets.back() - Consts::EPS), x_min, x_max);
+    offsets.pop_back();
+    x_line_max = std::clamp<int>(x_min + std::floor(offsets.back() + Consts::EPS), x_min, x_max);
     return true;
+}
+
+// Custom bulk variant of Triangle::abgBarycCoord to increase precision and performance
+// Returns result for point, tris[0] + Vec2D(1, 0), tris[0] + Vec2D(0, 1)
+std::tuple<Vec3D, Vec3D, Vec3D> bulkAbgCoord(const Triangle& tris, const Vec2D& point) {
+    Vec2D ba = Vec2D(tris[1]) - Vec2D(tris[0]);
+    Vec2D ca = Vec2D(tris[2]) - Vec2D(tris[0]);
+    Vec2D pa = point - Vec2D(tris[0]);
+
+    bool swapped = std::abs(ca.y()) < Consts::EPS;
+    if (swapped) {
+        std::swap(ba, ca);
+    }
+
+    double divider = ba.y() * ca.x() - ba.x() * ca.y();
+
+    double betta = (pa.y() * ca.x() - pa.x() * ca.y()) / divider;
+    double betta_dx = -ca.y() / divider;
+    double betta_dy = ca.x() / divider;
+
+    double gamma = (pa.y() - betta * ba.y()) / ca.y();
+    double gamma_dx = -betta_dx * ba.y() / ca.y();
+    double gamma_dy = (1.0 - betta_dy * ba.y()) / ca.y();
+
+    double alpha = 1.0 - betta - gamma;
+    double alpha_dx = 1.0 - betta_dx - gamma_dx;
+    double alpha_dy = 1.0 - betta_dy - gamma_dy;
+
+    if (swapped) {
+        std::swap(betta, gamma);
+        std::swap(betta_dx, gamma_dx);
+        std::swap(betta_dy, gamma_dy);
+    }
+
+    return {
+        Vec3D(alpha, betta, gamma),
+        Vec3D(alpha_dx, betta_dx, gamma_dx),
+        Vec3D(alpha_dy, betta_dy, gamma_dy)
+    };
 }
 
 void Screen::drawTriangle(const Triangle &triangle, Material *material) {
@@ -235,12 +278,7 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     auto texture = material ? material->texture() : nullptr;
     Color color = material ? material->ambient() : Consts::RED;
 
-    // calculate for start coords to increase precision
-    Vec3D abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
-    Vec3D abg_dx = triangle.abgBarycCoord(Vec2D(x_min + 1, y_min));
-    Vec3D abg_dy = triangle.abgBarycCoord(Vec2D(x_min, y_min + 1));
-    abg_dx = abg_dx - abg_origin;
-    abg_dy = abg_dy - abg_origin;
+    auto [abg_origin, abg_dx, abg_dy] = bulkAbgCoord(triangle, Vec2D(x_min, y_min));
 
     Vec3D uv_hom_origin, uv_hom_dx, uv_hom_dy;
 
@@ -248,15 +286,16 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
 
         // Derivative in X
-        Vec3D abg_xp = abg_origin + abg_dx;
-        Vec3D uv_hom_xp = tc[0] + (tc[1] - tc[0]) * abg_xp.y() + (tc[2] - tc[0]) * abg_xp.z();
-        uv_hom_dx = uv_hom_xp - uv_hom_origin;
+        Vec3D uv_hom_xp = tc[0] + (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
+        uv_hom_dx = uv_hom_xp - tc[0];
 
         // Derivative in Y
-        Vec3D abg_yp = abg_origin + abg_dy;
-        Vec3D uv_hom_yp = tc[0] + (tc[1] - tc[0]) * abg_yp.y() + (tc[2] - tc[0]) * abg_yp.z();
-        uv_hom_dy = uv_hom_yp - uv_hom_origin;
+        Vec3D uv_hom_yp = tc[0] + (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
+        uv_hom_dy = uv_hom_yp - tc[0];
     }
+
+    abg_dx[0] -= 1;
+    abg_dy[0] -= 1;
 
     for (int y = y_min; y <= y_max; y++) {
         Vec3D abg = abg_origin;
@@ -309,11 +348,9 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
 
     if (x_min > x_max || y_min > y_max) return;
 
-    Vec3D abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
-    Vec3D abg_dx = triangle.abgBarycCoord(Vec2D(x_min + 1, y_min));
-    Vec3D abg_dy = triangle.abgBarycCoord(Vec2D(x_min, y_min + 1));
-    abg_dx = abg_dx - abg_origin;
-    abg_dy = abg_dy - abg_origin;
+    auto [abg_origin, abg_dx, abg_dy] = bulkAbgCoord(triangle, Vec2D(x_min, y_min));
+    abg_dx[0] -= 1;
+    abg_dy[0] -= 1;
 
     for (int y = y_min; y <= y_max; y++) {
         Vec3D abg = abg_origin;

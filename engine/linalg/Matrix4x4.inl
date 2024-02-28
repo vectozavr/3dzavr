@@ -4,10 +4,9 @@
 
 #include <cmath>
 
-#include <linalg/Matrix4x4.h>
-#include <Consts.h>
+#include <ScalarConsts.h>
 
-Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
+inline Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
     Matrix4x4 result = Matrix4x4::Zero();
 
     for (int i = 0; i < 4; i++)
@@ -17,7 +16,7 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
     return result;
 }
 
-Vec4D Matrix4x4::operator*(const Vec4D &point4D) const {
+inline Vec4D Matrix4x4::operator*(const Vec4D &point4D) const {
     return Vec4D(
             _arr[0][0] * point4D.x() + _arr[0][1] * point4D.y() + _arr[0][2] * point4D.z() + _arr[0][3] * point4D.w(),
             _arr[1][0] * point4D.x() + _arr[1][1] * point4D.y() + _arr[1][2] * point4D.z() + _arr[1][3] * point4D.w(),
@@ -26,7 +25,7 @@ Vec4D Matrix4x4::operator*(const Vec4D &point4D) const {
     );
 }
 
-Vec3D Matrix4x4::operator*(const Vec3D &vec) const {
+inline Vec3D Matrix4x4::operator*(const Vec3D &vec) const {
     return Vec3D(
             _arr[0][0] * vec.x() + _arr[0][1] * vec.y() + _arr[0][2] * vec.z(),
             _arr[1][0] * vec.x() + _arr[1][1] * vec.y() + _arr[1][2] * vec.z(),
@@ -34,7 +33,7 @@ Vec3D Matrix4x4::operator*(const Vec3D &vec) const {
     );
 }
 
-Matrix4x4 Matrix4x4::Identity() {
+inline Matrix4x4 Matrix4x4::Identity() {
     Matrix4x4 result;
 
     result._arr[0][0] = 1.0;
@@ -45,7 +44,7 @@ Matrix4x4 Matrix4x4::Identity() {
     return result;
 }
 
-Matrix4x4 Matrix4x4::Constant(double value) {
+inline Matrix4x4 Matrix4x4::Constant(double value) {
     Matrix4x4 result;
 
     for (int i = 0; i < 4; i++) {
@@ -57,11 +56,11 @@ Matrix4x4 Matrix4x4::Constant(double value) {
     return result;
 }
 
-Matrix4x4 Matrix4x4::Zero() {
+inline Matrix4x4 Matrix4x4::Zero() {
     return Matrix4x4::Constant(0);
 }
 
-Matrix4x4 Matrix4x4::Scale(const Vec3D &factor) {
+inline Matrix4x4 Matrix4x4::Scale(const Vec3D &factor) {
     Matrix4x4 s{};
     s._arr[0][0] = factor.x();
     s._arr[1][1] = factor.y();
@@ -71,7 +70,7 @@ Matrix4x4 Matrix4x4::Scale(const Vec3D &factor) {
     return s;
 }
 
-Matrix4x4 Matrix4x4::Translation(const Vec3D &v) {
+inline Matrix4x4 Matrix4x4::Translation(const Vec3D &v) {
     Matrix4x4 t{};
 
     t._arr[0][0] = 1.0;
@@ -86,7 +85,7 @@ Matrix4x4 Matrix4x4::Translation(const Vec3D &v) {
     return t;
 }
 
-Matrix4x4 Matrix4x4::RotationX(double rx) {
+inline Matrix4x4 Matrix4x4::RotationX(double rx) {
     Matrix4x4 Rx{};
 
     double c = cos(rx), s = sin(rx);
@@ -103,7 +102,7 @@ Matrix4x4 Matrix4x4::RotationX(double rx) {
     return Rx;
 }
 
-Matrix4x4 Matrix4x4::RotationY(double ry) {
+inline Matrix4x4 Matrix4x4::RotationY(double ry) {
     Matrix4x4 Ry{};
 
     double c = cos(ry), s = sin(ry);
@@ -120,7 +119,7 @@ Matrix4x4 Matrix4x4::RotationY(double ry) {
     return Ry;
 }
 
-Matrix4x4 Matrix4x4::RotationZ(double rz) {
+inline Matrix4x4 Matrix4x4::RotationZ(double rz) {
     Matrix4x4 Rz{};
 
     double c = cos(rz), s = sin(rz);
@@ -137,11 +136,11 @@ Matrix4x4 Matrix4x4::RotationZ(double rz) {
     return Rz;
 }
 
-Matrix4x4 Matrix4x4::Rotation(const Vec3D &r) {
+inline Matrix4x4 Matrix4x4::Rotation(const Vec3D &r) {
     return RotationX(r.x()) * RotationY(r.y()) * RotationZ(r.z());
 }
 
-Matrix4x4 Matrix4x4::Rotation(const Vec3D &v, double rv) {
+inline Matrix4x4 Matrix4x4::Rotation(const Vec3D &v, double rv) {
     Matrix4x4 Rv{};
     Vec3D nv(v.normalized());
 
@@ -164,7 +163,7 @@ Matrix4x4 Matrix4x4::Rotation(const Vec3D &v, double rv) {
     return Rv;
 }
 
-Matrix4x4 Matrix4x4::Projection(double fov, double aspect, double ZNear, double ZFar) {
+inline Matrix4x4 Matrix4x4::Projection(double fov, double aspect, double ZNear, double ZFar) {
     Matrix4x4 p{};
 
     p._arr[0][0] = 1.0 / (tan(Consts::PI * fov * 0.5 / 180.0) * aspect);
@@ -176,7 +175,7 @@ Matrix4x4 Matrix4x4::Projection(double fov, double aspect, double ZNear, double 
     return p;
 }
 
-Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
+inline Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
     Matrix4x4 s{};
 
     s._arr[0][0] = -0.5 * width;
@@ -191,7 +190,7 @@ Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
     return s;
 }
 
-Matrix4x4 Matrix4x4::View(const Matrix4x4 &transformMatrix) {
+inline Matrix4x4 Matrix4x4::View(const Matrix4x4 &transformMatrix) {
     Matrix4x4 V = Zero();
 
     Vec3D left   = transformMatrix.x();
@@ -253,23 +252,23 @@ Matrix4x4 Matrix4x4::View(const Matrix4x4 &transformMatrix) {
     return V;
 }
 
-Vec3D Matrix4x4::x() const {
+inline Vec3D Matrix4x4::x() const {
     return Vec3D(_arr[0][0], _arr[1][0], _arr[2][0]);
 }
 
-Vec3D Matrix4x4::y() const {
+inline Vec3D Matrix4x4::y() const {
     return Vec3D(_arr[0][1], _arr[1][1], _arr[2][1]);
 }
 
-Vec3D Matrix4x4::z() const {
+inline Vec3D Matrix4x4::z() const {
     return Vec3D(_arr[0][2], _arr[1][2], _arr[2][2]);
 }
 
-Vec3D Matrix4x4::w() const {
+inline Vec3D Matrix4x4::w() const {
     return Vec3D(_arr[0][3], _arr[1][3], _arr[2][3]);
 }
 
-std::ostream &operator<<(std::ostream &os, const Matrix4x4 &matrix4x4) {
+inline std::ostream &operator<<(std::ostream &os, const Matrix4x4 &matrix4x4) {
     for(int i = 0; i < 4; i++) {
         for(int j = 0; j < 4; j++) {
             os << matrix4x4._arr[i][j] << " ";
@@ -279,7 +278,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix4x4 &matrix4x4) {
     return os;
 }
 
-double Matrix4x4::abs() const {
+inline double Matrix4x4::abs() const {
     double result = 0;
 
     for(int i = 0; i < 4; i++) {
@@ -290,7 +289,7 @@ double Matrix4x4::abs() const {
     return std::sqrt(result);
 }
 
-Matrix4x4 Matrix4x4::operator+(const Matrix4x4 &matrix4X4) const {
+inline Matrix4x4 Matrix4x4::operator+(const Matrix4x4 &matrix4X4) const {
     Matrix4x4 result = Matrix4x4::Zero();
 
     for(int i = 0; i < 4; i++) {
@@ -302,7 +301,7 @@ Matrix4x4 Matrix4x4::operator+(const Matrix4x4 &matrix4X4) const {
     return result;
 }
 
-Matrix4x4 Matrix4x4::operator-(const Matrix4x4 &matrix4X4) const {
+inline Matrix4x4 Matrix4x4::operator-(const Matrix4x4 &matrix4X4) const {
     Matrix4x4 result = Matrix4x4::Zero();
 
     for(int i = 0; i < 4; i++) {
@@ -314,7 +313,7 @@ Matrix4x4 Matrix4x4::operator-(const Matrix4x4 &matrix4X4) const {
     return result;
 }
 
-Matrix4x4 Matrix4x4::inverse() const {
+inline Matrix4x4 Matrix4x4::inverse() const {
 
     std::array<std::array<double, 4>, 4> m = _arr;
 

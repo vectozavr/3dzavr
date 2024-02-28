@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 # create target
 add_library(
         3DZAVR STATIC
+        ScalarConsts.h
         Consts.h
         Engine.h
         Engine.cpp
@@ -11,13 +12,9 @@ add_library(
         World.cpp
 
         linalg/Vec2D.h
-        linalg/Vec2D.cpp
         linalg/Vec3D.h
-        linalg/Vec3D.cpp
         linalg/Vec4D.h
-        linalg/Vec4D.cpp
         linalg/Matrix4x4.h
-        linalg/Matrix4x4.cpp
 
         objects/Camera.h
         objects/Camera.cpp

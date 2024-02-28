@@ -6,7 +6,7 @@
 #include "Consts.h"
 
 Triangle::Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv) :
-_points{p}, _textureCoordinates(uv) {
+    _points{p}, _textureCoordinates(uv) {
     calculateNormal();
 }
 
@@ -26,14 +26,6 @@ Triangle Triangle::operator*(const Matrix4x4 &matrix4X4) const {
     return Triangle{{matrix4X4 * _points[0], matrix4X4 * _points[1], matrix4X4 * _points[2]}, _textureCoordinates};
 }
 
-Vec3D Triangle::norm() const {
-    return _normal;
-}
-
-const Vec4D& Triangle::operator[](int i) const {
-    return _points[i];
-}
-
 bool Triangle::isPointInside(const Vec3D &point) const {
 
     // TODO: this can be made more efficiently: by finding alpha betta gamma for this triangle and the point.
@@ -48,23 +40,22 @@ bool Triangle::isPointInside(const Vec3D &point) const {
     return false;
 }
 
-Vec3D Triangle::abgBarycCoord(const Vec2D &point) const {
-    auto A = _points[0];
-    auto B = _points[1];
-    auto C = _points[2];
-    auto P = point;
+Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
+    Vec2D ba = Vec2D(_points[1]) - Vec2D(_points[0]);
+    Vec2D ca = Vec2D(_points[2]) - Vec2D(_points[0]);
+    auto pa = point - Vec2D(_points[0]);
 
-    bool swapped = std::abs(C.y() - A.y()) < Consts::EPS;
-    if(swapped) {
-        std::swap(B, C);
+    bool swapped = std::abs(ca.y()) < Consts::EPS;
+    if (swapped) {
+        std::swap(ba, ca);
     }
 
-    double betta = (A.x()*(C.y()-A.y()) + (P.y() - A.y())*(C.x()-A.x()) - P.x()*(C.y()-A.y()))/
-            ((B.y()-A.y())*(C.x() - A.x()) - (B.x()-A.x())*(C.y()-A.y()));
-    double gamma = (P.y() - A.y() - betta*(B.y()-A.y()))/(C.y()-A.y());
+    double betta = (pa.y() * ca.x() - pa.x() * ca.y()) /
+                   (ba.y() * ca.x() - ba.x() * ca.y());
+    double gamma = (pa.y() - betta * ba.y()) / ca.y();
     double alpha = 1.0 - betta - gamma;
 
-    if(swapped) {
+    if (swapped) {
         std::swap(betta, gamma);
     }
 
