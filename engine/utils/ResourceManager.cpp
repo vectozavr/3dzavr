@@ -150,12 +150,9 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     std::vector<Triangle> tris{};
     std::string objName, materialName;
 
-    std::string prevCommand;
-    std::string readCommands;
-
     // On each step we will check did we read all the information to be able to create a new material
-    auto addObject = [objects, &materials, &objName, &materialName, &tris, &readCommands] {
-        if((!objName.empty() || !materialName.empty()) && !tris.empty() && !readCommands.empty()) {
+    auto addObject = [objects, &materials, &objName, &materialName, &tris] {
+        if((!objName.empty() || !materialName.empty()) && !tris.empty()) {
             objects->add(std::make_shared<Mesh>(
                     ObjectTag(objName + "_" + materialName + "_" + std::to_string(objects->size())), tris,
                     materials[MaterialTag(materialName)]));
@@ -166,10 +163,10 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
             tris.clear();
             objName = "";
             materialName = "";
-
-            readCommands = "";
         }
     };
+
+    std::array<std::string, 3> separators = { "o", "g", "usemtl" };
 
     while (!file.eof()) {
         std::string line;
@@ -185,12 +182,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         std::transform(type.begin(), type.end(), type.begin(),
                        [](unsigned char c) { return std::tolower(c); });
 
-
-        if(type != prevCommand) {
-            readCommands += prevCommand + "|";
-        }
-
-        if(readCommands.find(type) != std::string::npos) {
+        if (std::find(separators.begin(), separators.end(), type) != separators.end() && !tris.empty()) {
             addObject();
         }
 
@@ -256,8 +248,6 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
         if (type == "usemtl") {
             lineStream >> materialName;
         }
-
-        prevCommand = type;
 
         if(file.eof()) {
             addObject();
