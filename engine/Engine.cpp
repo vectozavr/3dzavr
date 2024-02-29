@@ -132,36 +132,24 @@ void Engine::exit() {
     Mouse::free();
     ResourceManager::free();
 
-    Log::log("Engine::exit(): exit engine (" + std::to_string(screen->width()) + "x" +
-             std::to_string(screen->height()) + ") with title '" + screen->title() + "'.");
+    Log::log("Engine::exit(): exit 3dzavr. Screen size: (" + std::to_string(screen->width()) + "x" + std::to_string(screen->height()) + ")");
 }
 
 void Engine::printDebugInfo() {
     if (_showDebugInfo) {
         // coordinates & fps:
-        std::string text = Consts::BUILD_INFO + "\n X: " +
-                           std::to_string((camera->position().x())) + "\n Y: " +
-                           std::to_string((camera->position().y())) + "\n Z: " +
-                           std::to_string((camera->position().z())) + "\n RY:" +
-                           std::to_string(camera->angle().y()) + "\n RL: " +
-                           std::to_string(camera->angleLeftUpLookAt().x()) + "\n\n" +
-                           std::to_string(screen->width()) + "x" +
-                           std::to_string(screen->height()) + " " +
-                           std::to_string(Time::fps()) + " fps";
-
-
         screen->drawText(Consts::BUILD_INFO, 15, 10);
-        screen->drawText("fps: " + std::to_string(Time::fps()), 15, 25);
-        screen->drawText("X: "   + std::to_string((camera->position().x())), 15, 40);
-        screen->drawText("Y: "   + std::to_string((camera->position().y())), 15, 55);
-        screen->drawText("Z: "   + std::to_string((camera->position().z())), 15, 70);
-        screen->drawText("RY: "  + std::to_string(camera->angle().y()), 15, 85);
-        screen->drawText("RL: "  + std::to_string(camera->angleLeftUpLookAt().x()), 15, 100);
+        screen->drawText("fps: " + std::to_string(Time::fps()), 15, 30);
+        screen->drawText("X: "   + std::to_string((camera->position().x())), 15, 45);
+        screen->drawText("Y: "   + std::to_string((camera->position().y())), 15, 60);
+        screen->drawText("Z: "   + std::to_string((camera->position().z())), 15, 75);
+        screen->drawText("RY: "  + std::to_string(camera->angle().y()), 15, 90);
+        screen->drawText("RL: "  + std::to_string(camera->angleLeftUpLookAt().x()), 15, 105);
 
         // timers:
         int timerWidth = 150;
         float xPos = 15;
-        float yPos = 130;
+        float yPos = 150;
         int height = 14;
 
         double totalTime = Time::elapsedTimerSeconds("d all");
@@ -207,7 +195,7 @@ void Engine::printDebugInfo() {
         // Draw a plot of fps
 
         _histResources["fpsCounter"].emplace_back(Time::time(), Time::fps());
-        screen->drawPlot(_histResources["fpsCounter"], 100, 25, 50, 14);
+        screen->drawPlot(_histResources["fpsCounter"], 100, 30, 50, 14);
 
         for(auto& [histName, data] : _histResources) {
             if(data.size() > 1000) {

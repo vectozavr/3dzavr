@@ -313,10 +313,10 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
 
 void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
     // Filling inside
-    int x_min = std::clamp<int>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
-    int y_min = std::clamp<int>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
-    int x_max = std::clamp<int>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
-    int y_max = std::clamp<int>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    auto x_max = std::clamp<uint16_t>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    auto y_max = std::clamp<uint16_t>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
 
     if (x_min > x_max || y_min > y_max) return;
 
@@ -329,7 +329,7 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
     auto abg_dx = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(1, 0)) - Vec3D(1, 0, 0);
     auto abg_dy = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(0, 1)) - Vec3D(1, 0, 0);
 
-    for (int y = y_min; y <= y_max; y++) {
+    for (uint16_t y = y_min; y <= y_max; y++) {
         uint16_t x_cur_min, x_cur_max;
         if (!lineLimits(abg_origin + abg_dy*(y - y_min), abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
 

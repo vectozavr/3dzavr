@@ -30,7 +30,6 @@ private:
 
     // For debug purposes
     bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;
-    std::vector<std::pair<double, double>> _fpsCounter;
     std::map<std::string, std::vector<std::pair<double, double>>> _histResources;
 
     void printDebugInfo();

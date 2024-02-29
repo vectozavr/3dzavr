@@ -15,13 +15,38 @@
 namespace Consts {
     const Color BACKGROUND_COLOR = Color(255, 255, 255);
 
+    // Running mode detection
 #ifndef NDEBUG
     const std::string RUNNING_MODE = "Debug";
 #else
     const std::string RUNNING_MODE = "Release";
 #endif
 
-    const std::string BUILD_INFO = "3dzavr sdl v0.2.0 " + RUNNING_MODE;
+    // OS Detection
+#if defined(_WIN32) || defined(_WIN64)
+    const std::string OPERATION_SYSTEM = "Windows";
+#elif defined(__linux__)
+    const std::string OPERATION_SYSTEM = "Linux";
+#elif defined(__APPLE__) && defined(__MACH__)
+    const std::string OPERATION_SYSTEM = "MacOS";
+#else
+    const std::string OPERATION_SYSTEM = "Unknown";
+#endif
+
+    // Processor Architecture
+#if defined(__x86_64__) || defined(_M_X64)
+    const std::string CPU_ARCHITECTURE = "x86-64";
+#elif defined(__i386__) || defined(_M_IX86)
+    const std::string CPU_ARCHITECTURE = "x86";
+#elif defined(__arm__)
+    const std::string CPU_ARCHITECTURE = "ARM";
+#elif defined(__aarch64__)
+    const std::string CPU_ARCHITECTURE = "ARM64";
+#else
+    const std::string CPU_ARCHITECTURE = "Unknown";
+#endif
+
+    const std::string BUILD_INFO = "3dzavr sdl v0.2.0 " + RUNNING_MODE + ". System: " + OPERATION_SYSTEM + ", " + CPU_ARCHITECTURE;
 
     const Vec2D BEZIER[2] = {Vec2D{0.8, 0}, Vec2D{0.2, 1}};
 
