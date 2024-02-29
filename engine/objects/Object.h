@@ -138,7 +138,7 @@ public:
     [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(model()); }
     [[nodiscard]] Matrix4x4 fullInvModel() const { return Matrix4x4::View(fullModel()); }
 
-    ~Object();
+    virtual ~Object();
 };
 
-#endif //MINECRAFT_3DZAVR_OBJECT_H
+#endif //ENGINE_OBJECT_H
