@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 14.01.2021.
-//
-
 #include <algorithm>
 #include <utility>
 #include <cmath>
@@ -98,7 +94,7 @@ void Screen::stopRender() {
 
 void Screen::clear() {
     std::fill(_depthBuffer.begin(), _depthBuffer.end(), 1.0f);
-    std::fill(_pixelBuffer.begin(), _pixelBuffer.end(), 0xFFFFFFFFU);
+    std::fill(_pixelBuffer.begin(), _pixelBuffer.end(), _background.rgba());
 }
 
 void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
@@ -178,13 +174,20 @@ void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, ui
     drawPixel(to_x, to_y, color);
 }
 
-inline bool isGoodAbg(const Vec3D& abg) {
+inline bool isInsideTriangleAbg(const Vec3D& abg) {
     return abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0;
 }
 
+/*
+ * This function returns the x limits within we want to draw:
+ * we draw the triangle line by line from up to down, hence for each Y coordinate
+ * we compute the limits:
+ * x_line_min - start drawing from this coordinate
+ * x_line_max - finish drawing at this coordinate.
+ */
 bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int& x_line_min, int& x_line_max) {
     stack_vector<double, 4> offsets = stack_vector<double, 4>();
-    if (isGoodAbg(abg)) {
+    if (isInsideTriangleAbg(abg)) {
         offsets.push_back(0);
     }
     double modifier;
@@ -205,7 +208,7 @@ bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int
 
     while (offsets.size() >= 2) {
         modifier = (offsets[offsets.size() - 1] + offsets[offsets.size() - 2]) / 2;
-        if (isGoodAbg(abg + abg_dx * modifier)) {
+        if (isInsideTriangleAbg(abg + abg_dx * modifier)) {
             break;
         } else {
             offsets.pop_back();
@@ -219,45 +222,6 @@ bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int
     offsets.pop_back();
     x_line_max = std::clamp<int>(x_min + std::floor(offsets.back() + Consts::EPS), x_min, x_max);
     return true;
-}
-
-// Custom bulk variant of Triangle::abgBarycCoord to increase precision and performance
-// Returns result for point, tris[0] + Vec2D(1, 0), tris[0] + Vec2D(0, 1)
-std::tuple<Vec3D, Vec3D, Vec3D> bulkAbgCoord(const Triangle& tris, const Vec2D& point) {
-    Vec2D ba = Vec2D(tris[1]) - Vec2D(tris[0]);
-    Vec2D ca = Vec2D(tris[2]) - Vec2D(tris[0]);
-    Vec2D pa = point - Vec2D(tris[0]);
-
-    bool swapped = std::abs(ca.y()) < Consts::EPS;
-    if (swapped) {
-        std::swap(ba, ca);
-    }
-
-    double divider = ba.y() * ca.x() - ba.x() * ca.y();
-
-    double betta = (pa.y() * ca.x() - pa.x() * ca.y()) / divider;
-    double betta_dx = -ca.y() / divider;
-    double betta_dy = ca.x() / divider;
-
-    double gamma = (pa.y() - betta * ba.y()) / ca.y();
-    double gamma_dx = -betta_dx * ba.y() / ca.y();
-    double gamma_dy = (1.0 - betta_dy * ba.y()) / ca.y();
-
-    double alpha = 1.0 - betta - gamma;
-    double alpha_dx = 1.0 - betta_dx - gamma_dx;
-    double alpha_dy = 1.0 - betta_dy - gamma_dy;
-
-    if (swapped) {
-        std::swap(betta, gamma);
-        std::swap(betta_dx, gamma_dx);
-        std::swap(betta_dy, gamma_dy);
-    }
-
-    return {
-        Vec3D(alpha, betta, gamma),
-        Vec3D(alpha_dx, betta_dx, gamma_dx),
-        Vec3D(alpha_dy, betta_dy, gamma_dy)
-    };
 }
 
 void Screen::drawTriangle(const Triangle &triangle, Material *material) {
@@ -278,36 +242,30 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     auto texture = material ? material->texture() : nullptr;
     Color color = material ? material->ambient() : Consts::RED;
 
-    auto [abg_origin, abg_dx, abg_dy] = bulkAbgCoord(triangle, Vec2D(x_min, y_min));
+    auto abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
+    /*
+     * Here we calculate the change of abg coordinates when we
+     * 1) add one pixel in X: abg_dx = abg(triangle[0] + dx) - abg(triangle[0]) = abg(triangle[0] + dx) - {1, 0, 0}
+     * 2) add one pixel in Y: abg_dy = abg(triangle[0] + dy) - abg(triangle[0]) = abg(triangle[0] + dy) - {1, 0, 0}
+     */
+    auto abg_dx = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(1, 0)) - Vec3D(1, 0, 0);
+    auto abg_dy = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(0, 1)) - Vec3D(1, 0, 0);
 
     Vec3D uv_hom_origin, uv_hom_dx, uv_hom_dy;
 
     if (texture) {
         uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
-
-        // Derivative in X
-        Vec3D uv_hom_xp = tc[0] + (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
-        uv_hom_dx = uv_hom_xp - tc[0];
-
-        // Derivative in Y
-        Vec3D uv_hom_yp = tc[0] + (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
-        uv_hom_dy = uv_hom_yp - tc[0];
+        uv_hom_dx = (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
+        uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
     }
 
-    abg_dx[0] -= 1;
-    abg_dy[0] -= 1;
-
     for (int y = y_min; y <= y_max; y++) {
-        Vec3D abg = abg_origin;
-        Vec3D uv_hom = uv_hom_origin;
-        abg_origin += abg_dy;
-        uv_hom_origin += uv_hom_dy;
 
         int x_cur_min, x_cur_max;
-        if (!lineLimits(abg, abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
+        if (!lineLimits(abg_origin + abg_dy*(y - y_min), abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
 
-        abg += abg_dx * (x_cur_min - x_min);
-        uv_hom += uv_hom_dx * (x_cur_min - x_min);
+        Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
+        Vec3D uv_hom = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*(x_cur_min - x_min);
 
         for (int x = x_cur_min; x <= x_cur_max; x++) {
             if (texture) {
@@ -348,16 +306,21 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
 
     if (x_min > x_max || y_min > y_max) return;
 
-    auto [abg_origin, abg_dx, abg_dy] = bulkAbgCoord(triangle, Vec2D(x_min, y_min));
-    abg_dx[0] -= 1;
-    abg_dy[0] -= 1;
+    auto abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
+    /*
+     * Here we calculate the change of abg coordinates when we
+     * 1) add one pixel in X: abg_dx = abg(triangle[0] + dx) - abg(triangle[0]) = abg(triangle[0] + dx) - {1, 0, 0}
+     * 2) add one pixel in Y: abg_dy = abg(triangle[0] + dy) - abg(triangle[0]) = abg(triangle[0] + dy) - {1, 0, 0}
+     */
+    auto abg_dx = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(1, 0)) - Vec3D(1, 0, 0);
+    auto abg_dy = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(0, 1)) - Vec3D(1, 0, 0);
 
     for (int y = y_min; y <= y_max; y++) {
-        Vec3D abg = abg_origin;
-        abg_origin += abg_dy;
 
         int x_cur_min, x_cur_max;
-        if (!lineLimits(abg, abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
+        if (!lineLimits(abg_origin + abg_dy*(y - y_min), abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
+
+        Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
 
         for (int x = x_cur_min; x <= x_cur_max; x++) {
             double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();

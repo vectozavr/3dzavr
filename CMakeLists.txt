@@ -9,9 +9,9 @@ add_executable(${CMAKE_PROJECT_NAME} main.cpp)
 
 find_package(SDL2 CONFIG COMPONENTS SDL2main)
 if(TARGET SDL2::SDL2main)
-    target_link_libraries(3dzavr_test PRIVATE SDL2::SDL2main)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SDL2::SDL2main)
 else()
-    target_compile_definitions(3dzavr_test PRIVATE SDL_MAIN_HANDLED)
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE SDL_MAIN_HANDLED)
 endif()
 
 # include engine into our project

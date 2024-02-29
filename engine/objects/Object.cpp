@@ -124,7 +124,10 @@ void Object::attach(std::shared_ptr<Object> object) {
                 throw std::invalid_argument{"Object::attach(): You created recursive attachment"};
             }
         } else {
-            throw std::invalid_argument{"Object::attach(): You cannot attach the object twice: unattach it first"};
+            // If the object was attached to some other object we have to unnatach it at first
+            // and then attach to the other:
+            object->_attachedTo->unattach(object->name());
+            attach(object);
         }
     } else {
         throw std::invalid_argument{"Object::attach(): You cannot attach object to itself"};
