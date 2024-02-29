@@ -99,6 +99,17 @@ target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 
 include_directories(/usr/local/include)
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported OUTPUT lto_error)
+
+if(lto_supported)
+    # I don't think you want to make debug builds harder to debug and longer to build
+    set_property(TARGET 3DZAVR PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
+    set_property(TARGET 3DZAVR PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+    message(WARNING "CMake can't enable LTO optimizations for your current compiler.\n${lto_error}")
+endif()
+
 # LibPNG library
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
