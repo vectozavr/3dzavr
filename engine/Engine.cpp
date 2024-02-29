@@ -20,25 +20,26 @@ Engine::Engine() {
     ResourceManager::init();
 }
 
-void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
+void Engine::projectAndDrawGroup(const Group& group) const {
 
     /*
      * TODO: we spend too much time on iteration through all of the objects in the scene.
      * Maybe we can exclude some objects on the early stage based on the space separation.
      */
 
-    for(const auto& [objTag, obj] : *group) {
+    for(const auto& [objTag, obj] : group) {
         std::shared_ptr<Mesh> subMesh = std::dynamic_pointer_cast<Mesh>(obj);
         if(subMesh) {
             // project triangles to the camera plane
             Time::startTimer("d projections");
-            auto projected = camera->project(subMesh);
+            auto projected = camera->project(*subMesh);
             Time::pauseTimer("d projections");
 
             // draw projected triangles
             Time::startTimer("d rasterization");
+            std::shared_ptr<Material> material = subMesh->getMaterial();
             for (auto &t : projected) {
-                screen->drawTriangle(*t.first, t.second.get());
+                screen->drawTriangle(t, material.get());
             }
             Time::pauseTimer("d rasterization");
             continue;
@@ -46,7 +47,7 @@ void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
         std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
         if(subGroup) {
             // We need to recursively continue to draw subgroup
-            projectAndDrawGroup(subGroup);
+            projectAndDrawGroup(*subGroup);
         }
     }
 }
@@ -105,7 +106,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
             Time::stopTimer("d collisions");
         }
 
-        projectAndDrawGroup(world->objects());
+        projectAndDrawGroup(*world->objects());
 
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");

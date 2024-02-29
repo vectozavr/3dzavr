@@ -185,8 +185,8 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             continue;
         }
 
-        auto trianglePlane = std::make_shared<Plane>(tri, ObjectTag(""));
-        auto intersection = trianglePlane->intersect(from_model, to_model);
+        auto trianglePlane = Plane(tri);
+        auto intersection = trianglePlane.intersect(from_model, to_model);
 
         if (intersection.distanceToObject > 0 && tri.isPointInside(intersection.pointOfIntersection)) {
 
@@ -194,8 +194,8 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             // Due-to this effect if you scale some object in x times you will get distance in x times smaller.
             // That's why we need to perform distance calculation in the global coordinate system where metric
             // is the same for all objects.
-            trianglePlane = std::make_shared<Plane>(tri*model, ObjectTag(""));
-            auto globalIntersection = trianglePlane->intersect(from, to);
+            trianglePlane = Plane(model * tri.norm(), Vec3D(model * tri[0]));
+            auto globalIntersection = trianglePlane.intersect(from, to);
             double globalDistance = (globalIntersection.pointOfIntersection - from).abs();
 
             if(globalDistance < minDistance) {

@@ -1,27 +1,22 @@
 //
 // Created by Иван Ильин on 19.01.2021.
 //
-#include <vector>
 
 #include "Plane.h"
 
-Plane::Plane(const Triangle &tri, const ObjectTag& nameTag, const Color& color) :
-Object(nameTag), _normal(tri.norm()), _point(tri[0]) {}
+Plane::Plane() : normal(1), offset() {}
 
-Plane::Plane(const Vec3D &N, const Vec3D &P, const ObjectTag& nameTag, const Color& color) :
-Object(nameTag), _normal(N.normalized()), _point(P) {}
+Plane::Plane(const Triangle &tri) : normal(tri.norm()), offset(tri.norm().dot(Vec3D(tri[0]))) {}
 
-double Plane::distance(const Vec3D &point) const {
-    return (point - _point).dot(_normal);
-}
+Plane::Plane(const Vec3D &normal, const Vec3D &point) : normal(normal.normalized()), offset(normal.normalized().dot(point)) {}
 
-Plane::Plane(const ObjectTag &tag, const Plane &plane) :
-Object(tag, plane), _point(plane._point), _normal(plane._normal) {
+Plane::Plane(const Vec3D &normal, double offset) : normal(normal.normalized()), offset(offset) {}
 
+double Plane::distance(const Vec3D &v) const {
+    return v.dot(normal) - offset;
 }
 
 stack_vector<Triangle, 2> Plane::clip(const Triangle &tri) const {
-
     stack_vector<Triangle, 2> result;
 
     // points coordinated
@@ -89,23 +84,19 @@ stack_vector<Triangle, 2> Plane::clip(const Triangle &tri) const {
     return result;
 }
 
-Object::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D &to) {
-    double s_dot_n = from.dot(_normal);
+Plane::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D &to) const {
+    double s_dot_n = from.dot(normal);
     double k = std::numeric_limits<double>::infinity();
 
-    double den = s_dot_n - to.dot(_normal);
+    double den = s_dot_n - to.dot(normal);
+    bool intersected = false;
     if(std::abs(den) > Consts::EPS) {
-        k =  (s_dot_n - _point.dot(_normal)) / den;
+        k = (s_dot_n - offset) / den;
+        intersected = k > 0;
     }
 
-    Vec3D point = from + (to - from) * k;
-    double distance = (point - from).abs();
+    Vec3D v = from + (to - from) * k;
+    double distance = (v - from).abs();
 
-    return Object::IntersectionInformation{point,
-                                           _normal,
-                                           distance,
-                                           name(),
-                                           shared_from_this(),
-                                           (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity()),
-                                           k};
+    return Plane::IntersectionInformation{v, distance, k, intersected};
 }

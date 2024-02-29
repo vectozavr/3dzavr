@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 24/01/2024.
 //
 
-#ifndef INC_3DZAVR_TEST_GROUP_H
-#define INC_3DZAVR_TEST_GROUP_H
+#ifndef ENGINE_GROUP_H
+#define ENGINE_GROUP_H
 
 #include <objects/Object.h>
 
@@ -33,6 +33,9 @@ public:
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator begin() { return _objects.begin(); }
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator end() { return _objects.end(); }
 
+    std::map<ObjectTag, std::shared_ptr<Object>>::const_iterator begin() const { return _objects.begin(); }
+    std::map<ObjectTag, std::shared_ptr<Object>>::const_iterator end() const { return _objects.end(); }
+
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
     [[nodiscard]] IntersectionInformation rayCast(const Vec3D &from, const Vec3D &to,
                                                   const std::set<ObjectTag> &skipTags = {}) const;
@@ -45,4 +48,4 @@ public:
 };
 
 
-#endif //INC_3DZAVR_TEST_GROUP_H
+#endif //ENGINE_GROUP_H
