@@ -15,8 +15,7 @@
 #endif
 
 
-void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const std::string &name, const Color& background) {
-    _title = name;
+void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const Color& background) {
     _background = background;
     _width = screenWidth;
     _height = screenHeight;
@@ -185,7 +184,7 @@ inline bool isInsideTriangleAbg(const Vec3D& abg) {
  * x_line_min - start drawing from this coordinate
  * x_line_max - finish drawing at this coordinate.
  */
-bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int& x_line_min, int& x_line_max) {
+bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, uint16_t x_min, uint16_t x_max, uint16_t& x_line_min, uint16_t& x_line_max) {
     stack_vector<double, 4> offsets = stack_vector<double, 4>();
     if (isInsideTriangleAbg(abg)) {
         offsets.push_back(0);
@@ -218,10 +217,32 @@ bool lineLimits(const Vec3D& abg, const Vec3D& abg_dx, int x_min, int x_max, int
         return false;
     }
 
-    x_line_min = std::clamp<int>(x_min + std::ceil(offsets.back() - Consts::EPS), x_min, x_max);
+    x_line_min = std::clamp<uint16_t>(x_min + std::ceil(offsets.back() - Consts::EPS), x_min, x_max);
     offsets.pop_back();
-    x_line_max = std::clamp<int>(x_min + std::floor(offsets.back() + Consts::EPS), x_min, x_max);
+    x_line_max = std::clamp<uint16_t>(x_min + std::floor(offsets.back() + Consts::EPS), x_min, x_max);
     return true;
+}
+
+inline double areaDuDv(const Vec3D& uv_hom,
+                       const Vec2D& uv_dehom,
+                       const Vec3D& uv_hom_dx,
+                       const Vec3D& uv_hom_dy,
+                       double x, double y,
+                       double x_min, double y_min,
+                       uint16_t imageWidth, uint16_t imageHeight) {
+    // Derivative in X
+    Vec3D uv_hom_xp = uv_hom + uv_hom_dx;
+    Vec2D uv_dehom_xp = Vec2D(uv_hom_xp.x() / uv_hom_xp.z(), uv_hom_xp.y() / uv_hom_xp.z()) - uv_dehom;
+
+    // Derivative in Y
+    Vec3D uv_hom_yp = uv_hom + uv_hom_dy;
+    Vec2D uv_dehom_yp = Vec2D(uv_hom_yp.x() / uv_hom_yp.z(), uv_hom_yp.y() / uv_hom_yp.z()) - uv_dehom;
+
+    // Derivative in XY combined [Jacobian]
+    Vec2D du(imageWidth * uv_dehom_xp.x(), imageWidth * uv_dehom_yp.x());
+    Vec2D dv(imageHeight * uv_dehom_xp.y(), imageHeight * uv_dehom_yp.y());
+
+    return du.abs() + dv.abs();
 }
 
 void Screen::drawTriangle(const Triangle &triangle, Material *material) {
@@ -231,10 +252,10 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
     // Filling inside
-    int x_min = std::clamp<int>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
-    int y_min = std::clamp<int>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
-    int x_max = std::clamp<int>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
-    int y_max = std::clamp<int>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    auto x_max = std::clamp<uint16_t>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    auto y_max = std::clamp<uint16_t>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
 
     if (x_min > x_max || y_min > y_max) return;
 
@@ -259,34 +280,27 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
     }
 
-    for (int y = y_min; y <= y_max; y++) {
-
-        int x_cur_min, x_cur_max;
+    for (uint16_t y = y_min; y <= y_max; y++) {
+        uint16_t x_cur_min, x_cur_max;
         if (!lineLimits(abg_origin + abg_dy*(y - y_min), abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
 
         Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
         Vec3D uv_hom = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*(x_cur_min - x_min);
 
-        for (int x = x_cur_min; x <= x_cur_max; x++) {
+        // Instead of exact area we compute average for each horizontal line:
+        Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
+        Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
+        double area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+
+        for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
             if (texture) {
                 // de-homogenize UV coordinates
                 Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
-
-                // TODO: move calculations of derivatives somewhere from here: it becomes messy
-                // Derivative in X
-                Vec3D uv_hom_xp = uv_hom + uv_hom_dx;
-                Vec2D uv_dehom_xp = Vec2D(uv_hom_xp.x() / uv_hom_xp.z(), uv_hom_xp.y() / uv_hom_xp.z()) - uv_dehom;
-
-                // Derivative in Y
-                Vec3D uv_hom_yp = uv_hom + uv_hom_dy;
-                Vec2D uv_dehom_yp = Vec2D(uv_hom_yp.x() / uv_hom_yp.z(), uv_hom_yp.y() / uv_hom_yp.z()) - uv_dehom;
-
-                // Derivative in XY combined [Jacobian]
-                Vec2D du(texture->width() * uv_dehom_xp.x(), texture->width() * uv_dehom_yp.x());
-                Vec2D dv(texture->height() * uv_dehom_xp.y(), texture->height() * uv_dehom_yp.y());
-
-                double area = du.abs() + dv.abs();
-
+                /*
+                 * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
+                 * Instead, we use averaged area for the horizontal line (calculation is above).
+                */
+                //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
                 color = texture->get_pixel_from_UV(uv_dehom, area);
             }
             double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
@@ -316,8 +330,7 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
     auto abg_dy = triangle.abgBarycCoord(Vec2D(triangle[0]) + Vec2D(0, 1)) - Vec3D(1, 0, 0);
 
     for (int y = y_min; y <= y_max; y++) {
-
-        int x_cur_min, x_cur_max;
+        uint16_t x_cur_min, x_cur_max;
         if (!lineLimits(abg_origin + abg_dy*(y - y_min), abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
 
         Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
@@ -431,4 +444,37 @@ Screen::~Screen() {
     }
 
     SDL_Quit();
+}
+
+void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+    double minX = std::numeric_limits<double>::infinity();
+    double minY = std::numeric_limits<double>::infinity();
+
+    double maxX = std::numeric_limits<double>::lowest();
+    double maxY = std::numeric_limits<double>::lowest();
+
+    for (const auto& [xVal, yVal] : data) {
+        if (xVal < minX) minX = xVal;
+        if (yVal < minY) minY = yVal;
+        if (xVal > maxX) maxX = xVal;
+        if (yVal > maxY) maxY = yVal;
+    }
+
+    if(std::abs(maxX-minX) < Consts::EPS) {
+        maxX += minX/2 + Consts::EPS;
+    }
+    if(std::abs(maxY-minY) < Consts::EPS) {
+        maxY += minY/2 + Consts::EPS;
+    }
+
+    drawStrokeRectangle(x, y, w, h, Consts::WHITE, 1);
+
+    auto [xPrev, yPrev] = data.front();
+    for (const auto& [xVal, yVal] : data) {
+        drawLine(Vec2D(x + (xPrev-minX)*w/(maxX-minX), y + h - (yPrev-minY)*h/(maxY-minY)),
+                 Vec2D(x + (xVal-minX)*w/(maxX-minX), y + h - (yVal-minY)*h/(maxY-minY)), Consts::RED);
+
+        xPrev = xVal;
+        yPrev = yVal;
+    }
 }

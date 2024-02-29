@@ -25,13 +25,15 @@
 
 class Engine {
 private:
-    std::string _name;
     bool _updateWorld = true;
     void projectAndDrawGroup(std::shared_ptr<Group> group) const;
 
     // For debug purposes
     bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;
-    void printDebugInfo() const;
+    std::vector<std::pair<double, double>> _fpsCounter;
+    std::map<std::string, std::vector<std::pair<double, double>>> _histResources;
+
+    void printDebugInfo();
 
 protected:
     const std::shared_ptr<Screen> screen = std::make_shared<Screen>();
@@ -53,7 +55,7 @@ public:
     Engine();
 
     void create(uint16_t screenWidth = Consts::STANDARD_SCREEN_WIDTH, uint16_t screenHeight = Consts::STANDARD_SCREEN_HEIGHT,
-                const std::string &name = Consts::PROJECT_NAME, const Color& background = Consts::BACKGROUND_COLOR);
+                const Color& background = Consts::BACKGROUND_COLOR);
 
     void exit();
 };

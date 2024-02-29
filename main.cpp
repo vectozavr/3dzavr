@@ -25,13 +25,13 @@ private:
         cameraController = std::make_shared<ObjectController>(camera);
 
 
-        for (int i = 1; i <= 8; i++) {
-            auto car = world->loadObject(
-                    ObjectTag("car"+std::to_string(i)),
-                    FilePath("resources/obj/cars/car"+std::to_string(i)+"/Car"+std::to_string(i)+".obj"));
-            car->rotate(Vec3D{0, Consts::PI, 0});
-            car->translate(Vec3D(-13.5 + 3*i, -4, 13));
-        }
+        //for (int i = 1; i <= 8; i++) {
+        //    auto car = world->loadObject(
+        //            ObjectTag("car"+std::to_string(i)),
+        //            FilePath("resources/obj/cars/car"+std::to_string(i)+"/Car"+std::to_string(i)+".obj"));
+        //    car->rotate(Vec3D{0, Consts::PI, 0});
+        //    car->translate(Vec3D(-13.5 + 3*i, -4, 13));
+        //}
 
         //auto Dust = world->loadObject(ObjectTag("Dust"), FilePath("resources/obj/Dust/dust_map.obj"));
 
@@ -40,16 +40,22 @@ private:
         PastVillage->translate(Vec3D{0,-0.3,-14.5});
         camera->rotateUp(Consts::PI);
 
+        auto skybox = world->loadObject(ObjectTag("skybox"), FilePath("resources/obj/skybox/midday/skyboxShape.obj"));
+        //auto skybox = world->loadObject(ObjectTag("skybox"), FilePath("resources/obj/skybox/sunset/skybox.obj"));
 
+        //skybox->scale(Vec3D{0.1, 0.1, 0.1});
+
+        // For debug
         redCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("RedCube"), 0.1));
         redCube->setVisible(objInFocus);
-        world->add(redCube);
+        //world->add(redCube);
     };
 
     void update() override {
         screen->setTitle("3dzavr, " + std::to_string(Time::fps()) + "fps");
 
-        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2, Consts::STANDARD_SCREEN_HEIGHT/2, 2, 2, Color(0,0,0,0));
+        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Consts::BLACK);
+        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Consts::BLACK);
 
         if(objSelected) {
             objController->update();
@@ -83,27 +89,26 @@ private:
         }
 
         // object scale x:
-        if(Keyboard::isKeyPressed(SDLK_UP)) {
+        if(Keyboard::isKeyPressed(SDLK_UP) && objSelected) {
             selectedObject->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));
         }
         // object scale y:
-        if(Keyboard::isKeyPressed(SDLK_DOWN)) {
+        if(Keyboard::isKeyPressed(SDLK_DOWN) && objSelected) {
             selectedObject->scaleInside(Vec3D(1, 1 + Time::deltaTime(), 1));
         }
         // object scale z:
-        if(Keyboard::isKeyPressed(SDLK_LEFT)) {
+        if(Keyboard::isKeyPressed(SDLK_LEFT) && objSelected) {
             selectedObject->scaleInside(Vec3D(1, 1, 1 + Time::deltaTime()));
         }
 
         // undo transformations
-        if(Keyboard::isKeyPressed(SDLK_u)) {
+        if(Keyboard::isKeyPressed(SDLK_u) && objSelected) {
             selectedObject->transform(selectedObject->invModel());
         }
 
         if(Keyboard::isKeyTapped(SDLK_TAB)) {
             setDebugInfo(!showDebugInfo());
         }
-
     };
 
 public:

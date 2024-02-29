@@ -51,13 +51,11 @@ void Engine::projectAndDrawGroup(std::shared_ptr<Group> group) const {
     }
 }
 
-void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const std::string &name, const Color& background) {
+void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& background) {
 
-    _name = name;
-    screen->open(screenWidth, screenHeight, name, background);
+    screen->open(screenWidth, screenHeight, background);
 
-    Log::log("Engine::create(): started engine (" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) +
-             ") with title '" + name + "'.");
+    Log::log("Engine::create(): started 3dzavr. Screen size: (" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + ")");
     Time::update();
 
     start();
@@ -138,32 +136,33 @@ void Engine::exit() {
              std::to_string(screen->height()) + ") with title '" + screen->title() + "'.");
 }
 
-void Engine::printDebugInfo() const {
+void Engine::printDebugInfo() {
     if (_showDebugInfo) {
         // coordinates & fps:
-        std::string text = _name + "\n\n X: " +
+        std::string text = Consts::BUILD_INFO + "\n X: " +
                            std::to_string((camera->position().x())) + "\n Y: " +
                            std::to_string((camera->position().y())) + "\n Z: " +
                            std::to_string((camera->position().z())) + "\n RY:" +
-                            std::to_string(camera->angle().y()) + "\n RL: " +
-                            std::to_string(camera->angleLeftUpLookAt().x()) + "\n\n" +
+                           std::to_string(camera->angle().y()) + "\n RL: " +
+                           std::to_string(camera->angleLeftUpLookAt().x()) + "\n\n" +
                            std::to_string(screen->width()) + "x" +
                            std::to_string(screen->height()) + " " +
                            std::to_string(Time::fps()) + " fps";
 
 
-        screen->drawText("fps: " + std::to_string(Time::fps()), 10, 10);
-        screen->drawText("X: " + std::to_string((camera->position().x())), 10, 30);
-        screen->drawText("Y: " + std::to_string((camera->position().y())), 10, 50);
-        screen->drawText("Z: " + std::to_string((camera->position().z())), 10, 70);
-        screen->drawText("RY: " +std::to_string(camera->angle().y()), 10, 90);
-        screen->drawText("RL: " +std::to_string(camera->angleLeftUpLookAt().x()), 10, 110);
+        screen->drawText(Consts::BUILD_INFO, 15, 10);
+        screen->drawText("fps: " + std::to_string(Time::fps()), 15, 25);
+        screen->drawText("X: "   + std::to_string((camera->position().x())), 15, 40);
+        screen->drawText("Y: "   + std::to_string((camera->position().y())), 15, 55);
+        screen->drawText("Z: "   + std::to_string((camera->position().z())), 15, 70);
+        screen->drawText("RY: "  + std::to_string(camera->angle().y()), 15, 85);
+        screen->drawText("RL: "  + std::to_string(camera->angleLeftUpLookAt().x()), 15, 100);
 
         // timers:
-        int timerWidth = screen->width()*2/3;
-        float xPos = screen->width()/4;
-        float yPos = screen->height()/2;
-        int height = screen->height()/30;
+        int timerWidth = 150;
+        float xPos = 15;
+        float yPos = 130;
+        int height = 14;
 
         double totalTime = Time::elapsedTimerSeconds("d all");
         double timeSum = 0;
@@ -179,13 +178,17 @@ void Engine::printDebugInfo() const {
                 continue;
             }
 
+            _histResources[timerName].emplace_back(Time::time(), timer.elapsedSeconds());
+
             screen->drawStrokeRectangle(xPos, yPos + (1.5*height)*i, width, height,
                                         Color(width * 255 / timerWidth, 255 - width * 255 / timerWidth, 0, 255));
 
             screen->drawText(
                     timerName.substr(2, timerName.size()) + " (" +
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
-                    10, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
+                    xPos+5, yPos + (1.5*height)*i, 12, Consts::BLACK);
+
+            screen->drawPlot(_histResources[timerName], timerWidth + 10, yPos + (1.5*height)*i, 50, height);
 
             i++;
             timeSum += timer.elapsedSeconds();
@@ -196,7 +199,20 @@ void Engine::printDebugInfo() const {
                              Color(width * 255 / timerWidth, 255 - width * 255 / timerWidth, 0, 255));
 
         screen->drawText("all other stuff (" + std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
-                         10, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
+                         xPos+5, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
 
+        _histResources["d other"].emplace_back(Time::time(), totalTime - timeSum);
+        screen->drawPlot(_histResources["d other"], timerWidth + 10, yPos + (1.5*height)*i, 50, height);
+
+        // Draw a plot of fps
+
+        _histResources["fpsCounter"].emplace_back(Time::time(), Time::fps());
+        screen->drawPlot(_histResources["fpsCounter"], 100, 25, 50, 14);
+
+        for(auto& [histName, data] : _histResources) {
+            if(data.size() > 1000) {
+                data.erase(data.begin());
+            }
+        }
     }
 }

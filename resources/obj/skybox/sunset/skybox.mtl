@@ -1,0 +1,50 @@
+# Blender MTL File: 'None'
+# Material Count: 4
+
+newmtl NC_EgyptClouds_clouds1
+Ns 86.470578
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.000000
+illum 1
+map_Kd EgyptClouds.tga.png
+map_d EgyptClouds.tga.png
+
+newmtl NC_EgyptClouds_clouds2
+Ns 86.470578
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.000000
+illum 1
+map_Kd EgyptWisps.tga.png
+map_d EgyptWisps.tga.png
+
+newmtl NC_EgyptHaze_clouds
+Ns 86.470578
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.000000
+illum 1
+map_Kd EgyptHaze.tga.png
+map_d EgyptHaze.tga.png
+
+newmtl NC_Egypt_Back_Sky
+Ns 86.470578
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.000000
+illum 1
+map_Kd EgyptBack.bmp.png
+map_d EgyptBack.bmp.png

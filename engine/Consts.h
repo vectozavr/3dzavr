@@ -14,7 +14,14 @@
 
 namespace Consts {
     const Color BACKGROUND_COLOR = Color(255, 255, 255);
-    const std::string PROJECT_NAME = "engine";
+
+#ifndef NDEBUG
+    const std::string RUNNING_MODE = "Debug";
+#else
+    const std::string RUNNING_MODE = "Release";
+#endif
+
+    const std::string BUILD_INFO = "3dzavr sdl v0.2.0 " + RUNNING_MODE;
 
     const Vec2D BEZIER[2] = {Vec2D{0.8, 0}, Vec2D{0.2, 1}};
 

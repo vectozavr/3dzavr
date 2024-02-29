@@ -32,7 +32,7 @@ private:
     int _scene = 0;
     bool _renderVideo = false;
 
-    std::string _title;
+    std::string _title = Consts::BUILD_INFO;
 
     Color _background;
 
@@ -46,7 +46,6 @@ public:
 
     void open(uint16_t screenWidth = Consts::STANDARD_SCREEN_WIDTH,
               uint16_t screenHeight = Consts::STANDARD_SCREEN_HEIGHT,
-              const std::string &title = Consts::PROJECT_NAME,
               const Color& background = Consts::BACKGROUND_COLOR);
     void display();
     void clear();
@@ -63,6 +62,8 @@ public:
     void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize = 12, const Color& color = Consts::BLACK);
 
     void drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img);
+
+    void drawPlot(const std::vector<std::pair<double, double>>& data, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 
     void setTitle(const std::string &title);
 
