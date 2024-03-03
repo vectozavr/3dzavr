@@ -13,6 +13,9 @@
 class Camera final : public Object {
 private:
     std::vector<Plane> _clipPlanes;
+    double _znear = 0;
+    double _zfar = 0;
+    double _fov = 0;
     bool _ready = false;
     double _aspect = 0;
     // Internal variables to reduce allocations
@@ -27,9 +30,9 @@ public:
 
     void setup(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
 
-    std::vector<Triangle> project(const Mesh& mesh);
+    void updateFrustum();
 
-    ~Camera();
+    std::vector<Triangle> project(const Mesh& mesh);
 };
 
 

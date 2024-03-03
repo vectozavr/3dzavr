@@ -106,6 +106,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
             Time::stopTimer("d collisions");
         }
 
+        camera->updateFrustum();
         projectAndDrawGroup(*world->objects());
 
         Time::stopTimer("d projections");
