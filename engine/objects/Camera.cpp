@@ -25,6 +25,27 @@ std::vector<Triangle> Camera::project(const Mesh& mesh) {
     Matrix4x4 objectToWorld = mesh.fullModel();
     Matrix4x4 worldToScreen = _SP * fullInvModel();
 
+    // Transform mesh bounds into global coordinates
+    Vec3D globalCenter = Vec3D(objectToWorld * mesh.bounds().center.makePoint4D());
+    Vec3D left = mesh.left() * mesh.bounds().extents.x();
+    Vec3D up = mesh.up() * mesh.bounds().extents.y();
+    Vec3D forward = mesh.lookAt() * mesh.bounds().extents.z();
+
+    double globalX = std::abs(left.x()) + std::abs(up.x()) + std::abs(forward.x());
+    double globalY = std::abs(left.y()) + std::abs(up.y()) + std::abs(forward.y());
+    double globalZ = std::abs(left.z()) + std::abs(up.z()) + std::abs(forward.z());
+
+    // Check if object bounds is inside camera frustum
+    for (auto &plane : _clipPlanes) {
+        double r =
+            globalX * std::abs(plane.normal.x()) +
+            globalY * std::abs(plane.normal.y()) +
+            globalZ * std::abs(plane.normal.z());
+
+        if (plane.distance(globalCenter) + r < 0)
+            return result;
+    }
+
     for (auto &t : mesh.triangles()) {
 
         Triangle MTriangle = t * objectToWorld;

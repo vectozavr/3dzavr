@@ -31,6 +31,7 @@ add_library(
         objects/props/Material.h
         objects/props/Material.cpp
 
+        objects/geometry/Bounds.h
         objects/geometry/Triangle.h
         objects/geometry/Triangle.cpp
         objects/geometry/Plane.h

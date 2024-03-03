@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <objects/geometry/Triangle.h>
+#include <objects/geometry/Bounds.h>
 #include <objects/Object.h>
 #include <io/Image.h>
 #include <objects/props/Material.h>
@@ -17,12 +18,14 @@ class Mesh : public Object {
 private:
     std::vector<Triangle> _tris;
     std::shared_ptr<Material> _material = nullptr;
+    Bounds _bounds;
 
     bool _visible = true;
 
     Mesh &operator*=(const Matrix4x4 &matrix4X4);
 
     void copyTriangles(const Mesh& mesh, bool deepCopy);
+    void calculateBounds();
 
 public:
     explicit Mesh(const ObjectTag& nameTag) : Object(nameTag) {};
@@ -40,7 +43,9 @@ public:
     [[nodiscard]] size_t size() const { return _tris.size() * 3; }
 
     [[nodiscard]] std::shared_ptr<Material> getMaterial() const { return _material; }
-    void setMaterial(std::shared_ptr<Material> material) { _material = material; }
+    void setMaterial(std::shared_ptr<Material> material) { _material = std::move(material); }
+
+    [[nodiscard]] const Bounds& bounds() const { return _bounds; }
 
     void setVisible(bool visibility) { _visible = visibility; }
 
@@ -48,13 +53,11 @@ public:
 
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) override;
 
-    ~Mesh();
-
     std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
         return std::make_shared<Mesh>(tag, *this);
     }
 
-    Mesh static Surface(const ObjectTag &tag, double width, double height, std::shared_ptr<Material> material = nullptr);
+    Mesh static Surface(const ObjectTag &tag, double width, double height, const std::shared_ptr<Material>& material = nullptr);
     Mesh static Cube(const ObjectTag &tag, double size = 1.0);
     Mesh static LineTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, double line_width = 0.1);
     Mesh static ArrowTo(const ObjectTag &tag, const Vec3D& from, const Vec3D& to, double line_width = 1);
