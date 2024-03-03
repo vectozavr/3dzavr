@@ -238,8 +238,8 @@ void Mesh::calculateBounds() {
     for (const auto & t : _tris) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                min[j] = std::min(min[i], t[i][j]);
-                max[j] = std::max(max[i], t[i][j]);
+                min[j] = std::min(min[j], t[i][j]);
+                max[j] = std::max(max[j], t[i][j]);
             }
         }
     }
