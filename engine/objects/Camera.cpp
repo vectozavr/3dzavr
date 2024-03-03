@@ -57,39 +57,41 @@ std::vector<Triangle> Camera::project(const Mesh& mesh) {
         }
 
         // It needs to be cleared because it's reused through iterations. Usually it doesn't free memory.
-        _clippedTriangles.clear();
-        _tempBuffer.clear();
+        _clipBuffer1.clear();
+        _clipBuffer2.clear();
 
         // In the beginning we need to translate triangle from object local coordinate to world coordinates:
         // After that we apply clipping for all planes from _clipPlanes
-        _clippedTriangles.emplace_back(MTriangle);
+
+        _clipBuffer2.emplace_back(Vec3D(MTriangle.points()[0]), MTriangle.textureCoordinates()[0]);
+        _clipBuffer2.emplace_back(Vec3D(MTriangle.points()[1]), MTriangle.textureCoordinates()[1]);
+        _clipBuffer2.emplace_back(Vec3D(MTriangle.points()[2]), MTriangle.textureCoordinates()[2]);
         for (auto &plane : _clipPlanes) {
-            while (!_clippedTriangles.empty()) {
-                stack_vector<Triangle, 2> clipResult = plane.clip(_clippedTriangles.back());
-                _clippedTriangles.pop_back();
-                for (auto &i : clipResult) {
-                    _tempBuffer.emplace_back(i);
-                }
-            }
-            _clippedTriangles.swap(_tempBuffer);
+            _clipBuffer1.swap(_clipBuffer2);
+            _clipBuffer2.clear();
+            plane.clip(_clipBuffer1, _clipBuffer2);
         }
 
-        for (auto &clipped : _clippedTriangles) {
-            // Finally it's time to project our clipped colored drawTriangle from 3D -> 2D
-            // and transform its coordinate to screen space (in pixels):
-            Triangle clippedProjected = clipped * worldToScreen;
-            auto clippedTexCoord = clippedProjected.textureCoordinates();
+        // It's time to project our clipped polygon from 3D -> 2D
+        // and transform its coordinate to screen space (in pixels):
+        for (auto &vertex : _clipBuffer2) {
+            Vec4D tmp = worldToScreen * vertex.first.makePoint4D();
+            vertex.first = Vec3D(tmp) / tmp.w();
+            vertex.second /= tmp.w();
+        }
 
+        // Finally, create triangle from sorted list of vertices
+        for (size_t i = 2; i < _clipBuffer2.size(); i++) {
             result.emplace_back(
                 std::array<Vec4D, 3>{
-                    clippedProjected[0] / clippedProjected[0].w(),
-                    clippedProjected[1] / clippedProjected[1].w(),
-                    clippedProjected[2] / clippedProjected[2].w()
+                    _clipBuffer2[0].first.makePoint4D(),
+                    _clipBuffer2[i - 1].first.makePoint4D(),
+                    _clipBuffer2[i].first.makePoint4D()
                 },
                 std::array<Vec3D, 3>{
-                    clippedTexCoord[0] / clippedProjected[0].w(),
-                    clippedTexCoord[1] / clippedProjected[1].w(),
-                    clippedTexCoord[2] / clippedProjected[2].w()
+                    _clipBuffer2[0].second,
+                    _clipBuffer2[i - 1].second,
+                    _clipBuffer2[i].second
                 }
             );
         }
@@ -112,9 +114,9 @@ void Camera::setup(int width, int height, double fov, double ZNear, double ZFar)
 
     _clipPlanes.reserve(6);
 
-    // The capacity is chosen simply by a small runtime test (though with proper clipping it should be 7 at most).
-    _clippedTriangles.reserve(12);
-    _tempBuffer.reserve(12);
+    // 3 vertices from triangle, 1 vertex from each plane clip
+    _clipBuffer1.reserve(9);
+    _clipBuffer2.reserve(9);
 
     _ready = true;
     Log::log("Camera::init(): camera successfully initialized.");

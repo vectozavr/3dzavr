@@ -19,8 +19,8 @@ private:
     bool _ready = false;
     double _aspect = 0;
     // Internal variables to reduce allocations
-    std::vector<Triangle> _clippedTriangles;
-    std::vector<Triangle> _tempBuffer;
+    std::vector<std::pair<Vec3D, Vec3D>> _clipBuffer1;
+    std::vector<std::pair<Vec3D, Vec3D>> _clipBuffer2;
 
     Matrix4x4 _SP;
 public:
