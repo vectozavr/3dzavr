@@ -88,22 +88,24 @@ private:
             selectedObject.reset();
         }
 
-        // object scale x:
-        if(Keyboard::isKeyPressed(SDLK_UP) && objSelected) {
-            selectedObject->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));
-        }
-        // object scale y:
-        if(Keyboard::isKeyPressed(SDLK_DOWN) && objSelected) {
-            selectedObject->scaleInside(Vec3D(1, 1 + Time::deltaTime(), 1));
-        }
-        // object scale z:
-        if(Keyboard::isKeyPressed(SDLK_LEFT) && objSelected) {
-            selectedObject->scaleInside(Vec3D(1, 1, 1 + Time::deltaTime()));
-        }
+        if (selectedObject) {
+            // object scale x:
+            if (Keyboard::isKeyPressed(SDLK_UP)) {
+                selectedObject->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));
+            }
+            // object scale y:
+            if (Keyboard::isKeyPressed(SDLK_DOWN)) {
+                selectedObject->scaleInside(Vec3D(1, 1 + Time::deltaTime(), 1));
+            }
+            // object scale z:
+            if (Keyboard::isKeyPressed(SDLK_LEFT)) {
+                selectedObject->scaleInside(Vec3D(1, 1, 1 + Time::deltaTime()));
+            }
 
-        // undo transformations
-        if(Keyboard::isKeyPressed(SDLK_u) && objSelected) {
-            selectedObject->transform(selectedObject->invModel());
+            // undo transformations
+            if (Keyboard::isKeyPressed(SDLK_u)) {
+                selectedObject->transform(selectedObject->invModel());
+            }
         }
 
         if(Keyboard::isKeyTapped(SDLK_TAB)) {
