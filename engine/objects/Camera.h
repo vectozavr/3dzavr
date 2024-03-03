@@ -12,9 +12,15 @@
 
 class Camera final : public Object {
 private:
-    std::vector<std::shared_ptr<Plane>> _clipPlanes{};
+    std::vector<Plane> _clipPlanes;
+    double _znear = 0;
+    double _zfar = 0;
+    double _fov = 0;
     bool _ready = false;
     double _aspect = 0;
+    // Internal variables to reduce allocations
+    std::vector<Triangle> _clippedTriangles;
+    std::vector<Triangle> _tempBuffer;
 
     Matrix4x4 _SP;
 public:
@@ -24,10 +30,10 @@ public:
 
     void setup(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
 
-    std::vector<std::pair<std::shared_ptr<Triangle>, std::shared_ptr<Material>>> project(std::shared_ptr<Mesh> mesh);
+    void updateFrustum();
 
-    ~Camera();
+    std::vector<Triangle> project(const Mesh& mesh);
 };
 
 
-#endif //INC_3DZAVR_CAMERA_H
+#endif //ENGINE_CAMERA_H

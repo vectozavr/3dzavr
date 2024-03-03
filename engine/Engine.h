@@ -26,7 +26,7 @@
 class Engine {
 private:
     bool _updateWorld = true;
-    void projectAndDrawGroup(std::shared_ptr<Group> group) const;
+    void projectAndDrawGroup(const Group& group) const;
 
     // For debug purposes
     bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;

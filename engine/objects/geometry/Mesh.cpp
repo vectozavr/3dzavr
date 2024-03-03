@@ -5,7 +5,6 @@
 #include <utility>
 
 #include "Mesh.h"
-#include "utils/ResourceManager.h"
 #include "Plane.h"
 
 Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
@@ -20,15 +19,17 @@ Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
 }
 
 Mesh::Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, std::shared_ptr<Material> material) :
-Object(tag), _tris(tries), _material(material) {}
+    Object(tag), _tris(tries), _material(std::move(material)) {
+    calculateBounds();
+}
 
-Mesh Mesh::Surface(const ObjectTag &tag, double w, double h, std::shared_ptr<Material> material) {
+Mesh Mesh::Surface(const ObjectTag &tag, double w, double h, const std::shared_ptr<Material>& material) {
     Mesh surface(tag);
 
-    surface._tris = {
+    surface.setTriangles(std::move(std::vector<Triangle>{
             { {Vec4D{w/2, 0.0, h/2, 1.0}, Vec4D{w/2, 0.0, -h/2, 1.0}, Vec4D{-w/2, 0.0, -h/2, 1.0}}, {Vec3D{0, 0, 1}, Vec3D{0, 1, 1}, Vec3D{1, 1, 1}} },
             { {Vec4D{-w/2, 0.0, -h/2, 1.0}, Vec4D{-w/2, 0.0, h/2, 1.0}, Vec4D{w/2, 0.0, h/2, 1.0}}, {Vec3D{1, 1, 1}, Vec3D{1, 0, 1}, Vec3D{0, 0, 1}} }
-    };
+    }));
     if(material) {
         surface.setMaterial(material);
     }
@@ -39,7 +40,7 @@ Mesh Mesh::Surface(const ObjectTag &tag, double w, double h, std::shared_ptr<Mat
 Mesh Mesh::Cube(const ObjectTag &tag, double size) {
     Mesh cube(tag);
 
-    cube._tris = {
+    cube.setTriangles(std::move(std::vector<Triangle>{
             { {Vec4D{0.0, 0.0, 0.0, 1.0},    Vec4D{0.0, 1.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 0.0, 1.0}} },
             { {Vec4D{0.0, 0.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 0.0, 1.0},    Vec4D{1.0, 0.0, 0.0, 1.0}} },
             { {Vec4D{1.0, 0.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 1.0, 1.0}} },
@@ -52,7 +53,7 @@ Mesh Mesh::Cube(const ObjectTag &tag, double size) {
             { {Vec4D{0.0, 1.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 1.0, 1.0},    Vec4D{1.0, 1.0, 0.0, 1.0}} },
             { {Vec4D{1.0, 0.0, 1.0, 1.0},    Vec4D{0.0, 0.0, 1.0, 1.0},    Vec4D{0.0, 0.0, 0.0, 1.0}} },
             { {Vec4D{1.0, 0.0, 1.0, 1.0},    Vec4D{0.0, 0.0, 0.0, 1.0},    Vec4D{1.0, 0.0, 0.0, 1.0}} },
-    };
+    }));
 
     return cube *= Matrix4x4::Scale(Vec3D(size, size, size))*Matrix4x4::Translation(Vec3D(-0.5, -0.5, -0.5));
 }
@@ -77,7 +78,7 @@ Mesh Mesh::LineTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, doub
     Vec4D p8 = (to - from + v2 * line_width / 2.0 - v3 * line_width / 2.0).makePoint4D();
 
 
-    line._tris = std::move(std::vector<Triangle>{
+    line.setTriangles(std::move(std::vector<Triangle>{
             {{p2, p4, p1}},
             {{p2, p3, p4}},
             {{p1, p6, p2}},
@@ -90,7 +91,7 @@ Mesh Mesh::LineTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, doub
             {{p4, p7, p8}},
             {{p1, p8, p5}},
             {{p1, p4, p8}}
-    });
+    }));
     line.translateToPoint(from);
 
     return line;
@@ -126,7 +127,7 @@ Mesh Mesh::ArrowTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, dou
 
     Vec4D p13 = (to - from).makePoint4D();
 
-    arrow._tris = std::move(std::vector<Triangle>{
+    arrow.setTriangles(std::move(std::vector<Triangle>{
             {{p2, p4, p1}},
             {{p2, p3, p4}},
             {{p1, p6, p2}},
@@ -144,7 +145,7 @@ Mesh Mesh::ArrowTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, dou
             {{ p10, p11, p13 }},
             {{ p11, p12, p13 }},
             {{ p12, p9, p13  }},
-    });
+    }));
     arrow.translateToPoint(from);
 
     return arrow;
@@ -152,10 +153,7 @@ Mesh Mesh::ArrowTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, dou
 
 void Mesh::setTriangles(std::vector<Triangle>&& t) {
     _tris = std::move(t);
-}
-
-Mesh::~Mesh() {
-    _tris.clear();
+    calculateBounds();
 }
 
 Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &to) {
@@ -185,8 +183,8 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             continue;
         }
 
-        auto trianglePlane = std::make_shared<Plane>(tri, ObjectTag(""));
-        auto intersection = trianglePlane->intersect(from_model, to_model);
+        auto trianglePlane = Plane(tri);
+        auto intersection = trianglePlane.intersect(from_model, to_model);
 
         if (intersection.distanceToObject > 0 && tri.isPointInside(intersection.pointOfIntersection)) {
 
@@ -194,8 +192,8 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
             // Due-to this effect if you scale some object in x times you will get distance in x times smaller.
             // That's why we need to perform distance calculation in the global coordinate system where metric
             // is the same for all objects.
-            trianglePlane = std::make_shared<Plane>(tri*model, ObjectTag(""));
-            auto globalIntersection = trianglePlane->intersect(from, to);
+            trianglePlane = Plane(model * tri.norm(), Vec3D(model * tri[0]));
+            auto globalIntersection = trianglePlane.intersect(from, to);
             double globalDistance = (globalIntersection.pointOfIntersection - from).abs();
 
             if(globalDistance < minDistance) {
@@ -231,6 +229,24 @@ void Mesh::copyTriangles(const Mesh &mesh, bool deepCopy) {
     } else {
         _tris = mesh._tris;
     }
+    _bounds = mesh._bounds;
+}
+
+void Mesh::calculateBounds() {
+    Vec3D min = _tris.empty() ? Vec3D() : Vec3D(_tris[0][0]);
+    Vec3D max = min;
+    for (const auto & t : _tris) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                min[j] = std::min(min[j], t[i][j]);
+                max[j] = std::max(max[j], t[i][j]);
+            }
+        }
+    }
+    _bounds = Bounds {
+        .center = (max + min) / 2,
+        .extents = (max - min) / 2
+    };
 }
 
 Mesh::Mesh(const Mesh &mesh, bool deepCopy) :
