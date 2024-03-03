@@ -30,8 +30,6 @@ public:
 
     void setup(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
 
-    void updateFrustum();
-
     std::vector<Triangle> project(const Mesh& mesh);
 };
 
