@@ -1,6 +1,8 @@
 #ifndef GEOMETRY_PLANE_H
 #define GEOMETRY_PLANE_H
 
+#include <vector>
+
 #include "linalg/Vec4D.h"
 #include "Triangle.h"
 #include "objects/Object.h"
@@ -34,6 +36,7 @@ public:
     [[nodiscard]] double distance(const Vec3D &point4D) const;
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const;
     [[nodiscard]] stack_vector<Triangle, 2> clip(const Triangle &tri) const;
+    void clip(std::vector<std::pair<Vec3D, Vec3D>>& input, std::vector<std::pair<Vec3D, Vec3D>>& output) const;
 };
 
 

@@ -80,6 +80,29 @@ stack_vector<Triangle, 2> Plane::clip(const Triangle &tri) const {
     return result;
 }
 
+void Plane::clip(std::vector<std::pair<Vec3D, Vec3D>>& input, std::vector<std::pair<Vec3D, Vec3D>>& output) const {
+    if (input.empty()) return;
+    auto prev = input.back();
+    double prevDistance = distance(prev.first);
+    for (auto & i : input) {
+        auto curr = i;
+        double currDistance = distance(curr.first);
+
+        if (currDistance >= 0) {
+            if (prevDistance < 0) {
+                auto p = intersect(prev.first, curr.first);
+                output.emplace_back(p.pointOfIntersection, prev.second + (curr.second - prev.second) * p.k);
+            }
+            output.emplace_back(curr);
+        } else if (prevDistance >= 0) {
+            auto p = intersect(prev.first, curr.first);
+            output.emplace_back(p.pointOfIntersection, prev.second + (curr.second - prev.second) * p.k);
+        }
+        prev = curr;
+        prevDistance = currDistance;
+    }
+}
+
 Plane::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D &to) const {
     double s_dot_n = from.dot(normal);
     double k = std::numeric_limits<double>::infinity();

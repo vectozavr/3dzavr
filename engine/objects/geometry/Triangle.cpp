@@ -41,7 +41,7 @@ Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
     Vec2D ca = Vec2D(_points[2]) - Vec2D(_points[0]);
     auto pa = point - Vec2D(_points[0]);
 
-    bool swapped = std::abs(ca.y()) < Consts::EPS;
+    bool swapped = std::abs(ca.y()) < std::abs(ba.y());
     if (swapped) {
         std::swap(ba, ca);
     }

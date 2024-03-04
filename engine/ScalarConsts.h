@@ -1,7 +1,7 @@
-#include <cstdint>
-
 #ifndef ENGINE_SCALAR_CONSTS_H
 #define ENGINE_SCALAR_CONSTS_H
+
+#include <cstdint>
 
 namespace Consts {
     constexpr uint16_t STANDARD_SCREEN_WIDTH = 640;
