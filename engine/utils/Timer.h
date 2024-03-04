@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 03.11.2021.
-//
-
 #ifndef UTILS_TIMER_H
 #define UTILS_TIMER_H
 

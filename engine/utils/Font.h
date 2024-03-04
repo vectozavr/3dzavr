@@ -1,7 +1,3 @@
-//
-// Created by Ivan Ilin on 28/01/2024.
-//
-
 #ifndef UTILS_FONT_H
 #define UTILS_FONT_H
 

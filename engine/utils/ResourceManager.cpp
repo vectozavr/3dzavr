@@ -1,7 +1,3 @@
-//
-// Created by Neirokan on 09.05.2020
-//
-
 #include <algorithm>
 #include <sstream>
 #include <fstream>

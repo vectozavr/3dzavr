@@ -1,7 +1,3 @@
-//
-// Created by Ivan Ilin on 04/03/2024.
-//
-
 #ifndef UTILS_MONITORING_H
 #define UTILS_MONITORING_H
 

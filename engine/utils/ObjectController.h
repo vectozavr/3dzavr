@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 22.01.2022.
-//
-
 #ifndef UTILS_OBJECTCONTROLLER_H
 #define UTILS_OBJECTCONTROLLER_H
 

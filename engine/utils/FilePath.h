@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 23/01/2024.
-//
-
 #ifndef UTILS_FILEPATH_H
 #define UTILS_FILEPATH_H
 

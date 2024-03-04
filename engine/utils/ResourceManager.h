@@ -1,7 +1,3 @@
-//
-// Created by Neirokan on 09.05.2020
-//
-
 #ifndef UTILS_RESOURCEMANAGER_H
 #define UTILS_RESOURCEMANAGER_H
 

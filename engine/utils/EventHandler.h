@@ -1,7 +1,3 @@
-//
-// Created by Ivan Ilin on 07/10/2023.
-//
-
 #ifndef UTILS_EVENTHANDLER_H
 #define UTILS_EVENTHANDLER_H
 

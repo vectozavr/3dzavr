@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 11.01.2021.
-//
-
 #ifndef UTILS_TIME_H
 #define UTILS_TIME_H
 

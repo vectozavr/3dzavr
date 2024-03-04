@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 13.01.2021.
-//
-
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <ctime>
