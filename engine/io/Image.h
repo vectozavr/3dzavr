@@ -1,11 +1,5 @@
-
-//
-// Created by Ivan Ilin on 21/09/2023.
-//
-
-#ifndef RAYTRACE3D_IMAGE_H
-#define RAYTRACE3D_IMAGE_H
-
+#ifndef IO_IMAGE_H
+#define IO_IMAGE_H
 
 #include <cstdint>
 #include <png.h>
@@ -53,4 +47,4 @@ public:
 };
 
 
-#endif //RAYTRACE3D_IMAGE_H
+#endif //IO_IMAGE_H

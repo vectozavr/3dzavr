@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 10.10.2021.
-//
-
-#ifndef ENGINE_VEC2D_H
-#define ENGINE_VEC2D_H
+#ifndef LINALG_VEC2D_H
+#define LINALG_VEC2D_H
 
 #include <array>
 
@@ -57,4 +53,4 @@ public:
 
 #include "Vec2D.inl"
 
-#endif //ENGINE_VEC2D_H
+#endif //LINALG_VEC2D_H

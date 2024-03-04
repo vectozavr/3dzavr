@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 15.03.2021.
-//
-
-#ifndef ENGINE_OBJECT_H
-#define ENGINE_OBJECT_H
+#ifndef OBJECTS_OBJECT_H
+#define OBJECTS_OBJECT_H
 
 #include <map>
 #include <set>
@@ -141,4 +137,4 @@ public:
     virtual ~Object();
 };
 
-#endif //ENGINE_OBJECT_H
+#endif //OBJECTS_OBJECT_H

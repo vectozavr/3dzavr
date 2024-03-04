@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 01.11.2021.
-//
-
-#ifndef SHOOTER_AROTATERELATIVEPOINT_H
-#define SHOOTER_AROTATERELATIVEPOINT_H
+#ifndef ANIMATION_AROTATERELATIVEPOINT_H
+#define ANIMATION_AROTATERELATIVEPOINT_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -33,4 +29,4 @@ public:
               _rotationValue(rotationValue) {}
 };
 
-#endif //SHOOTER_AROTATERELATIVEPOINT_H
+#endif //ANIMATION_AROTATERELATIVEPOINT_H

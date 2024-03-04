@@ -2,8 +2,8 @@
 // Created by Neirokan on 09.05.2020
 //
 
-#ifndef ENGINE_RESOURCEMANAGER_H
-#define ENGINE_RESOURCEMANAGER_H
+#ifndef UTILS_RESOURCEMANAGER_H
+#define UTILS_RESOURCEMANAGER_H
 
 #include <memory>
 
@@ -48,4 +48,4 @@ public:
     static std::shared_ptr<Font> loadFont(const FilePath &fontFile);
 };
 
-#endif //PSEUDO3DENGINE_RESOURCEMANAGER_H
+#endif //UTILS_RESOURCEMANAGER_H

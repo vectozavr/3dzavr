@@ -1,8 +1,3 @@
-//
-// Created by Иван Ильин on 19.09.2021.
-//
-
-
 #include <io/Keyboard.h>
 #include <utils/Time.h>
 #include <Consts.h>

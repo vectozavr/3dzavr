@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 01.11.2021.
-//
-
-#ifndef SHOOTER_AATTRACTTOPOINT_H
-#define SHOOTER_AATTRACTTOPOINT_H
+#ifndef ANIMATION_AATTRACTTOPOINT_H
+#define ANIMATION_AATTRACTTOPOINT_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -33,4 +29,4 @@ public:
               _valueToAttract(valueToAttract) {}
 };
 
-#endif //SHOOTER_AATTRACTTOPOINT_H
+#endif //ANIMATION_AATTRACTTOPOINT_H

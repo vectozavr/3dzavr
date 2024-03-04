@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 22/01/2024.
-//
-
-#ifndef INC_3DZAVR_TEST_MATERIAL_H
-#define INC_3DZAVR_TEST_MATERIAL_H
+#ifndef PROPS_MATERIAL_H
+#define PROPS_MATERIAL_H
 
 #include <string>
 
@@ -59,4 +55,4 @@ public:
 };
 
 
-#endif //INC_3DZAVR_TEST_MATERIAL_H
+#endif //PROPS_MATERIAL_H

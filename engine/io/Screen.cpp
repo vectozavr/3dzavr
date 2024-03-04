@@ -251,6 +251,8 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
+    //TODO: sometimes with large triangles and clipping there are big white lines on the screen. We need to fix it.
+
     // Filling inside
     auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
     auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);

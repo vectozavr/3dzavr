@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 04.11.2021.
-//
-
-#ifndef SHOOTER_HITBOX_H
-#define SHOOTER_HITBOX_H
+#ifndef PHYSICS_HITBOX_H
+#define PHYSICS_HITBOX_H
 
 #include "objects/geometry/Mesh.h"
 
@@ -31,4 +27,4 @@ public:
 };
 
 
-#endif //SHOOTER_HITBOX_H
+#endif //PHYSICS_HITBOX_H

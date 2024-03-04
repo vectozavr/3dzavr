@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 29.01.2021.
-//
-
-#ifndef ENGINE_ATRANSLATE_H
-#define ENGINE_ATRANSLATE_H
+#ifndef ANIMATION_ATRANSLATE_H
+#define ANIMATION_ATRANSLATE_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -33,4 +29,4 @@ public:
     }
 };
 
-#endif //INC_3DZAVR_ATRANSLATE_H
+#endif //ANIMATION_ATRANSLATE_H

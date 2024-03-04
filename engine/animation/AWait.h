@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 29.01.2021.
-//
-
-#ifndef ENGINE_AWAIT_H
-#define ENGINE_AWAIT_H
+#ifndef ANIMATION_AWAIT_H
+#define ANIMATION_AWAIT_H
 
 #include <animation/Animation.h>
 
@@ -16,4 +12,4 @@ public:
     }
 };
 
-#endif //INC_3DZAVR_AWAIT_H
+#endif //ANIMATION_AWAIT_H

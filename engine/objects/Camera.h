@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 14.01.2021.
-//
-
-#ifndef ENGINE_CAMERA_H
-#define ENGINE_CAMERA_H
+#ifndef OBJECTS_CAMERA_H
+#define OBJECTS_CAMERA_H
 
 #include <vector>
 
@@ -36,4 +32,4 @@ public:
 };
 
 
-#endif //ENGINE_CAMERA_H
+#endif //OBJECTS_CAMERA_H

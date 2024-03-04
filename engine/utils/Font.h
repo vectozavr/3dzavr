@@ -2,8 +2,8 @@
 // Created by Ivan Ilin on 28/01/2024.
 //
 
-#ifndef INC_3DZAVR_TEST_FONT_H
-#define INC_3DZAVR_TEST_FONT_H
+#ifndef UTILS_FONT_H
+#define UTILS_FONT_H
 
 #include <string>
 #include <map>
@@ -46,4 +46,4 @@ public:
 };
 
 
-#endif //INC_3DZAVR_TEST_FONT_H
+#endif //ENGINE_FONT_H

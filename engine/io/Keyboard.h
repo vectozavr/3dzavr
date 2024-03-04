@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 19.09.2021.
-//
-
-#ifndef SHOOTER_KEYBOARD_H
-#define SHOOTER_KEYBOARD_H
+#ifndef IO_KEYBOARD_H
+#define IO_KEYBOARD_H
 
 #include <map>
 #include <cstdint>
@@ -36,4 +32,4 @@ public:
 };
 
 
-#endif //SHOOTER_KEYBOARD_H
+#endif //IO_KEYBOARD_H

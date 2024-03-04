@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 27.01.2021.
-//
-
 #include <animation/Animation.h>
 #include <Consts.h>
 #include <utils/Time.h>
@@ -28,9 +24,6 @@ bool Animation::updateState() {
             break;
         case InterpolationType::Linear:
             _dprogress = Interpolation::dLinear(_time, _dtime);
-            break;
-        case InterpolationType::Cos:
-            _dprogress = Interpolation::dCos(_time, _dtime);
             break;
         default:
             throw std::logic_error{

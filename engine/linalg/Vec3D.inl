@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 09.10.2021.
-//
-
 #include <cmath>
 #include <stdexcept>
 

@@ -1,7 +1,3 @@
-//
-// Created by Ivan Ilin on 21/09/2023.
-//
-
 #include <algorithm>
 #include <fstream>
 #include <cmath>

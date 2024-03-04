@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 03.11.2021.
 //
 
-#ifndef SHOOTER_TIMER_H
-#define SHOOTER_TIMER_H
+#ifndef UTILS_TIMER_H
+#define UTILS_TIMER_H
 
 #include <chrono>
 
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //SHOOTER_TIMER_H
+#endif //UTILS_TIMER_H

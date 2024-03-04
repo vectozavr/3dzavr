@@ -1,8 +1,5 @@
-//
-// Created by Иван Ильин on 14.01.2021.
-//
-
 #include <iostream>
+#include <mach/mach.h>
 
 #include <Engine.h>
 #include <utils/Time.h>
@@ -10,7 +7,7 @@
 #include <animation/Timeline.h>
 #include <io/Keyboard.h>
 #include <io/Mouse.h>
-#include <cmath>
+#include "utils/monitoring.h"
 
 Engine::Engine() {
     Time::init();
@@ -137,21 +134,36 @@ void Engine::exit() {
     Log::log("Engine::exit(): exit 3dzavr. Screen size: (" + std::to_string(screen->width()) + "x" + std::to_string(screen->height()) + ")");
 }
 
+
+
 void Engine::printDebugInfo() {
     if (_showDebugInfo) {
-        // coordinates & fps:
-        screen->drawText(Consts::BUILD_INFO, 15, 10);
-        screen->drawText("fps: " + std::to_string(Time::fps()), 15, 30);
-        screen->drawText("X: "   + std::to_string((camera->position().x())), 15, 45);
-        screen->drawText("Y: "   + std::to_string((camera->position().y())), 15, 60);
-        screen->drawText("Z: "   + std::to_string((camera->position().z())), 15, 75);
-        screen->drawText("RY: "  + std::to_string(camera->angle().y()), 15, 90);
-        screen->drawText("RL: "  + std::to_string(camera->angleLeftUpLookAt().x()), 15, 105);
+        uint8_t offset = 10;
+        uint8_t shift = 0;
+        uint8_t h = 15;
+
+        // Build info, coordinates & fps:
+        screen->drawText(Consts::BUILD_INFO, 10, (shift++)*h + offset);
+        screen->drawText("System: " + Consts::OPERATION_SYSTEM + ", " + Consts::CPU_ARCHITECTURE, 10, (shift++)*h + offset);
+        shift++;
+        screen->drawText("fps: " + std::to_string(Time::fps()), 10, (shift++)*h + offset);
+        shift++;
+        screen->drawText("X: "   + std::to_string((camera->position().x())), 10, (shift++)*h + offset);
+        screen->drawText("Y: "   + std::to_string((camera->position().y())), 10, (shift++)*h + offset);
+        screen->drawText("Z: "   + std::to_string((camera->position().z())), 10, (shift++)*h + offset);
+        screen->drawText("RY: "  + std::to_string(camera->angle().y()), 10, (shift++)*h + offset);
+        screen->drawText("RL: "  + std::to_string(camera->angleLeftUpLookAt().x()), 10, (shift++)*h + offset);
+        shift++;
+
+        //Process info:
+        auto res = getProcessSizeMB();
+        screen->drawText("Process size: " + std::to_string(res) + " MB", 10, (shift++)*h + offset);
 
         // timers:
         int timerWidth = 150;
-        float xPos = 15;
-        float yPos = 150;
+        int plotWidth = 50;
+        float xPos = screen->width() - timerWidth - plotWidth - 10;
+        float yPos = 10;
         int height = 14;
 
         double totalTime = Time::elapsedTimerSeconds("d all");
@@ -178,7 +190,7 @@ void Engine::printDebugInfo() {
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
                     xPos+5, yPos + (1.5*height)*i, 12, Consts::BLACK);
 
-            screen->drawPlot(_histResources[timerName], timerWidth + 10, yPos + (1.5*height)*i, 50, height);
+            screen->drawPlot(_histResources[timerName], xPos + timerWidth, yPos + (1.5*height)*i, plotWidth, height);
 
             i++;
             timeSum += timer.elapsedSeconds();
@@ -192,12 +204,12 @@ void Engine::printDebugInfo() {
                          xPos+5, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
 
         _histResources["d other"].emplace_back(Time::time(), totalTime - timeSum);
-        screen->drawPlot(_histResources["d other"], timerWidth + 10, yPos + (1.5*height)*i, 50, height);
+        screen->drawPlot(_histResources["d other"], xPos + timerWidth, yPos + (1.5*height)*i, 50, height);
 
         // Draw a plot of fps
 
         _histResources["fpsCounter"].emplace_back(Time::time(), Time::fps());
-        screen->drawPlot(_histResources["fpsCounter"], 100, 30, 50, 14);
+        screen->drawPlot(_histResources["fpsCounter"], 60, 3*h + offset, plotWidth, 14);
 
         for(auto& [histName, data] : _histResources) {
             if(data.size() > 1000) {

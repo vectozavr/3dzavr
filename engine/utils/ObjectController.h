@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 22.01.2022.
 //
 
-#ifndef SHOOTER_OBJECTCONTROLLER_H
-#define SHOOTER_OBJECTCONTROLLER_H
+#ifndef UTILS_OBJECTCONTROLLER_H
+#define UTILS_OBJECTCONTROLLER_H
 
 #include "objects/Object.h"
 #include <io/Keyboard.h>
@@ -19,4 +19,4 @@ public:
     void update();
 };
 
-#endif //SHOOTER_OBJECTCONTROLLER_H
+#endif //UTILS_OBJECTCONTROLLER_H

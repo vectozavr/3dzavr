@@ -1,9 +1,5 @@
-//
-// Created by Ivan Ilin on 13/09/2023.
-//
-
-#ifndef RAYTRACE3D_COLOR_H
-#define RAYTRACE3D_COLOR_H
+#ifndef PROPS_COLOR_H
+#define PROPS_COLOR_H
 
 #include <array>
 #include <cstdint>
@@ -43,4 +39,4 @@ public:
 };
 
 
-#endif //RAYTRACE3D_COLOR_H
+#endif //PROPS_COLOR_H

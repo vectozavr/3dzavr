@@ -18,6 +18,8 @@ namespace Consts {
 
     constexpr double LARGEST_TIME_STEP = 1.0 / 15.0;
     constexpr double TAP_DELAY = 0.2;
+
+    constexpr int MB = 1024*1024;
 }
 
 #endif //ENGINE_SCALAR_CONSTS_H

@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 12.01.2021.
-//
-
-#ifndef ENGINE_MATRIX4X4_H
-#define ENGINE_MATRIX4X4_H
+#ifndef LINALG_MATRIX4X4_H
+#define LINALG_MATRIX4X4_H
 
 #include <array>
 #include <iostream>
@@ -58,4 +54,4 @@ public:
 
 #include "Matrix4x4.inl"
 
-#endif //ENGINE_MATRIX4X4_H
+#endif //LINALG_MATRIX4X4_H

@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 23.02.2022.
-//
-
-#ifndef INC_3DZAVR_ADECOMPOSE_H
-#define INC_3DZAVR_ADECOMPOSE_H
+#ifndef ANIMATION_ADECOMPOSE_H
+#define ANIMATION_ADECOMPOSE_H
 
 #include <animation/Animation.h>
 #include <objects/geometry/Mesh.h>
@@ -46,4 +42,4 @@ public:
                                                                                   _value(value), _mesh(mesh) {}
 };
 
-#endif //INC_3DZAVR_ADECOMPOSE_H
+#endif //ANIMATION_ADECOMPOSE_H

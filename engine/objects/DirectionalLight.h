@@ -1,9 +1,5 @@
-//
-// Created by Ivan Ilin on 18/10/2023.
-//
-
-#ifndef RAYTRACE3D_DIRECTIONALLIGHT_H
-#define RAYTRACE3D_DIRECTIONALLIGHT_H
+#ifndef OBJECTS_DIRECTIONALLIGHT_H
+#define OBJECTS_DIRECTIONALLIGHT_H
 
 #include <objects/Object.h>
 

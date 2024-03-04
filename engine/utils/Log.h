@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 13.01.2021.
 //
 
-#ifndef ENGINE_LOG_H
-#define ENGINE_LOG_H
+#ifndef UTILS_LOG_H
+#define UTILS_LOG_H
 
 #include <string>
 
@@ -12,4 +12,4 @@ namespace Log {
 };
 
 
-#endif //INC_3DZAVR_LOG_H
+#endif //UTILS_LOG_H

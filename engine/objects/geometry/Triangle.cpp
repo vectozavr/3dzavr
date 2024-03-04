@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 13.01.2021.
-//
-
 #include "Triangle.h"
 #include "Consts.h"
 

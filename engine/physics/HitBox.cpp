@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 04.11.2021.
-//
-
 #include <set>
 #include <cmath>
 

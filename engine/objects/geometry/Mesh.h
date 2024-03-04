@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 13.01.2021.
-//
-
-#ifndef ENGINE_MESH_H
-#define ENGINE_MESH_H
+#ifndef GEOMETRY_MESH_H
+#define GEOMETRY_MESH_H
 
 #include <utility>
 #include <vector>
@@ -63,4 +59,4 @@ public:
     Mesh static ArrowTo(const ObjectTag &tag, const Vec3D& from, const Vec3D& to, double line_width = 1);
 };
 
-#endif //ENGINE_MESH_H
+#endif //GEOMETRY_MESH_H

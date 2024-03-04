@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 19.09.2021.
-//
-
 #include <io/Mouse.h>
 #include <utils/Time.h>
 #include <utils/Log.h>

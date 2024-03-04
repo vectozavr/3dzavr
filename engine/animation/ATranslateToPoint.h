@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 29.01.2021.
-//
-
-#ifndef ENGINE_ATRANSLATETOPOINT_H
-#define ENGINE_ATRANSLATETOPOINT_H
+#ifndef ANIMATION_ATRANSLATETOPOINT_H
+#define ANIMATION_ATRANSLATETOPOINT_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -38,4 +34,4 @@ public:
     }
 };
 
-#endif //INC_3DZAVR_ATRANSLATETOPOINT_H
+#endif //ANIMATION_ATRANSLATETOPOINT_H

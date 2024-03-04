@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 09.11.2021.
-//
-
-#ifndef SHOOTER_ANIMATIONS_H
-#define SHOOTER_ANIMATIONS_H
+#ifndef ANIMATION_ANIMATIONS_H
+#define ANIMATION_ANIMATIONS_H
 
 #include <animation/Timeline.h>
 
@@ -22,4 +18,4 @@
 #include <animation/ADecompose.h>
 
 
-#endif //SHOOTER_ANIMATIONS_H
+#endif //ANIMATION_ANIMATIONS_H

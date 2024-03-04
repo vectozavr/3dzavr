@@ -75,6 +75,8 @@ add_library(
         utils/stack_vector.h
         utils/math.h
         utils/math.cpp
+        utils/monitoring.h
+        utils/monitoring.cpp
 
         animation/Animation.h
         animation/Animation.cpp
@@ -94,7 +96,8 @@ add_library(
         animation/AShowCreation.h
         animation/AShowUncreation.h
         animation/ARotateLeftUpLookAt.h
-        animation/ADecompose.h)
+        animation/ADecompose.h
+        animation/ATranslateToPoint.h)
 
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 

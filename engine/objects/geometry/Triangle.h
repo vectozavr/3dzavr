@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 13.01.2021.
-//
-
-#ifndef ENGINE_TRIANGLE_H
-#define ENGINE_TRIANGLE_H
+#ifndef GEOMETRY_TRIANGLE_H
+#define GEOMETRY_TRIANGLE_H
 
 #include <linalg/Vec4D.h>
 #include <linalg/Vec3D.h>
@@ -55,4 +51,4 @@ public:
 };
 
 
-#endif //ENGINE_TRIANGLE_H
+#endif //GEOMETRY_TRIANGLE_H

@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 14.01.2021.
-//
-
-#ifndef ENGINE_SCREEN_H
-#define ENGINE_SCREEN_H
+#ifndef IO_SCREEN_H
+#define IO_SCREEN_H
 
 
 #include <string>
@@ -83,4 +79,4 @@ public:
 };
 
 
-#endif //ENGINE_SCREEN_H
+#endif //IO_SCREEN_H

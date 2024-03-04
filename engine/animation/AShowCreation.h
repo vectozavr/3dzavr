@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 10.11.2021.
-//
-
-#ifndef SHOOTER_ASHOWCREATION_H
-#define SHOOTER_ASHOWCREATION_H
+#ifndef ANIMATION_ASHOWCREATION_H
+#define ANIMATION_ASHOWCREATION_H
 
 #include <animation/Animation.h>
 #include <objects/geometry/Mesh.h>
@@ -58,4 +54,4 @@ public:
                                                                               _mesh(mesh), _triangles(mesh.lock()->triangles()) {}
 };
 
-#endif //SHOOTER_ASHOWCREATION_H
+#endif //ANIMATION_ASHOWCREATION_H

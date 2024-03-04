@@ -1,6 +1,3 @@
-//
-// Created by Иван Ильин on 09.11.2021.
-//
 #include <cmath>
 
 #include <animation/Interpolation.h>
@@ -56,10 +53,6 @@ double Interpolation::Bouncing(double t) {
 
 double Interpolation::dLinear(double t, double dt) {
     return ((int) trunc(t) % 2) ? -dt : dt;
-}
-
-double Interpolation::dCos(double t, double dt) {
-    return 0.5 * Consts::PI * sin(Consts::PI * t) * dt;
 }
 
 double Interpolation::dBezier(const Vec2D &p1, const Vec2D &p2, double t, double dt) {

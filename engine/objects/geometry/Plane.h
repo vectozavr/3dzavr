@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 19.01.2021.
-//
-
-#ifndef ENGINE_PLANE_H
-#define ENGINE_PLANE_H
+#ifndef GEOMETRY_PLANE_H
+#define GEOMETRY_PLANE_H
 
 #include "linalg/Vec4D.h"
 #include "Triangle.h"
@@ -41,4 +37,4 @@ public:
 };
 
 
-#endif //ENGINE_PLANE_H
+#endif //GEOMETRY_PLANE_H

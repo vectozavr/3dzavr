@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 23/01/2024.
 //
 
-#ifndef INC_3DZAVR_TEST_FILEPATH_H
-#define INC_3DZAVR_TEST_FILEPATH_H
+#ifndef UTILS_FILEPATH_H
+#define UTILS_FILEPATH_H
 
 #include <filesystem>
 
@@ -28,4 +28,4 @@ public:
     [[nodiscard]] std::string fileName() const;
 };
 
-#endif //INC_3DZAVR_TEST_FILEPATH_H
+#endif //UTILS_FILEPATH_H

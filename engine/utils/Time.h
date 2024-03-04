@@ -2,8 +2,8 @@
 // Created by Иван Ильин on 11.01.2021.
 //
 
-#ifndef ENGINE_TIME_H
-#define ENGINE_TIME_H
+#ifndef UTILS_TIME_H
+#define UTILS_TIME_H
 
 #include <chrono>
 #include <map>
@@ -61,4 +61,4 @@ public:
     [[nodiscard]] static std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> timers();
 };
 
-#endif //INC_3DZAVR_TIME_H
+#endif //UTILS_TIME_H

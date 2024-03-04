@@ -2,8 +2,8 @@
 // Created by Ivan Ilin on 07/10/2023.
 //
 
-#ifndef RAYTRACE3D_EVENTHANDLER_H
-#define RAYTRACE3D_EVENTHANDLER_H
+#ifndef UTILS_EVENTHANDLER_H
+#define UTILS_EVENTHANDLER_H
 
 class EventHandler {
     // TODO: implement EventHandler. Ideally this would be type safe. I have to think how to make it good...
@@ -11,4 +11,4 @@ class EventHandler {
 };
 
 
-#endif //RAYTRACE3D_EVENTHANDLER_H
+#endif //UTILS_EVENTHANDLER_H

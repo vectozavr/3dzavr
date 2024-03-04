@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 24/01/2024.
-//
-
-#ifndef ENGINE_GROUP_H
-#define ENGINE_GROUP_H
+#ifndef OBJECTS_GROUP_H
+#define OBJECTS_GROUP_H
 
 #include <objects/Object.h>
 
@@ -44,8 +40,8 @@ public:
         return std::make_shared<Group>(tag, *this);
     }
 
-    ~Group();
+    ~Group() override;
 };
 
 
-#endif //ENGINE_GROUP_H
+#endif //OBJECTS_GROUP_H

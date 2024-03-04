@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 19.09.2021.
-//
-
-#ifndef SHOOTER_MOUSE_H
-#define SHOOTER_MOUSE_H
+#ifndef IO_MOUSE_H
+#define IO_MOUSE_H
 
 #include <memory>
 #include <utility>
@@ -36,4 +32,4 @@ public:
 };
 
 
-#endif //SHOOTER_MOUSE_H
+#endif //IO_MOUSE_H

@@ -1,9 +1,5 @@
-//
-// Created by Ivan Ilin on 07/10/2023.
-//
-
-#ifndef RAYTRACE3D_SPHERE_H
-#define RAYTRACE3D_SPHERE_H
+#ifndef GEOMETRY_SPHERE_H
+#define GEOMETRY_SPHERE_H
 
 #include "objects/Object.h"
 #include "objects/props/Color.h"
@@ -24,4 +20,4 @@ public:
 };
 
 
-#endif //RAYTRACE3D_SPHERE_H
+#endif //GEOMETRY_SPHERE_H

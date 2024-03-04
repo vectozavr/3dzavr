@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 26.01.2021.
-//
-
-#ifndef ENGINE_ANIMATION_H
-#define ENGINE_ANIMATION_H
+#ifndef ANIMATION_ANIMATION_H
+#define ANIMATION_ANIMATION_H
 
 #include <animation/Interpolation.h>
 
@@ -11,7 +7,6 @@ class Animation {
 public:
     enum class InterpolationType {
         Linear,
-        Cos,
         Bezier,
         Bouncing
     };
@@ -55,4 +50,4 @@ public:
     [[nodiscard]] bool isWaitingForFinish() const { return _waitForFinish; }
 };
 
-#endif //INC_3DZAVR_ANIMATION_H
+#endif //ANIMATION_ANIMATION_H

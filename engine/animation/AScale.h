@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 29.01.2021.
-//
-
-#ifndef ENGINE_ASCALE_H
-#define ENGINE_ASCALE_H
+#ifndef ANIMATION_ASCALE_H
+#define ANIMATION_ASCALE_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -36,4 +32,4 @@ public:
     }
 };
 
-#endif //INC_3DZAVR_ASCALE_H
+#endif //ANIMATION_ASCALE_H

@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 07.10.2021.
-//
-
 #ifndef ENGINE_CONSTS_H
 #define ENGINE_CONSTS_H
 
@@ -46,7 +42,7 @@ namespace Consts {
     const std::string CPU_ARCHITECTURE = "Unknown";
 #endif
 
-    const std::string BUILD_INFO = "3dzavr sdl v0.2.0 " + RUNNING_MODE + ". System: " + OPERATION_SYSTEM + ", " + CPU_ARCHITECTURE;
+    const std::string BUILD_INFO = "3dzavr sdl v0.2.0 CPU | " + RUNNING_MODE;
 
     const Vec2D BEZIER[2] = {Vec2D{0.8, 0}, Vec2D{0.2, 1}};
 

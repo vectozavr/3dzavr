@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 29.01.2021.
-//
-
-#ifndef ENGINE_AROTATE_H
-#define ENGINE_AROTATE_H
+#ifndef ANIMATION_AROTATE_H
+#define ANIMATION_AROTATE_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -31,4 +27,4 @@ public:
     }
 };
 
-#endif //INC_3DZAVR_AROTATE_H
+#endif //ANIMATION_AROTATE_H

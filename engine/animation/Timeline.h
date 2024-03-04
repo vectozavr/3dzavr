@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 03.10.2021.
-//
-
-#ifndef SHOOTER_TIMELINE_H
-#define SHOOTER_TIMELINE_H
+#ifndef ANIMATION_TIMELINE_H
+#define ANIMATION_TIMELINE_H
 
 #include <memory>
 #include <string>
@@ -70,4 +66,4 @@ public:
     }
 };
 
-#endif //SHOOTER_TIMELINE_H
+#endif //ANIMATION_TIMELINE_H

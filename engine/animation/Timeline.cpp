@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 03.10.2021.
-//
-
 #include <list>
 
 #include <animation/Timeline.h>

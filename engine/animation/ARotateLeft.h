@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 01.11.2021.
-//
-
-#ifndef SHOOTER_AROTATELEFT_H
-#define SHOOTER_AROTATELEFT_H
+#ifndef ANIMATION_AROTATELEFT_H
+#define ANIMATION_AROTATELEFT_H
 
 #include <animation/Animation.h>
 #include "objects/Object.h"
@@ -30,4 +26,4 @@ public:
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {}
 };
 
-#endif //SHOOTER_AROTATELEFT_H
+#endif //ANIMATION_AROTATELEFT_H

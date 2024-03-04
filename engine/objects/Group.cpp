@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 24/01/2024.
-//
-
 #include "Group.h"
 #include "utils/Log.h"
 #include "utils/ResourceManager.h"

@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 08.03.2021.
-//
-
-#ifndef ENGINE_SIMPLEX_H
-#define ENGINE_SIMPLEX_H
+#ifndef PHYSICS_SIMPLEX_H
+#define PHYSICS_SIMPLEX_H
 
 #include <list>
 
@@ -58,4 +54,4 @@ public:
     [[nodiscard]] SimplexType type() const { return static_cast<SimplexType>(_points.size()); }
 };
 
-#endif //INC_3DZAVR_SIMPLEX_H
+#endif //PHYSICS_SIMPLEX_H

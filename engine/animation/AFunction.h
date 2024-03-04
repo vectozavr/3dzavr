@@ -1,9 +1,5 @@
-//
-// Created by Иван Ильин on 06.04.2021.
-//
-
-#ifndef ENGINE_AFUNCTION_H
-#define ENGINE_AFUNCTION_H
+#ifndef ANIMATION_AFUNCTION_H
+#define ANIMATION_AFUNCTION_H
 
 #include <functional>
 
@@ -29,4 +25,4 @@ public:
     }
 };
 
-#endif //MINECRAFT_3DZAVR_AFUNCTION_H
+#endif //ANIMATION_AFUNCTION_H

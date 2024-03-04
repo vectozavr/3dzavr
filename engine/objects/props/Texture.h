@@ -1,9 +1,5 @@
-//
-// Created by Ivan Ilin on 04/11/2023.
-//
-
-#ifndef RAYTRACE3D_TEXTURE_H
-#define RAYTRACE3D_TEXTURE_H
+#ifndef PROPS_TEXTURE_H
+#define PROPS_TEXTURE_H
 
 #include <vector>
 
@@ -30,4 +26,4 @@ public:
 };
 
 
-#endif //RAYTRACE3D_TEXTURE_H
+#endif //PROPS_TEXTURE_H

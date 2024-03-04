@@ -1,7 +1,3 @@
-//
-// Created by Иван Ильин on 19.01.2021.
-//
-
 #include "Plane.h"
 
 Plane::Plane() : normal(1), offset() {}

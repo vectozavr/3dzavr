@@ -1,7 +1,3 @@
-//
-// Created by Ivan Ilin on 04/11/2023.
-//
-
 #include <cmath>
 
 #include "Texture.h"
