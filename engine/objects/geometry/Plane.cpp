@@ -84,8 +84,7 @@ void Plane::clip(std::vector<std::pair<Vec3D, Vec3D>>& input, std::vector<std::p
     if (input.empty()) return;
     auto prev = input.back();
     double prevDistance = distance(prev.first);
-    for (auto & i : input) {
-        auto curr = i;
+    for (auto &curr : input) {
         double currDistance = distance(curr.first);
 
         if (currDistance >= 0) {

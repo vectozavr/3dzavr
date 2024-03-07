@@ -34,9 +34,11 @@ private:
 
     bool _isOpen = false;
 
+    // returns true if z is smaller than what is stored in the _depthBuffer
+    [[nodiscard]] bool checkPixelDepth(uint16_t x, uint16_t y, double z) const;
+
     void drawPixelUnsafe(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer and checks
     void drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color); // With using depth buffer without checks
-
 public:
     Screen& operator=(const Screen& scr) = delete;
 

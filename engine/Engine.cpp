@@ -19,7 +19,7 @@ Engine::Engine() {
 void Engine::projectAndDrawGroup(const Group& group) const {
 
     /*
-     * TODO: we spend too much time on iteration through all of the objects in the scene.
+     * TODO: we spend too much time on iteration through all the objects in the scene.
      * Maybe we can exclude some objects on the early stage based on the space separation.
      */
 

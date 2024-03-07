@@ -107,7 +107,7 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    if(z < _depthBuffer[y * _width + x]) {
+    if(checkPixelDepth(x, y, z)) {
         drawPixelUnsafe(x, y, color);
         _depthBuffer[y * _width + x] = z;
     }
@@ -118,10 +118,14 @@ inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Co
 }
 
 inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
-    if (z < _depthBuffer[y * _width + x]) {
+    if (checkPixelDepth(x, y, z)) {
         drawPixelUnsafe(x, y, color);
         _depthBuffer[y * _width + x] = z;
     }
+}
+
+inline bool Screen::checkPixelDepth(uint16_t x, uint16_t y, double z) const {
+    return z < _depthBuffer[y * _width + x];
 }
 
 void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness) {
@@ -251,8 +255,6 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
-    //TODO: sometimes with large triangles and clipping there are big white lines on the screen. We need to fix it.
-
     // Filling inside
     auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
     auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
@@ -296,19 +298,22 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         uint16_t sample = texture->get_sample_index(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
-            if (texture) {
-                // de-homogenize UV coordinates
-                Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
-                /*
-                 * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
-                 * Instead, we use averaged area for the horizontal line (calculation is above).
-                */
-                //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
-                //color = texture->get_pixel_from_UV(uv_dehom, area);
-                color = texture->get_pixel_from_sample_UV(uv_dehom, sample);
-            }
             double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
-            drawPixelUnsafe(x, y, z, color);
+            if(checkPixelDepth(x, y, z)) {
+                if (texture) {
+                    // de-homogenize UV coordinates
+                    Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
+                    /*
+                     * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
+                     * Instead, we use averaged area for the horizontal line (calculation is above).
+                    */
+                    //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
+                    //color = texture->get_pixel_from_UV(uv_dehom, area);
+                    color = texture->get_pixel_from_sample_UV(uv_dehom, sample);
+                }
+
+                drawPixelUnsafe(x, y, z, color);
+            }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
         }
