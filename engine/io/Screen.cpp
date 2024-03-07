@@ -483,7 +483,7 @@ void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, uint16
         maxY += minY/2 + Consts::EPS;
     }
 
-    drawStrokeRectangle(x, y, w, h, Consts::WHITE, 1);
+    drawStrokeRectangle(x, y, w, h, Color(255, 255, 255, 50), 1);
 
     auto [xPrev, yPrev] = data.front();
     for (const auto& [xVal, yVal] : data) {
