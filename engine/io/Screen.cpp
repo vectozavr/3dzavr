@@ -123,7 +123,10 @@ inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Co
 inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
     if (checkPixelDepth(x, y, z)) {
         drawPixelUnsafe(x, y, color);
-        _depthBuffer[y * _width + x] = z;
+
+        if(color.a() == 255) {
+            _depthBuffer[y * _width + x] = z;
+        }
     }
 }
 
