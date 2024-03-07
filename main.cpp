@@ -16,6 +16,7 @@ private:
     std::shared_ptr<Mesh> redCube = nullptr;
     bool objSelected = false;
     bool objInFocus = false;
+    bool isControllerActive = true;
 
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
@@ -45,6 +46,21 @@ private:
         redCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("RedCube"), 0.1));
         redCube->setVisible(objInFocus);
         //world->add(redCube);
+
+        auto orangeGlass = std::make_shared<Material>(
+                MaterialTag("Transparent orange glass"),
+                nullptr,
+                Color(255, 200, 50, 100),
+                Color(255, 200, 50, 100),
+                Color(255, 200, 50, 100)
+                );
+        redCube->setMaterial(orangeGlass);
+
+        auto greenwood = world->loadObject(ObjectTag("greenwood"),
+                                           FilePath("resources/obj/cars/greenwood/greenwood.obj"));
+        greenwood->translate(Vec3D{0, -0.3, -10});
+        greenwood->scale(Vec3D(0.3, 0.3, 0.3));
+        greenwood->rotateUp(-3*Consts::PI/4);
     };
 
     void update() override {
@@ -53,10 +69,12 @@ private:
         screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Consts::BLACK);
         screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Consts::BLACK);
 
-        if(objSelected) {
-            objController->update();
-        } else {
-            cameraController->update();
+        if(isControllerActive) {
+            if(objSelected) {
+                objController->update();
+            } else {
+                cameraController->update();
+            }
         }
 
 
@@ -84,7 +102,11 @@ private:
             selectedObject.reset();
         }
 
-        if (selectedObject) {
+        if(Keyboard::isKeyTapped(SDLK_q)) {
+            isControllerActive = !isControllerActive;
+        }
+
+        if (selectedObject && isControllerActive) {
             // object scale x:
             if (Keyboard::isKeyPressed(SDLK_UP)) {
                 selectedObject->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));

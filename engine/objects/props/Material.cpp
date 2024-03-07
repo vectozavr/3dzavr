@@ -6,3 +6,14 @@ bool MaterialTag::contains(const MaterialTag &nameTag) const {
     }
     return false;
 }
+
+Material::Material(const MaterialTag &tag, std::shared_ptr<Texture> texture, const Color &ambient, const Color &diffuse,
+                   const Color &specular, uint8_t illum, double d):
+                   _tag(tag), _texture(texture), _ambient(ambient),
+                   _diffuse(diffuse), _specular(specular), _illum(illum), _d(d) {
+    if(texture) {
+        _isTransparent = texture->isTransparent() || (d < 1.0-Consts::EPS);
+    } else {
+        _isTransparent = (ambient.a() != 255) || (d < 1.0-Consts::EPS);
+    }
+}

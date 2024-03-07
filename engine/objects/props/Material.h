@@ -33,25 +33,29 @@ private:
 
     Color _ambient, _diffuse, _specular;
     uint16_t _illum;
+    double _d = 1.0;
 
+    bool _isTransparent = false;
 public:
     Material(const MaterialTag& tag,
              std::shared_ptr<Texture> texture,
              const Color& ambient,
              const Color& diffuse,
              const Color& specular,
-             uint8_t illum) :
-             _tag(tag), _texture(texture), _ambient(ambient), _diffuse(diffuse),
-             _specular(specular), _illum(illum) {};
+             uint8_t illum = 1,
+             double d = 1);
 
     [[nodiscard]] Color ambient() const { return _ambient; }
     [[nodiscard]] Color diffuse() const { return _diffuse; }
     [[nodiscard]] Color specular() const { return _specular; }
     [[nodiscard]] uint8_t illum() const { return _illum; }
+    [[nodiscard]] double d() const { return _d; }
 
     [[nodiscard]] std::shared_ptr<Texture> texture() const {return _texture;}
 
     [[nodiscard]] MaterialTag tag() const { return _tag; }
+
+    [[nodiscard]] bool isTransparent() const {return _isTransparent; }
 };
 
 

@@ -100,7 +100,7 @@ void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
     if(x >= _width || x < 0 || y >= _height || y < 0)
         return;
 
-    _pixelBuffer[y * _width + x] = color.rgba();
+    drawPixelUnsafe(x, y, color);
 }
 
 void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
@@ -114,7 +114,10 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
 }
 
 inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
-    _pixelBuffer[y * _width + x] = color.rgba();
+    //_pixelBuffer[y * _width + x] = color.rgba();
+    double alpha = color.a()/255.0;
+    Color sumColor = color*alpha + Color(_pixelBuffer[y * _width + x])*(1.0-alpha);
+    _pixelBuffer[y * _width + x] = sumColor.rgba();
 }
 
 inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
@@ -292,10 +295,14 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         Vec3D uv_hom = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*(x_cur_min - x_min);
 
         // Instead of exact area we compute average for each horizontal line:
-        Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
-        Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
-        double area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
-        uint16_t sample = texture->get_sample_index(area);
+        double area;
+        uint16_t sample;
+        if(texture) {
+            Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
+            Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
+            area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+            sample = texture->get_sample_index(area);
+        }
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
             double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
@@ -312,7 +319,7 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
                     color = texture->get_pixel_from_sample_UV(uv_dehom, sample);
                 }
 
-                drawPixelUnsafe(x, y, z, color);
+                drawPixelUnsafe(x, y, z, color*material->d());
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;

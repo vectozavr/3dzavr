@@ -37,13 +37,15 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
     std::shared_ptr<Texture> texture = nullptr;
     Color ambient, diffuse, specular;
     uint16_t illum;
+    double d = 1.0;
     bool readAmbient = false, readDiffuse = false, readSpecular = false, readIllum = false;
+
 
     // On each step we will check did we read all the information to be able to create a new material
     auto checkMaterialData = []
             (const std::string& matName,
                     std::shared_ptr<Texture> texture, bool readAmbient, bool readDiffuse, bool readSpecular, bool readIllum)-> bool {
-        if(!matName.empty() && texture != nullptr && readAmbient && readDiffuse && readSpecular && readIllum) {
+        if(!matName.empty() && readIllum && (readAmbient && readDiffuse && readSpecular || texture != nullptr)) {
             return true;
         }
         return false;
@@ -62,6 +64,24 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
         // Use std::transform to convert the whole string to lowercase
         std::transform(type.begin(), type.end(), type.begin(),
                        [](unsigned char c) { return std::tolower(c); });
+
+        if(type == "newmtl" || file.eof()) {
+            // Add a new material into the array of materials
+            if(checkMaterialData(matName, texture, readAmbient, readDiffuse, readSpecular, readIllum)) {
+                auto material = std::make_shared<Material>(
+                        MaterialTag(matName), texture, ambient, diffuse, specular, illum, d);
+                materials.insert({material->tag(), material});
+
+                // When we read all data and created a new material
+                // we have to clear the fields and start reading over again
+                matName = "";
+                texture = nullptr;
+                readAmbient = false;
+                readDiffuse = false;
+                readSpecular = false;
+                readIllum = false;
+            }
+        }
 
         // material name
         if (type == "newmtl") {
@@ -96,22 +116,10 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
             lineStream >> textureFileName;
             texture = std::make_shared<Texture>(FilePath(mtlFile.parentPath(), textureFileName));
         }
-
-        // Add a new material into the array of materials
-        if(checkMaterialData(matName, texture, readAmbient, readDiffuse, readSpecular, readIllum)) {
-            auto material = std::make_shared<Material>(
-                    MaterialTag(matName), texture, ambient, diffuse, specular, illum);
-            materials.insert({material->tag(), material});
-
-            // When we read all data and created a new material
-            // we have to clear the fields and start reading over again
-            matName = "";
-            texture = nullptr;
-            readAmbient = false;
-            readDiffuse = false;
-            readSpecular = false;
-            readIllum = false;
+        if (type == "d") {
+            lineStream >> d;
         }
+
     }
 
     return materials;

@@ -22,7 +22,12 @@
 class Engine {
 private:
     bool _updateWorld = true;
-    void projectAndDrawGroup(const Group& group) const;
+    [[maybe_unused]] void projectAndDrawGroup(const Group& group) const;
+
+    std::vector<std::pair<Triangle, std::shared_ptr<Material>>> _projectedOpaqueTriangles;
+    std::vector<std::pair<Triangle, std::shared_ptr<Material>>> _projectedTranspTriangles;
+    void projectGroup(const Group& group);
+    void drawProjectedTriangles();
 
     // For debug purposes
     bool _showDebugInfo = Consts::SHOW_DEBUG_INFO;

@@ -14,8 +14,12 @@ Mesh &Mesh::operator*=(const Matrix4x4 &matrix4X4) {
     return *this;
 }
 
-Mesh::Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, std::shared_ptr<Material> material) :
-    Object(tag), _tris(tries), _material(std::move(material)) {
+Mesh::Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, const std::shared_ptr<Material>& material) :
+    Object(tag), _tris(tries) {
+    if(material) {
+        _material = material;
+    }
+
     calculateBounds();
 }
 

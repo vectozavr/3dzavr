@@ -4,9 +4,9 @@
 #include <cstdint>
 
 namespace Consts {
-    constexpr uint16_t STANDARD_SCREEN_WIDTH = 640;
-    constexpr uint16_t STANDARD_SCREEN_HEIGHT = 480;
-    constexpr uint16_t SCREEN_SCALE = 2;
+    constexpr uint16_t STANDARD_SCREEN_WIDTH = 640*2;
+    constexpr uint16_t STANDARD_SCREEN_HEIGHT = 480*2;
+    constexpr uint16_t SCREEN_SCALE = 1;
 
     constexpr bool USE_LOG_FILE = true;
     constexpr bool SHOW_DEBUG_INFO = false;

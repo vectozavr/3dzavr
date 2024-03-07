@@ -12,6 +12,8 @@ private:
     // up until 1x1 image (avg color of the whole texture)
     std::vector<Image> _texture;
 
+    bool _isTransparent = false;
+
 public:
     explicit Texture(const FilePath& filename);
 
@@ -25,6 +27,8 @@ public:
 
     [[nodiscard]] uint16_t width() const { return _texture.front().width(); }
     [[nodiscard]] uint16_t height() const { return _texture.front().height(); }
+
+    [[nodiscard]] bool isTransparent() const {return _isTransparent; }
 };
 
 

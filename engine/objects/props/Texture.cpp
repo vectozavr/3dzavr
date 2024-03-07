@@ -3,10 +3,23 @@
 #include "Texture.h"
 #include <utils/math.h>
 
+#include <iostream>
+
 Texture::Texture(const FilePath &filename) {
     _texture.emplace_back(filename);
     while (_texture.back().width() * _texture.back().height() != 1) {
         _texture.emplace_back(_texture.back().downSampled());
+    }
+
+    //Check does the texture have the transparent pixels
+    for(int x = 0; x < width(); x++) {
+        for(int y = 0; y < height(); y++) {
+            auto pix = get_pixel(x, y);
+            if(pix.a() != 255) {
+                _isTransparent = true;
+                return;
+            }
+        }
     }
 }
 

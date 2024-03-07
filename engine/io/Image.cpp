@@ -1,8 +1,8 @@
 #include <algorithm>
-#include <fstream>
 #include <cmath>
 #include "linalg/Vec3D.h"
 #include "Image.h"
+#include <Consts.h>
 
 Image::Image(uint16_t width, uint16_t height) : _width(width), _height(height), _valid(true) {
     if(width != 0 && height != 0) {
@@ -22,8 +22,11 @@ Image::Image(const FilePath &filename) {
     FILE *fp = fopen(filename.str().c_str(), "rb");
 
     if (!fp) {
-        invalidate();
-        return;
+        fp = fopen(Consts::DEFAULT_TEXTURE_PATH.str().c_str(), "rb");
+        if (!fp) {
+            invalidate();
+            return;
+        }
     }
 
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING,

@@ -16,36 +16,65 @@ Engine::Engine() {
     ResourceManager::init();
 }
 
-void Engine::projectAndDrawGroup(const Group& group) const {
-
-    /*
-     * TODO: we spend too much time on iteration through all the objects in the scene.
-     * Maybe we can exclude some objects on the early stage based on the space separation.
-     */
+void Engine::projectGroup(const Group &group) {
 
     for(const auto& [objTag, obj] : group) {
         std::shared_ptr<Mesh> subMesh = std::dynamic_pointer_cast<Mesh>(obj);
         if(subMesh) {
-            // project triangles to the camera plane
-            Time::startTimer("d projections");
             auto projected = camera->project(*subMesh);
-            Time::pauseTimer("d projections");
-
-            // draw projected triangles
-            Time::startTimer("d rasterization");
             std::shared_ptr<Material> material = subMesh->getMaterial();
-            for (auto &t : projected) {
-                screen->drawTriangle(t, material.get());
+            bool isTransparent = material->isTransparent();
+
+            if(!isTransparent) {
+                for(const auto& t: projected) {
+                    _projectedOpaqueTriangles.emplace_back(t, material);
+                }
+            } else {
+                for(const auto& t: projected) {
+                    _projectedTranspTriangles.emplace_back(t, material);
+                }
             }
-            Time::pauseTimer("d rasterization");
+
             continue;
         }
         std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
         if(subGroup) {
             // We need to recursively continue to draw subgroup
-            projectAndDrawGroup(*subGroup);
+            projectGroup(*subGroup);
         }
     }
+}
+
+void
+Engine::drawProjectedTriangles() {
+
+    Time::startTimer("d sort triangles");
+    /*
+    std::sort(_projectedOpaqueTriangles.begin(), _projectedOpaqueTriangles.end(), [](const auto& e1, const auto& e2){
+        Triangle t1(e1.first);
+        Triangle t2(e2.first);
+        double z1 = t1[0].z() + t1[1].z() + t1[2].z();
+        double z2 = t2[0].z() + t2[1].z() + t2[2].z();
+        return z1 < z2;
+    });
+    */
+    std::sort(_projectedTranspTriangles.begin(), _projectedTranspTriangles.end(), [](const auto& e1, const auto& e2){
+        Triangle t1(e1.first);
+        Triangle t2(e2.first);
+        double z1 = t1[0].z() + t1[1].z() + t1[2].z();
+        double z2 = t2[0].z() + t2[1].z() + t2[2].z();
+        return z1 > z2;
+    });
+    Time::stopTimer("d sort triangles");
+
+    Time::startTimer("d rasterization");
+    for (const auto& [triangle, material]: _projectedOpaqueTriangles) {
+        screen->drawTriangle(triangle, material.get());
+    }
+    for (const auto& [triangle, material]: _projectedTranspTriangles) {
+        screen->drawTriangle(triangle, material.get());
+    }
+    Time::stopTimer("d rasterization");
 }
 
 void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& background) {
@@ -102,7 +131,13 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
             Time::stopTimer("d collisions");
         }
 
-        projectAndDrawGroup(*world->objects());
+        //projectAndDrawGroup(*world->objects());
+        Time::startTimer("d projections");
+        projectGroup(*world->objects());
+        Time::stopTimer("d projections");
+        drawProjectedTriangles();
+        _projectedOpaqueTriangles.clear();
+        _projectedTranspTriangles.clear();
 
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");

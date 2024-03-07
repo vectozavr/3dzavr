@@ -36,6 +36,15 @@ public:
     // Operations with colors
     [[nodiscard]] inline bool operator==(const Color &other) const { return _c == other._c; }
     [[nodiscard]] inline bool operator!=(const Color &other) const { return !(*this == other); }
+
+    [[nodiscard]] inline Color operator*(double alpha) const { return Color((uint8_t)(_c[0]*alpha),
+                                                                            (uint8_t)(_c[1]*alpha),
+                                                                            (uint8_t)(_c[2]*alpha),
+                                                                            (uint8_t)(_c[3]*alpha)); };
+    [[nodiscard]] inline Color operator+(const Color &other) const { return Color(r()+other.r(),
+                                                                                  g()+other.g(),
+                                                                                  b()+other.b(),
+                                                                                  a()+other.a()); };
 };
 
 

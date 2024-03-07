@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <ScalarConsts.h>
+#include <objects/props/Material.h>
 #include <objects/props/Color.h>
 #include <linalg/Vec2D.h>
 #include <utils/FilePath.h>
@@ -67,6 +68,14 @@ namespace Consts {
     const Color RED = Color(255, 0, 0);
     const Color GREEN = Color(0, 255, 0);
     const Color BLUE = Color(0, 0, 255);
+
+    const FilePath DEFAULT_TEXTURE_PATH = FilePath("engine/resources/png/texture_test.png");
+    const std::shared_ptr<Material> DEFAULT_MATERIAL = std::make_shared<Material>(
+            MaterialTag("Default_material"),
+            std::make_shared<Texture>(DEFAULT_TEXTURE_PATH),
+                    Color(255, 0, 0),
+                    Color(255, 0, 0),
+                    Color(255, 0, 0));
 
     // resources
     const FilePath DEFAULT_FONT_FILENAME = FilePath("engine/resources/fonts/Roboto/Roboto-Light.ttf");

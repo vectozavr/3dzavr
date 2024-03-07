@@ -13,7 +13,7 @@
 class Mesh : public Object {
 private:
     std::vector<Triangle> _tris;
-    std::shared_ptr<Material> _material = nullptr;
+    std::shared_ptr<Material> _material = Consts::DEFAULT_MATERIAL;
     Bounds _bounds;
 
     bool _visible = true;
@@ -30,7 +30,7 @@ public:
     Mesh(const Mesh &mesh, bool deepCopy = false);
     Mesh(const ObjectTag& tag, const Mesh &mesh, bool deepCopy = false);
 
-    explicit Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, std::shared_ptr<Material> material = nullptr);
+    explicit Mesh(const ObjectTag& tag, const std::vector<Triangle> &tries, const std::shared_ptr<Material>& material = Consts::DEFAULT_MATERIAL);
 
     [[nodiscard]] std::vector<Triangle> const &triangles() const { return _tris; }
 
