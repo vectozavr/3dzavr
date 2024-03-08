@@ -261,6 +261,12 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
+    if (material == nullptr || material->texture() == nullptr) {
+        Color color = material ? material->ambient() : Consts::RED;
+        drawTriangle(triangle, color * material->d());
+        return;
+    }
+
     // Filling inside
     auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
     auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
@@ -269,9 +275,9 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
 
     if (x_min > x_max || y_min > y_max) return;
 
-    auto tc = triangle.textureCoordinates();
-    auto texture = material ? material->texture() : nullptr;
-    Color color = material ? material->ambient() : Consts::RED;
+    auto& tc = triangle.textureCoordinates();
+    auto texture = material->texture();
+    Color color = material->ambient();
 
     auto abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
     /*
@@ -284,11 +290,9 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
 
     Vec3D uv_hom_origin, uv_hom_dx, uv_hom_dy;
 
-    if (texture) {
-        uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
-        uv_hom_dx = (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
-        uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
-    }
+    uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
+    uv_hom_dx = (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
+    uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
 
     for (uint16_t y = y_min; y <= y_max; y++) {
         uint16_t x_cur_min, x_cur_max;
@@ -298,29 +302,23 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         Vec3D uv_hom = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*(x_cur_min - x_min);
 
         // Instead of exact area we compute average for each horizontal line:
-        double area;
-        uint16_t sample;
-        if(texture) {
-            Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
-            Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
-            area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
-            sample = texture->get_sample_index(area);
-        }
+        Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
+        Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
+        double area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+        uint16_t sample = texture->get_sample_index(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
             double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
             if(checkPixelDepth(x, y, z)) {
-                if (texture) {
-                    // de-homogenize UV coordinates
-                    Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
-                    /*
-                     * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
-                     * Instead, we use averaged area for the horizontal line (calculation is above).
-                    */
-                    //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
-                    //color = texture->get_pixel_from_UV(uv_dehom, area);
-                    color = texture->get_pixel_from_sample_UV(uv_dehom, sample);
-                }
+                // de-homogenize UV coordinates
+                Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
+                /*
+                 * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
+                 * Instead, we use averaged area for the horizontal line (calculation is above).
+                */
+                //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
+                //color = texture->get_pixel_from_UV(uv_dehom, area);
+                color = texture->get_pixel_from_sample_UV(uv_dehom, sample);
 
                 drawPixelUnsafe(x, y, z, color*material->d());
             }
