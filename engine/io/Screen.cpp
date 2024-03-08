@@ -117,9 +117,8 @@ inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Co
     if (color.a() == 255) {
         _pixelBuffer[y * _width + x] = color.rgba();
     } else {
-        double alpha = color.a() / 255.0;
-        Color sumColor = color * alpha + Color(_pixelBuffer[y * _width + x]) * (1.0 - alpha);
-        _pixelBuffer[y * _width + x] = sumColor.rgba();
+        size_t offset = y * _width + x;
+        _pixelBuffer[offset] = color.blend(Color(_pixelBuffer[offset])).rgba();
     }
 }
 
@@ -418,21 +417,11 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
     uint16_t pitch = surfaceText->pitch;
     uint8_t *pixels = reinterpret_cast<uint8_t *>(surfaceText->pixels);
 
-    // default SDL blend mode:
-    // dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
-    // dstA = srcA + (dstA * (1-srcA))
-
     for (uint16_t i = 0; i < textHeight; i++) {
         for (uint16_t j = 0; j < textWidth; j++) {
             if (pixels[i * pitch + j]) {
                 size_t offset = (i + y) * _width + (j + x);
-                Color dst(_pixelBuffer[offset]);
-                Color res((static_cast<int>(src.r()) * src.a() + static_cast<int>(dst.r()) * (255 - src.a())) / 255,
-                          (static_cast<int>(src.g()) * src.a() + static_cast<int>(dst.g()) * (255 - src.a())) / 255,
-                          (static_cast<int>(src.b()) * src.a() + static_cast<int>(dst.b()) * (255 - src.a())) / 255,
-                          src.a() + dst.a() * (255 - src.a())
-                );
-                _pixelBuffer[offset] = res.rgba();
+                _pixelBuffer[offset] = src.blend(Color(_pixelBuffer[offset])).rgba();
             }
         }
     }

@@ -48,6 +48,19 @@ public:
                                                                                   g()+other.g(),
                                                                                   b()+other.b(),
                                                                                   a()+other.a()); };
+
+    [[nodiscard]] inline Color blend(const Color& other) const {
+        // default SDL blend mode:
+        // dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
+        // dstA = srcA + (dstA * (1-srcA))
+        uint8_t ra = 255 - a();
+        return Color(
+            (static_cast<uint16_t>(r()) * a() + other.r() * ra) / 255,
+            (static_cast<uint16_t>(g()) * a() + other.g() * ra) / 255,
+            (static_cast<uint16_t>(b()) * a() + other.b() * ra) / 255,
+            (static_cast<uint16_t>(a()) * 255 + other.a() * ra) / 255
+        );
+    }
 };
 
 
