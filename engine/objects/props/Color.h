@@ -31,6 +31,9 @@ public:
     [[nodiscard]] inline uint8_t b() const { return _c[2]; }
     [[nodiscard]] inline uint8_t a() const { return _c[3]; }
 
+    [[nodiscard]] inline uint8_t& operator[](std::size_t i) { return _c[i]; }
+    [[nodiscard]] inline const uint8_t& operator[](std::size_t i) const { return _c[i]; }
+
     [[nodiscard]] inline uint32_t rgba() const { return (_c[0] << 24) | (_c[1] << 16) | (_c[2] << 8) | _c[3]; }
 
     // Operations with colors

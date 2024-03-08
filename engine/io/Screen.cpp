@@ -262,8 +262,14 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
     if (material == nullptr || material->texture() == nullptr) {
-        Color color = material ? material->ambient() : Consts::RED;
-        drawTriangle(triangle, color * material->d());
+        Color color;
+        if (material == nullptr) {
+            color = Consts::RED;
+        } else {
+            color = material->ambient();
+            color[3] *= material->d();
+        }
+        drawTriangle(triangle, color);
         return;
     }
 
@@ -319,8 +325,8 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
                 //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
                 //color = texture->get_pixel_from_UV(uv_dehom, area);
                 color = sample.get_pixel_from_UV(uv_dehom);
-
-                drawPixelUnsafe(x, y, z, color*material->d());
+                color[3] *= material->d();
+                drawPixelUnsafe(x, y, z, color);
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
