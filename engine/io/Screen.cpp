@@ -114,10 +114,13 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
 }
 
 inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
-    //_pixelBuffer[y * _width + x] = color.rgba();
-    double alpha = color.a()/255.0;
-    Color sumColor = color*alpha + Color(_pixelBuffer[y * _width + x])*(1.0-alpha);
-    _pixelBuffer[y * _width + x] = sumColor.rgba();
+    if (color.a() == 255) {
+        _pixelBuffer[y * _width + x] = color.rgba();
+    } else {
+        double alpha = color.a() / 255.0;
+        Color sumColor = color * alpha + Color(_pixelBuffer[y * _width + x]) * (1.0 - alpha);
+        _pixelBuffer[y * _width + x] = sumColor.rgba();
+    }
 }
 
 inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
