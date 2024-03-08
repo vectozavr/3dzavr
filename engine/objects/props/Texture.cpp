@@ -31,7 +31,7 @@ Color Texture::get_pixel_from_UV(const Vec2D &uv) const {
     return _texture.front().get_pixel_from_UV(uv);
 }
 
-uint16_t Texture::get_sample_index(double area) const {
+const Image& Texture::get_sample(double area) const {
     uint64_t limit = 1ULL << (_texture.size() - 1);
     uint16_t K;
 
@@ -42,14 +42,9 @@ uint16_t Texture::get_sample_index(double area) const {
     } else {
         K = _texture.size() - 1;
     }
-    return K;
-}
-
-Color Texture::get_pixel_from_sample_UV(const Vec2D& uv, uint16_t sample) const {
-    return _texture[sample].get_pixel_from_UV(uv);
+    return _texture[K];
 }
 
 Color Texture::get_pixel_from_UV(const Vec2D &uv, double area) const {
-    uint16_t sample = get_sample_index(area);
-    return get_pixel_from_sample_UV(uv, sample);
+    return get_sample(area).get_pixel_from_UV(uv);
 }
