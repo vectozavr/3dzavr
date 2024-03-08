@@ -114,10 +114,12 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
 }
 
 inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
-    //_pixelBuffer[y * _width + x] = color.rgba();
-    double alpha = color.a()/255.0;
-    Color sumColor = color*alpha + Color(_pixelBuffer[y * _width + x])*(1.0-alpha);
-    _pixelBuffer[y * _width + x] = sumColor.rgba();
+    if (color.a() == 255) {
+        _pixelBuffer[y * _width + x] = color.rgba();
+    } else {
+        size_t offset = y * _width + x;
+        _pixelBuffer[offset] = color.blend(Color(_pixelBuffer[offset])).rgba();
+    }
 }
 
 inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color) {
@@ -261,6 +263,18 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
     //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
 
+    if (material == nullptr || material->texture() == nullptr) {
+        Color color;
+        if (material == nullptr) {
+            color = Consts::RED;
+        } else {
+            color = material->ambient();
+            color[3] *= material->d();
+        }
+        drawTriangle(triangle, color);
+        return;
+    }
+
     // Filling inside
     auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
     auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
@@ -269,9 +283,9 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
 
     if (x_min > x_max || y_min > y_max) return;
 
-    auto tc = triangle.textureCoordinates();
-    auto texture = material ? material->texture() : nullptr;
-    Color color = material ? material->ambient() : Consts::RED;
+    auto& tc = triangle.textureCoordinates();
+    auto texture = material->texture();
+    Color color = material->ambient();
 
     auto abg_origin = triangle.abgBarycCoord(Vec2D(x_min, y_min));
     /*
@@ -284,11 +298,9 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
 
     Vec3D uv_hom_origin, uv_hom_dx, uv_hom_dy;
 
-    if (texture) {
-        uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
-        uv_hom_dx = (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
-        uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
-    }
+    uv_hom_origin = tc[0] + (tc[1] - tc[0]) * abg_origin.y() + (tc[2] - tc[0]) * abg_origin.z();
+    uv_hom_dx = (tc[1] - tc[0]) * abg_dx.y() + (tc[2] - tc[0]) * abg_dx.z();
+    uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
 
     for (uint16_t y = y_min; y <= y_max; y++) {
         uint16_t x_cur_min, x_cur_max;
@@ -298,31 +310,25 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         Vec3D uv_hom = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*(x_cur_min - x_min);
 
         // Instead of exact area we compute average for each horizontal line:
-        double area;
-        uint16_t sample;
-        if(texture) {
-            Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
-            Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
-            area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
-            sample = texture->get_sample_index(area);
-        }
+        Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
+        Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
+        double area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+        const Image& sample = texture->get_sample(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
             double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
             if(checkPixelDepth(x, y, z)) {
-                if (texture) {
-                    // de-homogenize UV coordinates
-                    Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
-                    /*
-                     * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
-                     * Instead, we use averaged area for the horizontal line (calculation is above).
-                    */
-                    //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
-                    //color = texture->get_pixel_from_UV(uv_dehom, area);
-                    color = texture->get_pixel_from_sample_UV(uv_dehom, sample);
-                }
-
-                drawPixelUnsafe(x, y, z, color*material->d());
+                // de-homogenize UV coordinates
+                Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
+                /*
+                 * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
+                 * Instead, we use averaged area for the horizontal line (calculation is above).
+                */
+                //double area = areaDuDv(uv_hom, uv_dehom, uv_hom_dx, uv_hom_dy, x, y, x_min, y_min, texture->width(), texture->height());
+                //color = texture->get_pixel_from_UV(uv_dehom, area);
+                color = sample.get_pixel_from_UV(uv_dehom);
+                color[3] *= material->d();
+                drawPixelUnsafe(x, y, z, color);
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
@@ -411,21 +417,11 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
     uint16_t pitch = surfaceText->pitch;
     uint8_t *pixels = reinterpret_cast<uint8_t *>(surfaceText->pixels);
 
-    // default SDL blend mode:
-    // dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
-    // dstA = srcA + (dstA * (1-srcA))
-
     for (uint16_t i = 0; i < textHeight; i++) {
         for (uint16_t j = 0; j < textWidth; j++) {
             if (pixels[i * pitch + j]) {
                 size_t offset = (i + y) * _width + (j + x);
-                Color dst(_pixelBuffer[offset]);
-                Color res((static_cast<int>(src.r()) * src.a() + static_cast<int>(dst.r()) * (255 - src.a())) / 255,
-                          (static_cast<int>(src.g()) * src.a() + static_cast<int>(dst.g()) * (255 - src.a())) / 255,
-                          (static_cast<int>(src.b()) * src.a() + static_cast<int>(dst.b()) * (255 - src.a())) / 255,
-                          src.a() + dst.a() * (255 - src.a())
-                );
-                _pixelBuffer[offset] = res.rgba();
+                _pixelBuffer[offset] = src.blend(Color(_pixelBuffer[offset])).rgba();
             }
         }
     }

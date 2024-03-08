@@ -31,6 +31,9 @@ public:
     [[nodiscard]] inline uint8_t b() const { return _c[2]; }
     [[nodiscard]] inline uint8_t a() const { return _c[3]; }
 
+    [[nodiscard]] inline uint8_t& operator[](std::size_t i) { return _c[i]; }
+    [[nodiscard]] inline const uint8_t& operator[](std::size_t i) const { return _c[i]; }
+
     [[nodiscard]] inline uint32_t rgba() const { return (_c[0] << 24) | (_c[1] << 16) | (_c[2] << 8) | _c[3]; }
 
     // Operations with colors
@@ -45,6 +48,19 @@ public:
                                                                                   g()+other.g(),
                                                                                   b()+other.b(),
                                                                                   a()+other.a()); };
+
+    [[nodiscard]] inline Color blend(const Color& other) const {
+        // default SDL blend mode:
+        // dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
+        // dstA = srcA + (dstA * (1-srcA))
+        uint8_t ra = 255 - a();
+        return Color(
+            (static_cast<uint16_t>(r()) * a() + other.r() * ra) / 255,
+            (static_cast<uint16_t>(g()) * a() + other.g() * ra) / 255,
+            (static_cast<uint16_t>(b()) * a() + other.b() * ra) / 255,
+            (static_cast<uint16_t>(a()) * 255 + other.a() * ra) / 255
+        );
+    }
 };
 
 

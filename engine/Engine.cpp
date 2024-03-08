@@ -27,15 +27,13 @@ void Engine::projectGroup(const Group &group) {
 
             if(!isTransparent) {
                 for(const auto& t: projected) {
-                    _projectedOpaqueTriangles.emplace_back(t, material);
+                    _projectedOpaqueTriangles.emplace_back(t, material.get());
                 }
             } else {
                 for(const auto& t: projected) {
-                    _projectedTranspTriangles.emplace_back(t, material);
+                    _projectedTranspTriangles.emplace_back(t, material.get());
                 }
             }
-
-            continue;
         }
         std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
         if(subGroup) {
@@ -45,8 +43,7 @@ void Engine::projectGroup(const Group &group) {
     }
 }
 
-void
-Engine::drawProjectedTriangles() {
+void Engine::drawProjectedTriangles() {
 
     Time::startTimer("d sort triangles");
     /*
@@ -59,8 +56,8 @@ Engine::drawProjectedTriangles() {
     });
     */
     std::sort(_projectedTranspTriangles.begin(), _projectedTranspTriangles.end(), [](const auto& e1, const auto& e2){
-        Triangle t1(e1.first);
-        Triangle t2(e2.first);
+        const Triangle& t1 = e1.first;
+        const Triangle& t2 = e2.first;
         double z1 = t1[0].z() + t1[1].z() + t1[2].z();
         double z2 = t2[0].z() + t2[1].z() + t2[2].z();
         return z1 > z2;
@@ -69,10 +66,10 @@ Engine::drawProjectedTriangles() {
 
     Time::startTimer("d rasterization");
     for (const auto& [triangle, material]: _projectedOpaqueTriangles) {
-        screen->drawTriangle(triangle, material.get());
+        screen->drawTriangle(triangle, material);
     }
     for (const auto& [triangle, material]: _projectedTranspTriangles) {
-        screen->drawTriangle(triangle, material.get());
+        screen->drawTriangle(triangle, material);
     }
     Time::stopTimer("d rasterization");
 }
