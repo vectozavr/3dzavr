@@ -24,8 +24,8 @@ private:
     bool _updateWorld = true;
     [[maybe_unused]] void projectAndDrawGroup(const Group& group) const;
 
-    std::vector<std::pair<Triangle, std::shared_ptr<Material>>> _projectedOpaqueTriangles;
-    std::vector<std::pair<Triangle, std::shared_ptr<Material>>> _projectedTranspTriangles;
+    std::vector<std::pair<Triangle, Material*>> _projectedOpaqueTriangles;
+    std::vector<std::pair<Triangle, Material*>> _projectedTranspTriangles;
     void projectGroup(const Group& group);
     void drawProjectedTriangles();
 
