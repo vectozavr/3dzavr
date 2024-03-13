@@ -12,6 +12,7 @@
 #include <Consts.h>
 #include "objects/geometry/Mesh.h"
 #include "objects/Camera.h"
+#include "objects/lighting/LightSource.h"
 
 class Screen final {
 private:
@@ -55,9 +56,15 @@ public:
     void drawTriangle(const Triangle &triangle, const Color &color);
     void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color);
     void drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
-                             const Color &color, uint16_t thickness = 1, const Color &strokeColor = Consts::BLACK);
+                             const Color &color, uint16_t thickness = 1, const Color &strokeColor = Color::BLACK);
 
-    void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize = 12, const Color& color = Consts::BLACK);
+
+    void drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
+                                  const std::vector<std::shared_ptr<LightSource>>& lights, Material* material = nullptr);
+    void drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
+                                  const std::vector<std::shared_ptr<LightSource>>& lights, const Color &color);
+
+    void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize = 12, const Color& color = Color::BLACK);
 
     void drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img);
 

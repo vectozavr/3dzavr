@@ -4,9 +4,9 @@
 #include "Camera.h"
 #include "Consts.h"
 
-std::vector<Triangle> Camera::project(const Mesh& mesh) {
+std::vector<std::pair<Triangle, Triangle>> Camera::project(const Mesh& mesh) {
 
-    std::vector<Triangle> result{};
+    std::vector<std::pair<Triangle, Triangle>> result{};
 
     if (!_ready) {
         Log::log("Camera::project(): cannot project _tris without camera initialization ( Camera::setup() ) ");
@@ -16,9 +16,10 @@ std::vector<Triangle> Camera::project(const Mesh& mesh) {
     if (!mesh.isVisible()) {
         return result;
     }
-
     // Model transform matrix: translate _tris in the origin of body.
     Matrix4x4 objectToCamera = fullInvModel() * mesh.fullModel();
+
+    Matrix4x4 cameraToWorld = fullModel();
 
     // Transform mesh bounds into camera coordinates
     Vec3D center = Vec3D(objectToCamera * mesh.bounds().center.makePoint4D());
@@ -44,6 +45,7 @@ std::vector<Triangle> Camera::project(const Mesh& mesh) {
 
     for (auto &t : mesh.triangles()) {
 
+        // TODO: here we apply the same objectToCamera matrix every single frame. Might be improved by cashing.
         Triangle MTriangle = t * objectToCamera;
         double dot = MTriangle.norm().dot(MTriangle.position());
 
@@ -63,9 +65,12 @@ std::vector<Triangle> Camera::project(const Mesh& mesh) {
             plane.clip(_clipBuffer1, _clipBuffer2);
         }
 
+        _clipBuffer1.clear();
         // It's time to project our clipped polygon from 3D -> 2D
         // and transform its coordinate to screen space (in pixels):
         for (auto &vertex : _clipBuffer2) {
+            _clipBuffer1.emplace_back(vertex);
+
             Vec4D tmp = _SP * vertex.first.makePoint4D();
             vertex.first = Vec3D(tmp) / tmp.w();
             vertex.second /= tmp.w();
@@ -74,16 +79,30 @@ std::vector<Triangle> Camera::project(const Mesh& mesh) {
         // Finally, create triangle from sorted list of vertices
         for (size_t i = 2; i < _clipBuffer2.size(); i++) {
             result.emplace_back(
-                std::array<Vec4D, 3>{
-                    _clipBuffer2[0].first.makePoint4D(),
-                    _clipBuffer2[i - 1].first.makePoint4D(),
-                    _clipBuffer2[i].first.makePoint4D()
-                },
-                std::array<Vec3D, 3>{
-                    _clipBuffer2[0].second,
-                    _clipBuffer2[i - 1].second,
-                    _clipBuffer2[i].second
-                }
+                    // The first one is projected triangle
+                    Triangle{std::array<Vec4D, 3>{
+                            _clipBuffer2[0].first.makePoint4D(),
+                            _clipBuffer2[i - 1].first.makePoint4D(),
+                            _clipBuffer2[i].first.makePoint4D()
+                        },
+                             std::array<Vec3D, 3>{
+                            _clipBuffer2[0].second,
+                            _clipBuffer2[i - 1].second,
+                            _clipBuffer2[i].second
+                            }
+                        },
+                    // The second one is in the world space (not projected)
+                        Triangle{std::array<Vec4D, 3>{
+                            cameraToWorld*(_clipBuffer1[0].first.makePoint4D()),
+                            cameraToWorld*(_clipBuffer1[i - 1].first.makePoint4D()),
+                            cameraToWorld*(_clipBuffer1[i].first.makePoint4D())
+                        },
+                                 std::array<Vec3D, 3>{
+                            _clipBuffer1[0].second,
+                            _clipBuffer1[i - 1].second,
+                            _clipBuffer1[i].second
+                        }
+                    }
             );
         }
 

@@ -63,12 +63,6 @@ namespace Consts {
             Color(97, 70, 51), // orange
     };
 
-    const Color WHITE = Color(255, 255, 255);
-    const Color BLACK = Color(0, 0, 0);
-    const Color RED = Color(255, 0, 0);
-    const Color GREEN = Color(0, 255, 0);
-    const Color BLUE = Color(0, 0, 255);
-
     const FilePath DEFAULT_TEXTURE_PATH = FilePath("engine/resources/png/texture_test.png");
     const std::shared_ptr<Material> DEFAULT_MATERIAL = std::make_shared<Material>(
             MaterialTag("Default_material"),

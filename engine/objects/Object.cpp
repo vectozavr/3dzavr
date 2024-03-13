@@ -115,6 +115,7 @@ void Object::attach(std::shared_ptr<Object> object) {
         if(!object->_attachedTo) {
             if (!object->checkIfAttached(this)) {
                 _attachedObjects.emplace(object->name(), object);
+                object->translateToPoint(object->fullPosition() - fullPosition());
                 object->_attachedTo = this;
             } else {
                 throw std::invalid_argument{"Object::attach(): You created recursive attachment"};

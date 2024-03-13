@@ -6,7 +6,7 @@
 #include <animation/Timeline.h>
 #include <io/Keyboard.h>
 #include <io/Mouse.h>
-#include "utils/monitoring.h"
+#include <utils/monitoring.h>
 
 Engine::Engine() {
     Time::init();
@@ -17,7 +17,6 @@ Engine::Engine() {
 }
 
 void Engine::projectGroup(const Group &group) {
-
     for(const auto& [objTag, obj] : group) {
         std::shared_ptr<Mesh> subMesh = std::dynamic_pointer_cast<Mesh>(obj);
         if(subMesh) {
@@ -26,12 +25,12 @@ void Engine::projectGroup(const Group &group) {
             bool isTransparent = material->isTransparent();
 
             if(!isTransparent) {
-                for(const auto& t: projected) {
-                    _projectedOpaqueTriangles.emplace_back(t, material.get());
+                for(const auto& [projectedTriangle, triangle]: projected) {
+                    _projectedOpaqueTriangles.emplace_back(projectedTriangle, triangle, material.get());
                 }
             } else {
-                for(const auto& t: projected) {
-                    _projectedTranspTriangles.emplace_back(t, material.get());
+                for(const auto& [projectedTriangle, triangle]: projected) {
+                    _projectedTranspTriangles.emplace_back(projectedTriangle, triangle, material.get());
                 }
             }
         }
@@ -40,36 +39,35 @@ void Engine::projectGroup(const Group &group) {
             // We need to recursively continue to draw subgroup
             projectGroup(*subGroup);
         }
+
+        std::shared_ptr<LightSource> l = std::dynamic_pointer_cast<LightSource>(obj);
+        if(l) {
+            _lightSources.emplace_back(l);
+        }
     }
 }
 
 void Engine::drawProjectedTriangles() {
 
     Time::startTimer("d sort triangles");
-    /*
-    std::sort(_projectedOpaqueTriangles.begin(), _projectedOpaqueTriangles.end(), [](const auto& e1, const auto& e2){
-        Triangle t1(e1.first);
-        Triangle t2(e2.first);
-        double z1 = t1[0].z() + t1[1].z() + t1[2].z();
-        double z2 = t2[0].z() + t2[1].z() + t2[2].z();
-        return z1 < z2;
-    });
-    */
     std::sort(_projectedTranspTriangles.begin(), _projectedTranspTriangles.end(), [](const auto& e1, const auto& e2){
-        const Triangle& t1 = e1.first;
-        const Triangle& t2 = e2.first;
-        double z1 = t1[0].z() + t1[1].z() + t1[2].z();
-        double z2 = t2[0].z() + t2[1].z() + t2[2].z();
+        const auto& [projT1, t1, material1] = e1;
+        const auto& [projT2, t2, material2] = e1;
+
+        double z1 = projT1[0].z() + projT1[1].z() + projT1[2].z();
+        double z2 = projT2[0].z() + projT2[1].z() + projT2[2].z();
         return z1 > z2;
     });
     Time::stopTimer("d sort triangles");
 
     Time::startTimer("d rasterization");
-    for (const auto& [triangle, material]: _projectedOpaqueTriangles) {
-        screen->drawTriangle(triangle, material);
+    for (const auto& [projectedTriangle, triangle, material]: _projectedOpaqueTriangles) {
+        screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, material);
+        //screen->drawTriangle(projectedTriangle, material);
     }
-    for (const auto& [triangle, material]: _projectedTranspTriangles) {
-        screen->drawTriangle(triangle, material);
+    for (const auto& [projectedTriangle, triangle, material]: _projectedTranspTriangles) {
+        screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, material);
+        //screen->drawTriangle(projectedTriangle, material);
     }
     Time::stopTimer("d rasterization");
 }
@@ -128,10 +126,12 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
             Time::stopTimer("d collisions");
         }
 
-        //projectAndDrawGroup(*world->objects());
+        _lightSources.clear();
+
         Time::startTimer("d projections");
         projectGroup(*world->objects());
         Time::stopTimer("d projections");
+
         drawProjectedTriangles();
         _projectedOpaqueTriangles.clear();
         _projectedTranspTriangles.clear();
@@ -218,7 +218,7 @@ void Engine::printDebugInfo() {
             screen->drawText(
                     timerName.substr(2, timerName.size()) + " (" +
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
-                    xPos+5, yPos + (1.5*height)*i, 12, Consts::BLACK);
+                    xPos+5, yPos + (1.5*height)*i, 12, Color::BLACK);
 
             screen->drawPlot(_histResources[timerName], xPos + timerWidth, yPos + (1.5*height)*i, plotWidth, height);
 

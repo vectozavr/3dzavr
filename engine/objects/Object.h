@@ -43,7 +43,7 @@ public:
         std::shared_ptr<Object> obj = nullptr;
         bool intersected = false;
         double k = 0;
-        Color color = Consts::BLACK;
+        Color color = Color::BLACK;
         Triangle triangle{};
     };
 private:
@@ -108,6 +108,7 @@ public:
     [[nodiscard]] Vec3D up() const { return _transformMatrix.y().normalized(); }
     [[nodiscard]] Vec3D lookAt() const { return _transformMatrix.z().normalized(); }
     [[nodiscard]] Vec3D position() const { return _transformMatrix.w(); }
+    [[nodiscard]] Vec3D fullPosition() const { return fullModel().w(); }
     [[nodiscard]] Vec3D angle() const { return _angle; }
     [[nodiscard]] Vec3D angleLeftUpLookAt() const { return _angleLeftUpLookAt; }
 

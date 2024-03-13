@@ -22,10 +22,12 @@
 class Engine {
 private:
     bool _updateWorld = true;
-    [[maybe_unused]] void projectAndDrawGroup(const Group& group) const;
 
-    std::vector<std::pair<Triangle, Material*>> _projectedOpaqueTriangles;
-    std::vector<std::pair<Triangle, Material*>> _projectedTranspTriangles;
+    std::vector<std::tuple<Triangle, Triangle, Material*>> _projectedOpaqueTriangles;
+    std::vector<std::tuple<Triangle, Triangle, Material*>> _projectedTranspTriangles;
+
+    std::vector<std::shared_ptr<LightSource>> _lightSources;
+
     void projectGroup(const Group& group);
     void drawProjectedTriangles();
 

@@ -2,11 +2,9 @@
 
 #include <Engine.h>
 #include <io/Screen.h>
-#include "objects/geometry/Sphere.h"
 #include <utils/ObjectController.h>
-
-
-#include "objects/props/Texture.h"
+#include <objects/props/Texture.h>
+#include <objects/lighting/PointLight.h>
 
 class Test final : public Engine {
 private:
@@ -20,7 +18,6 @@ private:
 
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
-
 
         for (int i = 1; i <= 8; i++) {
             auto car = world->loadObject(
@@ -56,18 +53,42 @@ private:
                 );
         redCube->setMaterial(orangeGlass);
 
-        auto greenwood = world->loadObject(ObjectTag("greenwood"),
-                                           FilePath("resources/obj/cars/greenwood/greenwood.obj"));
-        greenwood->translate(Vec3D{0, -0.3, -10});
-        greenwood->scale(Vec3D(0.3, 0.3, 0.3));
-        greenwood->rotateUp(-3*Consts::PI/4);
+        //auto greenwood = world->loadObject(ObjectTag("greenwood"),
+        //                                   FilePath("resources/obj/cars/greenwood/greenwood.obj"));
+        //greenwood->translate(Vec3D{0, -0.3, -10});
+        //greenwood->scale(Vec3D(0.3, 0.3, 0.3));
+        //greenwood->rotateUp(-3*Consts::PI/4);
+
+        auto dir_light = std::make_shared<DirectionalLight>(
+                ObjectTag("Directional Light 1"), Vec3D(1, -1, -1),
+                Color::WHITE, 1.5);
+
+        auto p_light = std::make_shared<PointLight>(
+                ObjectTag("Point Light 1"), Vec3D(0, 0.5, -5),
+                Color::LIGHT_YELLOW, 2);
+
+        world->add(dir_light);
+        world->add(p_light);
+
+        auto lightCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("LightCube"), 0.1));
+        auto lightMaterial = std::make_shared<Material>(
+                MaterialTag("Point Light Material"),
+                nullptr,
+                Color::LIGHT_YELLOW,
+                Color(255, 200, 50, 100),
+                Color(255, 200, 50, 100)
+        );
+        lightCube->setMaterial(lightMaterial);
+        lightCube->translateToPoint(p_light->position());
+        lightCube->attach(p_light);
+        world->add(lightCube);
     };
 
     void update() override {
         screen->setTitle("3dzavr, " + std::to_string(Time::fps()) + "fps");
 
-        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Consts::BLACK);
-        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Consts::BLACK);
+        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Color::BLACK);
+        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Color::BLACK);
 
         if(isControllerActive) {
             if(objSelected) {

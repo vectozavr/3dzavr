@@ -7,7 +7,7 @@
 #include <objects/Group.h>
 #include <io/Screen.h>
 #include <objects/Object.h>
-#include <objects/DirectionalLight.h>
+#include "objects/lighting/DirectionalLight.h"
 #include <physics/RigidBody.h>
 
 class World final {
