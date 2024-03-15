@@ -386,20 +386,25 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
 
 
                 // Exact calculation of light (non linear and computationally expensive)
+                // Here we do homogination and de-homogination part to do the same as we did for textures
                 /*
                 Vec3DUint l;
-                auto pixelPosition = Vec3D(Mtriangle[0] * abg.x() + Mtriangle[1] * abg.y() + Mtriangle[2] * abg.z());
+                auto dehomPixelPosition = Vec4D(
+                        Mtriangle[0] * abg.x() * tc[0].z() +
+                        Mtriangle[1] * abg.y() * tc[1].z() +
+                        Mtriangle[2] * abg.z() * tc[2].z())/uv_hom.z();
                 for (const auto& lightSource: lights) {
                     auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
-                    auto cl = light->illuminate(Mtriangle.norm(), pixelPosition);
+                    auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
                     l += {cl.r(), cl.g(), cl.b()};
                 }
                  */
 
                 // Linearization of light:
-                Vec3DUint l =   l1 * std::clamp(abg.x(), 0.0, 1.0) +
-                                l2 * std::clamp(abg.y(), 0.0, 1.0) +
-                                l3 * std::clamp(abg.z(), 0.0, 1.0);
+                // Here we do homogination and de-homogination part to do the same as we did for textures
+                Vec3DUint l =   l1 * std::clamp(abg.x() * tc[0].z() / uv_hom.z(), 0.0, 1.0) +
+                                l2 * std::clamp(abg.y() * tc[1].z() / uv_hom.z(), 0.0, 1.0) +
+                                l3 * std::clamp(abg.z() * tc[2].z() / uv_hom.z(), 0.0, 1.0);
 
                 // Constant for the whole triangle
                 //Vec3DUint l = l1;
