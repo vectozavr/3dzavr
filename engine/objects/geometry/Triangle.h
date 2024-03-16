@@ -25,7 +25,9 @@ public:
 
     Triangle(const Triangle &triangle) = default;
 
-    Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv = {});
+    Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv = {Vec3D{0, 0, 1},
+                                                                              Vec3D{0, 0, 1},
+                                                                              Vec3D{0, 0, 1}});
 
     Triangle &operator=(const Triangle &) = default;
 

@@ -371,10 +371,12 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
         const Image& sample = texture->get_sample(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
-            double z = projectedTriangle[0].z() * abg.x() + projectedTriangle[1].z() * abg.y() + projectedTriangle[2].z() * abg.z();
-            if(checkPixelDepth(x, y, z)) {
+            double non_linear_z_hom = projectedTriangle[0].z() * abg.x() + projectedTriangle[1].z() * abg.y() + projectedTriangle[2].z() * abg.z();
+            double z_hom = tc[0].z()*abg.x() + tc[1].z()*abg.y() + tc[2].z()*abg.z();
+
+            if(checkPixelDepth(x, y, non_linear_z_hom)) {
                 // de-homogenize UV coordinates
-                Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
+                Vec2D uv_dehom(uv_hom.x() / z_hom, uv_hom.y() / z_hom);
                 /*
                  * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
                  * Instead, we use averaged area for the horizontal line (calculation is above).
@@ -392,7 +394,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                 auto dehomPixelPosition = Vec4D(
                         Mtriangle[0] * abg.x() * tc[0].z() +
                         Mtriangle[1] * abg.y() * tc[1].z() +
-                        Mtriangle[2] * abg.z() * tc[2].z())/uv_hom.z();
+                        Mtriangle[2] * abg.z() * tc[2].z())/z_hom;
                 for (const auto& lightSource: lights) {
                     auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
                     auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
@@ -400,11 +402,14 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                 }
                  */
 
+                double a = std::clamp<double>(abg.x() * tc[0].z() / z_hom, 0.0, 1.0);
+                double b = std::clamp<double>(abg.y() * tc[1].z() / z_hom, 0.0, 1.0);
+                a = a+b <= 1.0 ? a : 0.0;
+                Vec3D dehom_abg(a, b, 1.0 - a - b);
+
                 // Linearization of light:
                 // Here we do homogination and de-homogination part to do the same as we did for textures
-                Vec3DUint l =   l1 * std::clamp(abg.x() * tc[0].z() / uv_hom.z(), 0.0, 1.0) +
-                                l2 * std::clamp(abg.y() * tc[1].z() / uv_hom.z(), 0.0, 1.0) +
-                                l3 * std::clamp(abg.z() * tc[2].z() / uv_hom.z(), 0.0, 1.0);
+                Vec3DUint l = l1*dehom_abg.x() + l2*dehom_abg.y() + l3*dehom_abg.z();
 
                 // Constant for the whole triangle
                 //Vec3DUint l = l1;
@@ -415,7 +420,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                                std::clamp<int>(color.g()*l.g/255, 0, 255),
                                std::clamp<int>(color.b()*l.b/255, 0, 255), color.a());
 
-                drawPixelUnsafe(x, y, z, resColor);
+                drawPixelUnsafe(x, y, non_linear_z_hom, resColor);
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
@@ -432,6 +437,8 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
     auto y_max = std::clamp<uint16_t>(std::floor(std::max({projectedTriangle[0].y(), projectedTriangle[1].y(), projectedTriangle[2].y()})), 0, _height - 1);
 
     if (x_min > x_max || y_min > y_max) return;
+
+    auto& tc = projectedTriangle.textureCoordinates();
 
     auto abg_origin = projectedTriangle.abgBarycCoord(Vec2D(x_min, y_min));
     /*
@@ -451,21 +458,29 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
         Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
 
         for (int x = x_cur_min; x <= x_cur_max; x++) {
-            double z = projectedTriangle[0].z() * abg.x() + projectedTriangle[1].z() * abg.y() + projectedTriangle[2].z() * abg.z();
+            double non_linear_z_hom = projectedTriangle[0].z() * abg.x() + projectedTriangle[1].z() * abg.y() + projectedTriangle[2].z() * abg.z();
+            double z_hom = tc[0].z()*abg.x() + tc[1].z()*abg.y() + tc[2].z()*abg.z();
 
-            // Linearization of light:
-            Vec3DUint l =   l1 * std::clamp(abg.x(), 0.0, 1.0) +
-                            l2 * std::clamp(abg.y(), 0.0, 1.0) +
-                            l3 * std::clamp(abg.z(), 0.0, 1.0);
+            if (checkPixelDepth(x, y, non_linear_z_hom)) {
+                double a = std::clamp<double>(abg.x() * tc[0].z() / z_hom, 0.0, 1.0);
+                double b = std::clamp<double>(abg.y() * tc[1].z() / z_hom, 0.0, 1.0);
+                a = a+b <= 1.0 ? a : 0.0;
+                Vec3D dehom_abg(a, b, 1.0 - a - b);
 
-            // Constant for the whole triangle
-            //Vec3DUint l = l1;
+                // Linearization of light:
+                // Here we do homogination and de-homogination part to do the same as we did for textures
+                Vec3DUint l = l1*dehom_abg.x() + l2*dehom_abg.y() + l3*dehom_abg.z();
 
-            Color resColor(std::clamp<int>(color.r()*l.r/255, 0, 255),
-                           std::clamp<int>(color.g()*l.g/255, 0, 255),
-                           std::clamp<int>(color.b()*l.b/255, 0, 255), color.a());
+                // Constant for the whole triangle
+                //Vec3DUint l = l1;
 
-            drawPixelUnsafe(x, y, z, resColor);
+                Color resColor(std::clamp<int>(color.r()*l.r/255, 0, 255),
+                               std::clamp<int>(color.g()*l.g/255, 0, 255),
+                               std::clamp<int>(color.b()*l.b/255, 0, 255), color.a());
+
+                drawPixelUnsafe(x, y, non_linear_z_hom, resColor);
+            }
+
             abg += abg_dx;
         }
     }
@@ -530,10 +545,12 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         const Image& sample = texture->get_sample(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
-            double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
-            if(checkPixelDepth(x, y, z)) {
+            double non_linear_z_hom = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
+            double z_hom = tc[0].z()*abg.x() + tc[1].z()*abg.y() + tc[2].z()*abg.z();
+
+            if(checkPixelDepth(x, y, non_linear_z_hom)) {
                 // de-homogenize UV coordinates
-                Vec2D uv_dehom(uv_hom.x() / uv_hom.z(), uv_hom.y() / uv_hom.z());
+                Vec2D uv_dehom(uv_hom.x() / z_hom, uv_hom.y() / z_hom);
                 /*
                  * We can calculate the area of Du*Dv for each pixel, but it is computationally inefficient.
                  * Instead, we use averaged area for the horizontal line (calculation is above).
@@ -542,7 +559,7 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
                 //color = texture->get_pixel_from_UV(uv_dehom, area);
                 color = sample.get_pixel_from_UV(uv_dehom);
                 color[3] *= material->d();
-                drawPixelUnsafe(x, y, z, color);
+                drawPixelUnsafe(x, y, non_linear_z_hom, color);
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
@@ -575,8 +592,8 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
         Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
 
         for (int x = x_cur_min; x <= x_cur_max; x++) {
-            double z = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
-            drawPixelUnsafe(x, y, z, color);
+            double non_linear_z_hom = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
+            drawPixelUnsafe(x, y, non_linear_z_hom, color);
             abg += abg_dx;
         }
     }
