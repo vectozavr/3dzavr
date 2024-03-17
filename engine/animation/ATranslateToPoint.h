@@ -28,7 +28,7 @@ private:
     }
 
 public:
-    ATranslateToPoint(std::weak_ptr<Object> object, const Vec3D &p, double duration = 1, LoopOut looped = LoopOut::None,
+    ATranslateToPoint(const std::weak_ptr<Object>& object, const Vec3D &p, double duration = 1, LoopOut looped = LoopOut::None,
                       InterpolationType interpolationType = InterpolationType::Bezier)
                       : Animation(duration, looped, interpolationType), _targetPoint(p), _object(object) {
     }

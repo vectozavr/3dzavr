@@ -5,7 +5,7 @@ project(3dzavr)
 
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+add_executable(${CMAKE_PROJECT_NAME} test_scenes/past_village.cpp)
 
 find_package(SDL2 CONFIG COMPONENTS SDL2main)
 if(TARGET SDL2::SDL2main)

@@ -24,7 +24,7 @@ private:
     }
 
 public:
-    ARotateLeftUpLookAt(std::weak_ptr<Object> object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
+    ARotateLeftUpLookAt(const std::weak_ptr<Object>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
             InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {}
 };

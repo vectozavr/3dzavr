@@ -36,7 +36,7 @@ private:
     }
 
 public:
-    ADecompose(std::weak_ptr<Mesh> mesh, double value, double duration = 1, LoopOut looped = LoopOut::None,
+    ADecompose(const std::weak_ptr<Mesh>& mesh, double value, double duration = 1, LoopOut looped = LoopOut::None,
                InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                                interpolationType),
                                                                                   _value(value), _mesh(mesh) {}

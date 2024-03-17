@@ -21,7 +21,7 @@ private:
     }
 
 public:
-    ATranslate(std::weak_ptr<Object> object, const Vec3D &t, double duration = 1, LoopOut looped = LoopOut::None,
+    ATranslate(const std::weak_ptr<Object>& object, const Vec3D &t, double duration = 1, LoopOut looped = LoopOut::None,
                InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                             interpolationType),
                                                                                   _object(object),

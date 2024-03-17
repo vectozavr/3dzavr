@@ -25,7 +25,7 @@ private:
     }
 
 public:
-    AScale(std::weak_ptr<Object> object, const Vec3D &s, double duration = 1, LoopOut looped = LoopOut::None,
+    AScale(const std::weak_ptr<Object>& object, const Vec3D &s, double duration = 1, LoopOut looped = LoopOut::None,
            InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                         interpolationType),
                                                                               _object(object), _scalingValue(s) {

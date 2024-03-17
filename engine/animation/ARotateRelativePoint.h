@@ -22,7 +22,7 @@ private:
     }
 
 public:
-    ARotateRelativePoint(std::weak_ptr<Object> object, const Vec3D &targetPoint, const Vec3D &rotationValue,
+    ARotateRelativePoint(const std::weak_ptr<Object>& object, const Vec3D &targetPoint, const Vec3D &rotationValue,
                          double duration = 1, Animation::LoopOut looped = LoopOut::None,
                          Animation::InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _targetPoint(targetPoint),

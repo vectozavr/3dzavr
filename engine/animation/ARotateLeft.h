@@ -21,7 +21,7 @@ private:
     }
 
 public:
-    ARotateLeft(std::weak_ptr<Object> object, double r, double duration = 1, LoopOut looped = LoopOut::None,
+    ARotateLeft(const std::weak_ptr<Object>& object, double r, double duration = 1, LoopOut looped = LoopOut::None,
             InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {}
 };
