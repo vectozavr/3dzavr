@@ -25,6 +25,7 @@ private:
 public:
     explicit Image(uint16_t width = Consts::STANDARD_SCREEN_WIDTH, uint16_t height = Consts::STANDARD_SCREEN_HEIGHT);
     explicit Image(const FilePath &filename);
+    Image(const std::vector<uint32_t>& pixelBuffer, uint16_t width, uint16_t height);
 
     Image(const Image& img) = delete;
     Image& operator=(const Image &img) = delete;
@@ -43,6 +44,8 @@ public:
     [[nodiscard]] Image downSampled() const;
 
     CODE save2png(const FilePath& file_name, uint16_t bit_depth = 8);
+
+    [[nodiscard]] png_bytep data() const {return _data; }
 
     ~Image();
 };

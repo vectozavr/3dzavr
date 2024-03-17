@@ -72,14 +72,12 @@ void Engine::drawProjectedTriangles() {
     Time::stopTimer("d rasterization");
 }
 
-void Engine::handleSDLEvents() {
+int Engine::handleSDLEvents() {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch(e.type) {
             case SDL_QUIT:
-                screen->close();
-                exit();
-                return;
+                return 1;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 Keyboard::sendKeyboardEvent(e);
@@ -92,6 +90,8 @@ void Engine::handleSDLEvents() {
                 break;
         }
     }
+
+    return 0;
 }
 
 void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& background) {
@@ -108,7 +108,11 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
 
     while (screen->isOpen()) {
 
-        handleSDLEvents();
+        if(handleSDLEvents()) {
+            screen->close();
+            exit();
+            return;
+        };
 
         // 'd' in the beginning of the name means debug.
         // While printing debug info we will take into account only timer names witch start with 'd '
@@ -143,13 +147,12 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");
 
-        Time::startTimer("d game update");
-        update();
-        Time::stopTimer("d game update");
-
         Time::stopTimer("d all");
 
         printDebugInfo();
+
+        update();
+
         screen->display();
     }
 }

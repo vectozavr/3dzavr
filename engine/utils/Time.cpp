@@ -1,6 +1,7 @@
 #include <utils/Time.h>
 #include <utils/Log.h>
 #include <Consts.h>
+#include <sstream>
 
 using namespace std::chrono;
 
@@ -134,4 +135,12 @@ std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> Time::
     }
 
     return {_instance->_timers};
+}
+
+std::string Time::getLocalTimeInfo(const std::string &format) {
+    std::time_t const now_c = std::time(nullptr);
+    auto dt = std::put_time(std::localtime(&now_c), format.c_str());
+    std::ostringstream result;
+    result << dt;
+    return result.str();
 }

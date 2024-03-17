@@ -2,6 +2,7 @@
 out/
 build/
 cmake-build-*/
+film/
 
 # IDE
 .vscode/

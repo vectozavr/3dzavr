@@ -8,14 +8,12 @@
 #include <utils/Time.h>
 #include <utils/Log.h>
 #include <Consts.h>
-#include "monitoring.h"
+#include <utils/monitoring.h>
 
 namespace Log {
     void log(const std::string &message) {
         if (Consts::USE_LOG_FILE) {
-            std::time_t const now_c = std::time(nullptr);
-            auto dt = std::put_time(std::localtime(&now_c), "%F %T");
-
+            auto dt = Time::getLocalTimeInfo();
             std::fstream file("engine.log", std::ios::out | std::ios::app);
             file << dt << " | Mem: " << getProcessSizeMB() << "MB " << "\t" << message << " (" << Time::fps() << " fps)" << std::endl;
             std::cout << dt << " | Mem: " << getProcessSizeMB() << "MB " << "\t" << message << " (" << Time::fps() << " fps)" << std::endl;

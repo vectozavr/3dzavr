@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include "Engine.h"
-#include "io/Screen.h"
-#include "utils/ObjectController.h"
-#include "objects/props/Texture.h"
-#include "animation/Animations.h"
+#include <Engine.h>
+#include <io/Screen.h>
+#include <utils/ObjectController.h>
+#include <objects/props/Texture.h>
+#include <animation/Animations.h>
 
 class Test final : public Engine {
 private:

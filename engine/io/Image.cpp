@@ -79,7 +79,7 @@ Image::Image(const FilePath &filename) {
     if (real != 4 * _width) abort();
 
     _data = new png_byte[_height * _width * 4];
-    png_bytepp tmp_rows = new png_bytep[_height];
+    auto tmp_rows = new png_bytep[_height];
     for(size_t y = 0; y < _height; y++) {
         tmp_rows[y] = _data + y * _width * 4;
     }
@@ -89,6 +89,36 @@ Image::Image(const FilePath &filename) {
     fclose(fp);
 
     png_destroy_read_struct(&png, &info, nullptr);
+    _valid = true;
+}
+
+Image::Image(const std::vector<uint32_t> &pixelBuffer, uint16_t width, uint16_t height) : _width(width), _height(height) {
+
+    _data = new png_byte[_height * _width * 4];
+
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            // Calculate the index for the pixelBuffer
+            int index = i * width + j;
+
+            // Extract the RGBA components
+            uint32_t color = pixelBuffer[index];
+            png_byte r = (color >> 24) & 0xFF; // Extract red
+            png_byte g = (color >> 16) & 0xFF; // Extract green
+            png_byte b = (color >> 8) & 0xFF;  // Extract blue
+            png_byte a = color & 0xFF;         // Extract alpha
+
+            // Calculate the position in the data array
+            int pos = (i * width + j) * 4;
+
+            // Assign the RGBA values to the data array
+            _data[pos + 0] = r; // Red
+            _data[pos + 1] = g; // Green
+            _data[pos + 2] = b; // Blue
+            _data[pos + 3] = a; // Alpha
+        }
+    }
+
     _valid = true;
 }
 

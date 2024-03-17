@@ -26,8 +26,8 @@ private:
     uint16_t _width;
     uint16_t _height;
 
-    int _scene = 0;
     bool _renderVideo = false;
+    FILE* _ffmpeg = nullptr;
 
     std::string _title = Consts::BUILD_INFO;
 
@@ -83,6 +83,7 @@ public:
 
     void startRender();
     void stopRender();
+    Image makeScreenShot();
 
     ~Screen();
 };

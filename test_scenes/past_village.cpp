@@ -16,6 +16,7 @@ private:
     bool objSelected = false;
     bool objInFocus = false;
     bool isControllerActive = true;
+    bool isRecording = false;
 
     void start() override {
         cameraController = std::make_shared<ObjectController>(camera);
@@ -122,6 +123,19 @@ private:
         if (Keyboard::isKeyTapped(SDLK_p)) {
             objSelected = false;
             selectedObject.reset();
+        }
+
+        if(Keyboard::isKeyTapped(SDLK_F1)) {
+            screen->makeScreenShot().save2png(FilePath("screenshot_" + Time::getLocalTimeInfo("%F_%H-%M-%S") + ".png"));
+        }
+
+        if(Keyboard::isKeyTapped(SDLK_F2)) {
+            if(!isRecording) {
+                screen->startRender();
+            } else{
+                screen->stopRender();
+            }
+            isRecording = !isRecording;
         }
 
         if(Keyboard::isKeyTapped(SDLK_q)) {

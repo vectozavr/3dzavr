@@ -49,9 +49,8 @@ void Screen::display() {
     if(_renderVideo) {
         // most of the time of video rendering is wasting on saving .png sequence
         // that's why we will save all images in the end
-
-        // TODO: implement saving screen state into _renderSequence
-        //_renderSequence.push_back(screenState);
+        png_bytep _data = Image(_pixelBuffer, width(), height()).data();
+        fwrite(_data, sizeof(png_byte), _height * _width * 4, _ffmpeg);
     }
 
     if(_isOpen) {
@@ -62,31 +61,30 @@ void Screen::display() {
 }
 
 void Screen::startRender() {
-    stopRender();
+    if(_renderVideo) {
+        stopRender();
+    }
+
+    popen("mkdir -p film", "w");
 
     Log::log("Screen::startRender(): start recording the screen");
+
+    auto cmd = "ffmpeg -f rawvideo -pixel_format rgba -video_size " +
+               std::to_string(_width) + "x" + std::to_string(_height) +
+               " -framerate 60 -i - -c:v libx264 -crf 17 -pix_fmt yuv420p -tune animation film/clip_" +
+               Time::getLocalTimeInfo("%F_%H-%M-%S") + ".mp4";
+    _ffmpeg = popen(cmd.c_str(), "w");
+
     _renderVideo = true;
 }
 
 void Screen::stopRender() {
     if(_renderVideo) {
         Log::log("Screen::stopRender(): stop recording the screen");
-        Log::log("Screen::stopRender(): start saving .png sequence");
-        std::string c = "rm film/png/*.png";
-        popen(c.c_str(), "w");
-        int i = 0;
-        /*
-        for(; i < _renderSequence.size(); i++) {
-            _renderSequence[i].copyToImage().saveToFile("film/png/" + std::to_string(i) + ".png");
-            Log::log("Screen::stopRender(): saving .png sequence (" + std::to_string(static_cast<int>(100*i/_renderSequence.size())) + "%)");
-        }
-        _renderSequence.clear();
-        */
-        Log::log("Screen::stopRender(): start rendering final video");
-        // TODO: .png sequence looks better than a final video (poor clarity and desaturated colors)
-        c = "ffmpeg -stats -r 60 -i film/png/%d.png -vcodec libx264 -crf 1 -pix_fmt yuv420p -frames " + std::to_string(i) + " film/mp4/" + std::to_string(_scene) + "_" + _title + "_" + std::to_string(rand()) + ".mp4";
-        popen(c.c_str(), "w");
-        _scene++;
+
+        pclose(_ffmpeg);
+        _ffmpeg = nullptr;
+
         _renderVideo = false;
         Log::log("Screen::stopRender(): finish rendering final video");
     }
@@ -138,7 +136,6 @@ inline bool Screen::checkPixelDepth(uint16_t x, uint16_t y, double z) const {
 }
 
 void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness) {
-    // TODO: It is better to use built in SDL functions
     //SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
     //SDL_RenderDrawLine(_renderer, (int)from.x(), (int)from.y(), (int)to.x(), (int)to.y());
 
@@ -723,4 +720,8 @@ void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, uint16
         xPrev = xVal;
         yPrev = yVal;
     }
+}
+
+Image Screen::makeScreenShot() {
+    return {_pixelBuffer, width(), height()};
 }
