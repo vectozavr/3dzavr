@@ -1,10 +1,11 @@
 #include <iostream>
 
-#include "Engine.h"
-#include "io/Screen.h"
-#include "utils/ObjectController.h"
-#include "objects/props/Texture.h"
-#include "objects/lighting/PointLight.h"
+#include <Engine.h>
+#include <io/Screen.h>
+#include <utils/ObjectController.h>
+#include <objects/props/Texture.h>
+#include <objects/lighting/PointLight.h>
+#include <animation/Animations.h>
 
 class Test final : public Engine {
 private:
@@ -98,7 +99,6 @@ private:
             }
         }
 
-
         auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt(), {redCube->name()});
 
         objInFocus = rayCast.intersected;
@@ -108,12 +108,13 @@ private:
         }
 
         // select object:
-        if (Keyboard::isKeyTapped(SDLK_o)) {
+        if (Keyboard::isKeyTapped(SDLK_o) || Mouse::isButtonTapped(SDL_BUTTON_LEFT)) {
             if(objInFocus) {
                 objSelected = true;
                 selectedObject = rayCast.obj;
                 objController = std::make_shared<ObjectController>(selectedObject);
                 Log::log("Object " + rayCast.objectName.str() + " selected.");
+                //Timeline::addAnimation<ATranslateToPoint>(camera, selectedObject->position() - (selectedObject->position() - camera->position()).normalized());
             }
         }
 

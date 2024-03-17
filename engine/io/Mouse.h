@@ -9,8 +9,10 @@
 
 class Mouse final {
 private:
+    std::map<uint8_t, bool> _buttons;
     std::map<uint8_t, double> _tappedButtons;
     Vec2D _motion;
+    Vec2D _scroll;
 
     static Mouse *_instance;
     Mouse() = default;
@@ -20,10 +22,11 @@ public:
     static bool isButtonPressed(uint8_t button);
 
     // returns true if this _button is tapped and 1/5 sec passed (_button bouncing problem solved)
-    bool isButtonTapped(uint8_t button);
+    static bool isButtonTapped(uint8_t button);
 
     [[nodiscard]] static Vec2D getMousePosition();
     [[nodiscard]] static Vec2D getMouseDisplacement();
+    [[nodiscard]] static Vec2D getMouseScroll();
 
     static void sendMouseEvent(const SDL_Event& event);
 

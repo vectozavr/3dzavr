@@ -72,6 +72,28 @@ void Engine::drawProjectedTriangles() {
     Time::stopTimer("d rasterization");
 }
 
+void Engine::handleSDLEvents() {
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+        switch(e.type) {
+            case SDL_QUIT:
+                screen->close();
+                exit();
+                return;
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                Keyboard::sendKeyboardEvent(e);
+                break;
+            case SDL_MOUSEMOTION:
+            case SDL_MOUSEWHEEL:
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                Mouse::sendMouseEvent(e);
+                break;
+        }
+    }
+}
+
 void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& background) {
 
     screen->open(screenWidth, screenHeight, background);
@@ -86,25 +108,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
 
     while (screen->isOpen()) {
 
-        // TODO: move event handling into another place
-        SDL_Event e;
-        while (SDL_PollEvent(&e)) {
-            switch(e.type) {
-                case SDL_QUIT:
-                    screen->close();
-                    exit();
-                    return;
-                case SDL_KEYDOWN:
-                    Keyboard::sendKeyboardEvent(e);
-                    break;
-                case SDL_KEYUP:
-                    Keyboard::sendKeyboardEvent(e);
-                    break;
-                case SDL_MOUSEMOTION:
-                    Mouse::sendMouseEvent(e);
-                    break;
-            }
-        }
+        handleSDLEvents();
 
         // 'd' in the beginning of the name means debug.
         // While printing debug info we will take into account only timer names witch start with 'd '

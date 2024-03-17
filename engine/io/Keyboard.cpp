@@ -31,6 +31,10 @@ bool Keyboard::isKeyPressed(SDL_Keycode key) {
 }
 
 bool Keyboard::isKeyTapped(SDL_Keycode key) {
+    if (_instance == nullptr) {
+        return false;
+    }
+
     if (!Keyboard::isKeyPressed(key)) {
         return false;
     }

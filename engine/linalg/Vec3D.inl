@@ -1,5 +1,6 @@
 #include <cmath>
 #include <stdexcept>
+#include <random>
 
 #include <ScalarConsts.h>
 
@@ -117,6 +118,12 @@ inline Vec4D Vec3D::makePoint4D() const {
 }
 
 inline Vec3D Vec3D::Random() {
-    // TODO: use C++11 random library instead of Rand()
-    return Vec3D((double) rand() / RAND_MAX, (double) rand() / RAND_MAX, (double) rand() / RAND_MAX);
+    // Create a static random engine with a random seed
+    static std::mt19937 engine(std::random_device{}());
+
+    // Create a uniform distribution in range [0, 1)
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+    // Use the distribution and engine to generate three random doubles and return them as a Vec3D
+    return Vec3D(dist(engine), dist(engine), dist(engine));
 }

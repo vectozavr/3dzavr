@@ -37,6 +37,8 @@ private:
 
     void printDebugInfo();
 
+    void handleSDLEvents();
+
 protected:
     const std::shared_ptr<Screen> screen = std::make_shared<Screen>();
 
