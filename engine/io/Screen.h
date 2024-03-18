@@ -27,6 +27,8 @@ private:
     uint16_t _height;
 
     bool _renderVideo = false;
+    double _lastFrameTime = 0;
+    int _clipFps = 30;
     FILE* _ffmpeg = nullptr;
 
     std::string _title = Consts::BUILD_INFO;
@@ -83,6 +85,7 @@ public:
 
     void startRender();
     void stopRender();
+    void setClipFps(int fps) { _clipFps = fps; }
     Image makeScreenShot();
 
     ~Screen();

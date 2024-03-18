@@ -46,9 +46,10 @@ void Screen::display() {
 
     std::string title = _title + " (" + std::to_string(Time::fps()) + " fps)";
 
-    if(_renderVideo) {
+    if(_renderVideo && (Time::time() - _lastFrameTime) >= 1.0/_clipFps) {
         // most of the time of video rendering is wasting on saving .png sequence
         // that's why we will save all images in the end
+        _lastFrameTime = Time::time();
         png_bytep _data = Image(_pixelBuffer, width(), height()).data();
         fwrite(_data, sizeof(png_byte), _height * _width * 4, _ffmpeg);
     }
@@ -65,13 +66,15 @@ void Screen::startRender() {
         stopRender();
     }
 
+    _lastFrameTime = Time::time();
+
     popen("mkdir -p film", "w");
 
     Log::log("Screen::startRender(): start recording the screen");
 
     auto cmd = "ffmpeg -f rawvideo -pixel_format rgba -video_size " +
                std::to_string(_width) + "x" + std::to_string(_height) +
-               " -framerate 60 -i - -c:v libx264 -crf 17 -pix_fmt yuv420p -tune animation film/clip_" +
+               " -framerate " + std::to_string(_clipFps) + " -i - -c:v libx264 -crf 17 -pix_fmt yuv420p -tune animation film/clip_" +
                Time::getLocalTimeInfo("%F_%H-%M-%S") + ".mp4";
     _ffmpeg = popen(cmd.c_str(), "w");
 
