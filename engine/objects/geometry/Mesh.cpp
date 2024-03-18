@@ -171,53 +171,47 @@ Object::IntersectionInformation Mesh::intersect(const Vec3D &from, const Vec3D &
     // many matrix multiplication.
     Matrix4x4 invModel = this->fullInvModel();
 
-    Vec3D v = (to - from).normalized();
-    Vec3D v_model = invModel*v;
+    Vec3D d = (to - from).normalized();
+    Vec3D d_model = invModel*d;
     Vec3D from_model = Vec3D(invModel*from.makePoint4D());
     Vec3D to_model = Vec3D(invModel*to.makePoint4D());
 
 
     for (auto &tri : triangles()) {
 
-        if(tri.norm().dot(v_model) > 0) {
+        if(tri.norm().dot(d_model) > 0) {
             continue;
         }
 
-        auto trianglePlane = Plane(tri);
-        auto intersection = trianglePlane.intersect(from_model, to_model);
+        auto intersection = tri.intersect(from_model, to_model);
 
-        if (intersection.distanceToObject > 0 && tri.isPointInside(intersection.pointOfIntersection)) {
+        if (intersection.intersected) {
 
             // When you change to model coordinate system you also will get distance scaled by invModel.
             // Due-to this effect if you scale some object in x times you will get distance in x times smaller.
             // That's why we need to perform distance calculation in the global coordinate system where metric
             // is the same for all objects.
-            trianglePlane = Plane(model * tri.norm(), Vec3D(model * tri[0]));
-            auto globalIntersection = trianglePlane.intersect(from, to);
-            double globalDistance = (globalIntersection.pointOfIntersection - from).abs();
 
-            if(globalDistance < minDistance) {
-                minDistance = globalDistance;
-                point = globalIntersection.pointOfIntersection;
+            if(abs(intersection.distanceToTriangle) < abs(minDistance)) {
+                minDistance = intersection.distanceToTriangle;
+                point = intersection.pointOfIntersection;
                 intersected = true;
-                norm = Vec3D(model * tri.norm());
-                triangle = Triangle({model * tri[0], model * tri[1], model * tri[2]}, tri.textureCoordinates());
+                norm = tri.norm();
+                triangle = tri;
             }
         }
     }
 
+    Vec3D globalPoint = Vec3D(model*point.makePoint4D());
+    Vec3D globalNorm = (model*norm).normalized();
+    double globalDistance = (globalPoint - from).dot(d);
 
-    double k = (to-from).x() > Consts::EPS ? (point - from).x()/(to-from).x() : (point - from).y()/(to-from).y();
-
-    return IntersectionInformation{point,
-                                   norm,
-                                   minDistance,
-                                   name(),
+    return IntersectionInformation{globalPoint,
+                                   globalNorm,
+                                   globalDistance,
                                    shared_from_this(),
                                    intersected,
-                                   k,
-                                   Color{},
-                                   triangle};
+                                   triangle*model};
 }
 
 void Mesh::copyTriangles(const Mesh &mesh, bool deepCopy) {

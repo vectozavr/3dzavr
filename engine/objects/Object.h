@@ -34,16 +34,12 @@ public:
 
 class Object : public std::enable_shared_from_this<Object> {
 public:
-    // TODO: maybe this structure should not be there
     struct IntersectionInformation final {
         Vec3D pointOfIntersection;
         Vec3D normal;
         double distanceToObject = std::numeric_limits<double>::infinity();
-        ObjectTag objectName{};
         std::shared_ptr<Object> obj = nullptr;
         bool intersected = false;
-        double k = 0;
-        Color color = Color::BLACK;
         Triangle triangle{};
     };
 private:

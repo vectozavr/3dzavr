@@ -113,7 +113,7 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
             intersection = std::make_shared<IntersectionInformation>(obj->intersect(from, to));
         }
 
-        if(intersection->distanceToObject < minIntersection->distanceToObject && intersection->k > 0) {
+        if(intersection->intersected && (intersection->distanceToObject < minIntersection->distanceToObject) && (intersection->distanceToObject > 0)) {
             minIntersection = intersection;
         }
     }

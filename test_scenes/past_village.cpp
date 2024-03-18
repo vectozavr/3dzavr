@@ -114,7 +114,7 @@ private:
                 objSelected = true;
                 selectedObject = rayCast.obj;
                 objController = std::make_shared<ObjectController>(selectedObject);
-                Log::log("Object " + rayCast.objectName.str() + " selected.");
+                Log::log("Object " + rayCast.obj->name().str() + " selected.");
                 //Timeline::addAnimation<ATranslateToPoint>(camera, selectedObject->position() - (selectedObject->position() - camera->position()).normalized());
             }
         }
@@ -159,6 +159,13 @@ private:
             // undo transformations
             if (Keyboard::isKeyPressed(SDLK_u)) {
                 selectedObject->transform(selectedObject->invModel());
+            }
+
+            // delete object
+            if (Keyboard::isKeyPressed(SDLK_DELETE)) {
+                world->remove(selectedObject->name());
+                objSelected = false;
+                selectedObject.reset();
             }
         }
 

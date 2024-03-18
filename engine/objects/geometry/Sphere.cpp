@@ -17,7 +17,7 @@ Object::IntersectionInformation Sphere::intersect(const Vec3D &from, const Vec3D
     Vec3D to_M = Vec3D(toModelMatrix*to.makePoint4D());
 
     // This should be done in the coordinate system of the object
-    Vec3D d = to_M-from_M;
+    Vec3D d = (to_M-from_M).normalized();
     Vec3D e_c = from_M;
 
     double d_ec = d.dot(e_c);
@@ -35,13 +35,13 @@ Object::IntersectionInformation Sphere::intersect(const Vec3D &from, const Vec3D
     double distance = (point - from).abs();
     norm = Vec3D(fromModelMatrix*norm.makePoint4D()).normalized();
 
-    IntersectionInformation res = Object::IntersectionInformation{point,
-                                           norm,
-                                           distance,
-                                           name(),
-                                           shared_from_this(),
-                                           (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity()),
-                                           k};
+    IntersectionInformation res = Object::IntersectionInformation{
+        point,
+        norm,
+        distance,
+        shared_from_this(),
+        (k > 0) && (std::abs(k) < std::numeric_limits<double>::infinity())
+    };
 
     return res;
 }

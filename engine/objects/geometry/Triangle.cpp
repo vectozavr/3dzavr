@@ -22,33 +22,51 @@ Triangle Triangle::operator*(const Matrix4x4 &matrix4X4) const {
     return Triangle{{matrix4X4 * _points[0], matrix4X4 * _points[1], matrix4X4 * _points[2]}, _textureCoordinates};
 }
 
-bool Triangle::isPointInside(const Vec3D &point) const {
+Triangle::IntersectionInformation Triangle::intersect(const Vec3D &from, const Vec3D &to) const {
+    // Möller, T. and Trumbore, B., 2005. Fast, minimum storage ray/triangle intersection. In ACM SIGGRAPH 2005 Courses (pp. 7-es).
 
-    // TODO: this can be made more efficiently: by finding alpha betta gamma for this triangle and the point.
-    Vec3D triangleNorm = norm();
-    double dot1 = (point - Vec3D(_points[0])).cross(Vec3D(_points[1] - _points[0])).dot(triangleNorm);
-    double dot2 = (point - Vec3D(_points[1])).cross(Vec3D(_points[2] - _points[1])).dot(triangleNorm);
-    double dot3 = (point - Vec3D(_points[2])).cross(Vec3D(_points[0] - _points[2])).dot(triangleNorm);
+    Vec3D pointOfIntersection;
+    double a = 0;
+    double b = 0;
+    double distanceToTriangle = std::numeric_limits<double>::infinity();
+    bool intersected = false;
 
-    if ((dot1 >= 0 && dot2 >= 0 && dot3 >= 0) || (dot1 <= 0 && dot2 <= 0 && dot3 <= 0)) {
-        return true;
+    Vec3D ab = Vec3D(_points[1] - _points[0]); // E1 = v1 - v0
+    Vec3D ac = Vec3D(_points[2] - _points[0]); // E2 = v2 - v0
+    Vec3D ap = from - Vec3D(_points[0]);       // T  = O - v0
+    Vec3D d = (to-from).normalized();               // D
+
+    Vec3D P = d.cross(ac);
+    Vec3D Q = ap.cross(ab);
+    double dot = P.dot(ab);
+
+    if(std::abs(dot) > Consts::EPS) {
+        a = P.dot(ap) / dot;
+        b = Q.dot(d) / dot;
+
+        if((a >= 0) && (b >= 0) && (a + b <= 1)) {
+            intersected = true;
+            distanceToTriangle = Q.dot(ac) / dot;
+            pointOfIntersection = from + d*distanceToTriangle;
+        }
     }
-    return false;
+
+    return {pointOfIntersection, Vec3D(a, b, 1-a-b), distanceToTriangle, intersected};
 }
 
 Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
-    Vec2D ba = Vec2D(_points[1]) - Vec2D(_points[0]);
-    Vec2D ca = Vec2D(_points[2]) - Vec2D(_points[0]);
-    auto pa = point - Vec2D(_points[0]);
+    Vec2D ab = Vec2D(_points[1] - _points[0]);
+    Vec2D ac = Vec2D(_points[2] - _points[0]);
+    Vec2D ap = point - Vec2D(_points[0]);
 
-    bool swapped = std::abs(ca.y()) < std::abs(ba.y());
+    bool swapped = std::abs(ac.y()) < std::abs(ab.y());
     if (swapped) {
-        std::swap(ba, ca);
+        std::swap(ab, ac);
     }
 
-    double betta = (pa.y() * ca.x() - pa.x() * ca.y()) /
-                   (ba.y() * ca.x() - ba.x() * ca.y());
-    double gamma = (pa.y() - betta * ba.y()) / ca.y();
+    double betta = (ap.y() * ac.x() - ap.x() * ac.y()) /
+                   (ab.y() * ac.x() - ab.x() * ac.y());
+    double gamma = (ap.y() - betta * ab.y()) / ac.y();
     double alpha = 1.0 - betta - gamma;
 
     if (swapped) {
@@ -56,13 +74,4 @@ Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
     }
 
     return Vec3D{alpha, betta, gamma};
-}
-
-Vec2D Triangle::uvCoord(const Vec2D &point) const {
-    return {};
-}
-
-Vec2D Triangle::uvCoordDer(const Vec2D &point) const {
-    // TODO: implement or delete
-    return {};
 }

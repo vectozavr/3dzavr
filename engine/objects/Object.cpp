@@ -154,7 +154,6 @@ Object::IntersectionInformation Object::intersect(const Vec3D &from, const Vec3D
     return IntersectionInformation{Vec3D(),
                                    Vec3D(),
                                    std::numeric_limits<double>::infinity(),
-                                   ObjectTag(""),
                                    nullptr,
                                    false};
 }

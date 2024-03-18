@@ -134,9 +134,6 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     std::shared_ptr<Group> objects = std::make_shared<Group>(tag);
     std::map<MaterialTag, std::shared_ptr<Material>> materials;
 
-
-    // TODO: now we load and return Group of Meshes, but I would rather return the Group of Groups of Meshes
-
     // If objects is already loaded - return pointer to it
     auto it = _instance->_objects.find(objFile);
     if (it != _instance->_objects.end()) {
