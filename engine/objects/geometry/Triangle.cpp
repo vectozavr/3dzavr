@@ -55,8 +55,8 @@ Triangle::IntersectionInformation Triangle::intersect(const Vec3D &from, const V
 }
 
 Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
-    Vec2D ab = Vec2D(_points[1] - _points[0]);
-    Vec2D ac = Vec2D(_points[2] - _points[0]);
+    Vec2D ab = Vec2D(_points[1]) - Vec2D(_points[0]);
+    Vec2D ac = Vec2D(_points[2]) - Vec2D(_points[0]);
     Vec2D ap = point - Vec2D(_points[0]);
 
     bool swapped = std::abs(ac.y()) < std::abs(ab.y());

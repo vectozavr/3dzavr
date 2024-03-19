@@ -116,10 +116,10 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
 }
 
 inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
+    size_t offset = y * _width + x;
     if (color.a() == 255) {
-        _pixelBuffer[y * _width + x] = color.rgba();
+        _pixelBuffer[offset] = color.rgba();
     } else {
-        size_t offset = y * _width + x;
         _pixelBuffer[offset] = color.blend(Color(_pixelBuffer[offset])).rgba();
     }
 }
@@ -186,8 +186,8 @@ void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, ui
     drawPixel(to_x, to_y, color);
 }
 
-inline bool isInsideTriangleAbg(const Vec3D& abg) {
-    return abg.x() >= 0 && abg.y() >= 0 && abg.z() >= 0;
+inline bool isInsideTriangleAbg(const Vec3D& abg, double eps = 0) {
+    return abg.x() >= -eps && abg.y() >= -eps && abg.z() >= -eps;
 }
 
 /*
@@ -374,7 +374,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
             double non_linear_z_hom = projectedTriangle[0].z() * abg.x() + projectedTriangle[1].z() * abg.y() + projectedTriangle[2].z() * abg.z();
             double z_hom = tc[0].z()*abg.x() + tc[1].z()*abg.y() + tc[2].z()*abg.z();
 
-            if(checkPixelDepth(x, y, non_linear_z_hom)) {
+            if(checkPixelDepth(x, y, non_linear_z_hom) && isInsideTriangleAbg(abg, Consts::EPS)) {
                 // de-homogenize UV coordinates
                 Vec2D uv_dehom(uv_hom.x() / z_hom, uv_hom.y() / z_hom);
                 /*
@@ -389,23 +389,19 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
 
                 // Exact calculation of light (non linear and computationally expensive)
                 // Here we do homogination and de-homogination part to do the same as we did for textures
+                Vec3D dehom_abg(abg.x() * tc[0].z() / z_hom, abg.y() * tc[1].z() / z_hom, abg.z() * tc[2].z() / z_hom);
                 /*
                 Vec3DUint l;
                 auto dehomPixelPosition = Vec4D(
-                        Mtriangle[0] * abg.x() * tc[0].z() +
-                        Mtriangle[1] * abg.y() * tc[1].z() +
-                        Mtriangle[2] * abg.z() * tc[2].z())/z_hom;
+                        Mtriangle[0] * dehom_abg.x() +
+                        Mtriangle[1] * dehom_abg.y() +
+                        Mtriangle[2] * dehom_abg.z());
                 for (const auto& lightSource: lights) {
                     auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
                     auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
                     l += {cl.r(), cl.g(), cl.b()};
                 }
                  */
-
-                double a = std::clamp<double>(abg.x() * tc[0].z() / z_hom, 0.0, 1.0);
-                double b = std::clamp<double>(abg.y() * tc[1].z() / z_hom, 0.0, 1.0);
-                a = a+b <= 1.0 ? a : 0.0;
-                Vec3D dehom_abg(a, b, 1.0 - a - b);
 
                 // Linearization of light:
                 // Here we do homogination and de-homogination part to do the same as we did for textures
@@ -461,11 +457,8 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
             double non_linear_z_hom = projectedTriangle[0].z() * abg.x() + projectedTriangle[1].z() * abg.y() + projectedTriangle[2].z() * abg.z();
             double z_hom = tc[0].z()*abg.x() + tc[1].z()*abg.y() + tc[2].z()*abg.z();
 
-            if (checkPixelDepth(x, y, non_linear_z_hom)) {
-                double a = std::clamp<double>(abg.x() * tc[0].z() / z_hom, 0.0, 1.0);
-                double b = std::clamp<double>(abg.y() * tc[1].z() / z_hom, 0.0, 1.0);
-                a = a+b <= 1.0 ? a : 0.0;
-                Vec3D dehom_abg(a, b, 1.0 - a - b);
+            if (checkPixelDepth(x, y, non_linear_z_hom) && isInsideTriangleAbg(abg, Consts::EPS)) {
+                Vec3D dehom_abg(abg.x() * tc[0].z() / z_hom, abg.y() * tc[1].z() / z_hom, abg.z() * tc[2].z() / z_hom);
 
                 // Linearization of light:
                 // Here we do homogination and de-homogination part to do the same as we did for textures
@@ -488,9 +481,9 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
 
 void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     // Drawing edge
-    //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Consts::BLACK);
-    //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Consts::BLACK);
-    //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Consts::BLACK);
+    //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Color::BLACK);
+    //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Color::BLACK);
+    //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Color::BLACK);
 
     if (material == nullptr || material->texture() == nullptr) {
         Color color;
@@ -505,8 +498,8 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
     }
 
     // Filling inside
-    auto x_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
-    auto y_min = std::clamp<uint16_t>(std::ceil(std::min({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
+    auto x_min = std::clamp<uint16_t>(std::ceil(std::min({ triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
+    auto y_min = std::clamp<uint16_t>(std::ceil(std::min({ triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
     auto x_max = std::clamp<uint16_t>(std::floor(std::max({triangle[0].x(), triangle[1].x(), triangle[2].x()})), 0, _width - 1);
     auto y_max = std::clamp<uint16_t>(std::floor(std::max({triangle[0].y(), triangle[1].y(), triangle[2].y()})), 0, _height - 1);
 
@@ -533,6 +526,7 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
 
     for (uint16_t y = y_min; y <= y_max; y++) {
         uint16_t x_cur_min, x_cur_max;
+
         if (!lineLimits(abg_origin + abg_dy*(y - y_min), abg_dx, x_min, x_max, x_cur_min, x_cur_max)) continue;
 
         Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
@@ -548,7 +542,7 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
             double non_linear_z_hom = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
             double z_hom = tc[0].z()*abg.x() + tc[1].z()*abg.y() + tc[2].z()*abg.z();
 
-            if(checkPixelDepth(x, y, non_linear_z_hom)) {
+            if(checkPixelDepth(x, y, non_linear_z_hom) && isInsideTriangleAbg(abg, Consts::EPS)) {
                 // de-homogenize UV coordinates
                 Vec2D uv_dehom(uv_hom.x() / z_hom, uv_hom.y() / z_hom);
                 /*
@@ -592,8 +586,11 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
         Vec3D abg = abg_origin + abg_dy*(y - y_min) + abg_dx*(x_cur_min - x_min);
 
         for (int x = x_cur_min; x <= x_cur_max; x++) {
-            double non_linear_z_hom = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
-            drawPixelUnsafe(x, y, non_linear_z_hom, color);
+            if(isInsideTriangleAbg(abg, Consts::EPS)) {
+                double non_linear_z_hom = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
+                drawPixelUnsafe(x, y, non_linear_z_hom, color);
+            }
+
             abg += abg_dx;
         }
     }
