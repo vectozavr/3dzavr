@@ -96,10 +96,10 @@ Image::Image(const std::vector<uint32_t> &pixelBuffer, uint16_t width, uint16_t 
 
     _data = new png_byte[_height * _width * 4];
 
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < width; ++j) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             // Calculate the index for the pixelBuffer
-            int index = i * width + j;
+            int index = x + y*width;
 
             // Extract the RGBA components
             uint32_t color = pixelBuffer[index];
@@ -109,7 +109,7 @@ Image::Image(const std::vector<uint32_t> &pixelBuffer, uint16_t width, uint16_t 
             png_byte a = color & 0xFF;         // Extract alpha
 
             // Calculate the position in the data array
-            int pos = (i * width + j) * 4;
+            int pos = index * 4;
 
             // Assign the RGBA values to the data array
             _data[pos + 0] = r; // Red

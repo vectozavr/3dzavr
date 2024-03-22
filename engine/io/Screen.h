@@ -1,18 +1,19 @@
 #ifndef IO_SCREEN_H
 #define IO_SCREEN_H
 
-
 #include <string>
 #include <map>
 
 #include "SDL.h"
+#include "utils/Font.h"
 
-#include "objects/geometry/Triangle.h"
+#include <objects/geometry/Triangle.h>
 #include <utils/Time.h>
 #include <Consts.h>
-#include "objects/geometry/Mesh.h"
-#include "objects/Camera.h"
-#include "objects/lighting/LightSource.h"
+#include <objects/geometry/Mesh.h>
+#include <objects/Camera.h>
+#include <objects/lighting/LightSource.h>
+
 
 class Screen final {
 private:
@@ -20,11 +21,12 @@ private:
     SDL_Window* _window = nullptr;
     SDL_Texture* _screenTexture = nullptr;
 
-    std::vector<float> _depthBuffer;
+    std::vector<double> _depthBuffer;
     std::vector<uint32_t> _pixelBuffer;
 
     uint16_t _width;
     uint16_t _height;
+    bool _depthTest = false;
 
     bool _renderVideo = false;
     double _lastFrameTime = 0;
@@ -37,11 +39,23 @@ private:
 
     bool _isOpen = false;
 
+    bool _enableLighting = true;
+    bool _enableTrueLighting = false;
+    bool _enableTransparency = true;
+    bool _enableTriangleBorders = false;
+    bool _enableTexturing = true;
+    bool _enableMipmapping = true;
+
     // returns true if z is smaller than what is stored in the _depthBuffer
     [[nodiscard]] bool checkPixelDepth(uint16_t x, uint16_t y, double z) const;
 
     void drawPixelUnsafe(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer and checks
     void drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Color &color); // With using depth buffer without checks
+
+    void plotLineLow(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness);
+    void plotLineHigh(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness);
+    void drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness = 1);
+
 public:
     Screen& operator=(const Screen& scr) = delete;
 
@@ -51,33 +65,37 @@ public:
     void display();
     void clear();
 
-    void drawPixel(uint16_t x, uint16_t y, const Color& color); // Without using depth buffer
-    void drawPixel(uint16_t x, uint16_t y, double z, const Color& color); // With using depth buffer
-    void drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness = 1);
+    void drawPixel(int x, int y, const Color& color); // Without using depth buffer
+    void drawPixel(int x, int y, double z, const Color& color); // With using depth buffer
+    void drawLine(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness = 1);
     void drawTriangle(const Triangle &triangle, Material* material = nullptr);
     void drawTriangle(const Triangle &triangle, const Color &color);
-    void drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color);
-    void drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
+    void drawRectangle(int x, int y, uint16_t width, uint16_t height, const Color &color);
+    void drawRectangle(int x, int y, uint16_t width, uint16_t height, Material* material = nullptr);
+    void drawCircle(int x, int y, uint16_t r, const Color &fillColor);
+    void drawStrokeRectangle(int x, int y, uint16_t width, uint16_t height,
                              const Color &color, uint16_t thickness = 1, const Color &strokeColor = Color::BLACK);
-
+    void drawText(const std::string& text, int x, int y, const Color& color = Color::BLACK, uint16_t fontsize = 12, const std::shared_ptr<Font>& font = nullptr);
+    void drawImage(int x, int y, std::shared_ptr<Image> img);
+    void drawPlot(const std::vector<std::pair<double, double>>& data, int x, int y, uint16_t w, uint16_t h);
 
     void drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
                                   const std::vector<std::shared_ptr<LightSource>>& lights, Material* material = nullptr);
     void drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
                                   const std::vector<std::shared_ptr<LightSource>>& lights, const Color &color);
 
-    void drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize = 12, const Color& color = Color::BLACK);
-
-    void drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img);
-
-    void drawPlot(const std::vector<std::pair<double, double>>& data, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-
     void setTitle(const std::string &title);
+    void setDepthTest(bool enable) { _depthTest = enable; };
+
+    void setLighting(bool enable) { _enableLighting = enable;}
+    void setTrueLighting(bool enable) { _enableTrueLighting = enable; }
+    void setTransparency(bool enable) { _enableTransparency = enable; }
+    void setTriangleBorders(bool enable) { _enableTriangleBorders = enable; }
+    void setTexturing(bool enable) { _enableTexturing = enable; }
+    void setMipmapping(bool enable) { _enableMipmapping = enable; }
 
     [[nodiscard]] std::string title() const { return _title; };
-
     [[nodiscard]] bool isOpen() const;
-
     [[nodiscard]] uint16_t width() const { return _width; }
     [[nodiscard]] uint16_t height() const { return _height; }
 

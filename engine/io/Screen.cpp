@@ -11,6 +11,10 @@
 #include <utils/ResourceManager.h>
 #include <objects/lighting/DirectionalLight.h>
 
+extern "C" {
+#include "io/microui/microui.h"
+}
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define popen _popen
 #endif
@@ -40,6 +44,8 @@ void Screen::open(uint16_t screenWidth, uint16_t screenHeight, const Color& back
     if ( TTF_Init() < 0 ) {
         Log::log("Screen::open(): error initializing SDL_ttf: " + std::string(TTF_GetError()));
     }
+
+    Log::log("Screen::open(): initialized and opened the screen");
 }
 
 void Screen::display() {
@@ -98,15 +104,15 @@ void Screen::clear() {
     std::fill(_pixelBuffer.begin(), _pixelBuffer.end(), _background.rgba());
 }
 
-void Screen::drawPixel(const uint16_t x, const uint16_t y, const Color &color) {
-    if(x >= _width || x < 0 || y >= _height || y < 0)
+void Screen::drawPixel(int x, const int y, const Color &color) {
+    if(x >= _width || y >= _height || x < 0 || y < 0)
         return;
 
     drawPixelUnsafe(x, y, color);
 }
 
-void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
-    if(x >= _width || x < 0 || y >= _height || y < 0)
+void Screen::drawPixel(int x, int y, double z, const Color &color) {
+    if(x >= _width || y >= _height || x < 0 || y < 0)
         return;
 
     if(checkPixelDepth(x, y, z)) {
@@ -115,9 +121,10 @@ void Screen::drawPixel(uint16_t x, uint16_t y, double z, const Color &color) {
     }
 }
 
-inline void Screen::drawPixelUnsafe(const uint16_t x, const uint16_t y, const Color &color) {
+inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, const Color &color) {
     size_t offset = y * _width + x;
-    if (color.a() == 255) {
+
+    if (color.a() == 255 || !_enableTransparency) {
         _pixelBuffer[offset] = color.rgba();
     } else {
         _pixelBuffer[offset] = color.blend(Color(_pixelBuffer[offset])).rgba();
@@ -128,62 +135,88 @@ inline void Screen::drawPixelUnsafe(uint16_t x, uint16_t y, double z, const Colo
     if (checkPixelDepth(x, y, z)) {
         drawPixelUnsafe(x, y, color);
 
-        if(color.a() == 255) {
+        if(color.a() == 255 || !_enableTransparency) {
             _depthBuffer[y * _width + x] = z;
         }
     }
 }
 
 inline bool Screen::checkPixelDepth(uint16_t x, uint16_t y, double z) const {
-    return z < _depthBuffer[y * _width + x];
+    return z < _depthBuffer[y * _width + x] || !_depthTest;
 }
 
-void Screen::drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness) {
-    //SDL_SetRenderDrawColor(_renderer, color.r(), color.g(), color.b(), color.a());
-    //SDL_RenderDrawLine(_renderer, (int)from.x(), (int)from.y(), (int)to.x(), (int)to.y());
-
-    if(to.x() < from.x()) {
-        return drawLine(to, from, color, thickness);
+void Screen::plotLineLow(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness) {
+    int dx = x_to - x_from;
+    int dy = y_to - y_from;
+    int yi = 1;
+    if (dy < 0) {
+        yi = -1;
+        dy = -dy;
     }
+    int D = (2 * dy) - dx;
+    int y = y_from;
 
-    double der = (to.y() - from.y())/(to.x() - from.x());
-
-    Vec2D from_to = (to - from).normalized();
-    Vec2D norm(-from_to.y(), from_to.x());
-
-
-    auto line = [from, to](double x_i, double y_i){
-        return x_i*(to.y() - from.y()) + y_i*(from.x() - to.x()) + to.x()*from.y() - from.x()*to.y();
-    };
-
-    auto x = (int)from.x();
-    auto y = (int)from.y();
-    auto to_x = (int)to.x();
-    auto to_y = (int)to.y();
-
-    int step_y = to.y() - from.y() > 0 ? 1 : -1;
-    int sign = std::abs(der) <= 1 ? 1 : -1;
-
-    while (x < to_x || y*step_y < to_y*step_y) {
-        for(int l = 0; l < thickness; l++) {
-            drawPixel(x + norm.x()*l, y + norm.y()*l, color);
-        }
-
-        if(line(x, y)*step_y*sign > 0) {
-            if(std::abs(der) <= 1) {
-                y += step_y;
-            } else {
-                x += 1;
-            }
-        }
-        if(std::abs(der) <= 1) {
-            x += 1;
+    for (int x = x_from; x <= x_to; x++) {
+        if(thickness == 1) {
+            drawPixel(x, y, color);
         } else {
-            y += step_y;
+            drawCircle(x, y, thickness / 2, color);
+        }
+
+        if (D > 0) {
+            y += yi;
+            D += 2 * (dy - dx);
+        } else {
+            D += 2 * dy;
         }
     }
+}
 
-    drawPixel(to_x, to_y, color);
+void Screen::plotLineHigh(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness) {
+    int dx = x_to - x_from;
+    int dy = y_to - y_from;
+    int xi = 1;
+    if (dx < 0) {
+        xi = -1;
+        dx = -dx;
+    }
+    int D = (2 * dx) - dy;
+    int x = x_from;
+
+    for (int y = y_from; y <= y_to; y++) {
+        if(thickness == 1) {
+            drawPixel(x, y, color);
+        } else {
+            drawCircle(x, y, thickness / 2, color);
+        }
+
+        if (D > 0) {
+            x += xi;
+            D += 2 * (dx - dy);
+        } else {
+            D += 2 * dx;
+        }
+    }
+}
+
+void Screen::drawLine(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness) {
+    if (std::abs(y_to - y_from) < std::abs(x_to - x_from)) {
+        if (x_from > x_to) {
+            plotLineLow(x_to, y_to, x_from, y_from, color, thickness);
+        } else {
+            plotLineLow(x_from, y_from, x_to, y_to, color, thickness);
+        }
+    } else {
+        if (y_from > y_to) {
+            plotLineHigh(x_to, y_to, x_from, y_from, color, thickness);
+        } else {
+            plotLineHigh(x_from, y_from, x_to, y_to, color, thickness);
+        }
+    }
+}
+
+void Screen::drawLine(const Vec2D &from, const Vec2D &to, const Color &color, uint16_t thickness) {
+    drawLine((int)from.x(), (int)from.y(), (int)to.x(), (int)to.y(), color, thickness);
 }
 
 inline bool isInsideTriangleAbg(const Vec3D& abg, double eps = 0) {
@@ -305,12 +338,13 @@ std::tuple<Vec3DUint, Vec3DUint, Vec3DUint> computeLightingForThreePoints(const 
 
 void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
                                       const std::vector<std::shared_ptr<LightSource>>& lights, Material* material) {
-    // Drawing edge
-    //drawLine(Vec2D(projectedTriangle[0]), Vec2D(projectedTriangle[1]), Color::BLACK);
-    //drawLine(Vec2D(projectedTriangle[1]), Vec2D(projectedTriangle[2]), Color::BLACK);
-    //drawLine(Vec2D(projectedTriangle[2]), Vec2D(projectedTriangle[0]), Color::BLACK);
 
-    if (material == nullptr || material->texture() == nullptr) {
+    if(!_enableLighting) {
+        drawTriangle(projectedTriangle, material);
+        return;
+    }
+
+    if (!material || !material->texture() || !_enableTexturing) {
         Color color;
         if (material == nullptr) {
             color = Color::RED;
@@ -367,7 +401,14 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
         // Instead of exact area we compute average for each horizontal line:
         Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
         Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
-        double area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+
+        double area = 0;
+        if(_enableMipmapping) {
+            area = areaDuDv(uv_hom_x_avr,
+                            uv_dehom_x_avr, uv_hom_dx, uv_hom_dy,
+                            (x_min+x_max)/2, y, x_min, y_min,
+                            texture->width(), texture->height());
+        }
         const Image& sample = texture->get_sample(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
@@ -390,27 +431,28 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                 // Exact calculation of light (non linear and computationally expensive)
                 // Here we do homogination and de-homogination part to do the same as we did for textures
                 Vec3D dehom_abg(abg.x() * tc[0].z() / z_hom, abg.y() * tc[1].z() / z_hom, abg.z() * tc[2].z() / z_hom);
-                /*
+
                 Vec3DUint l;
-                auto dehomPixelPosition = Vec4D(
-                        Mtriangle[0] * dehom_abg.x() +
-                        Mtriangle[1] * dehom_abg.y() +
-                        Mtriangle[2] * dehom_abg.z());
-                for (const auto& lightSource: lights) {
-                    auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
-                    auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
-                    l += {cl.r(), cl.g(), cl.b()};
+                if(!_enableTrueLighting) {
+                    // Linearization of light:
+                    l = l1*dehom_abg.x() + l2*dehom_abg.y() + l3*dehom_abg.z();
+
+                    // Constant for the whole triangle
+                    //Vec3DUint l = l1;
+
+                } else {
+                    auto dehomPixelPosition = Vec4D(
+                            Mtriangle[0] * dehom_abg.x() +
+                            Mtriangle[1] * dehom_abg.y() +
+                            Mtriangle[2] * dehom_abg.z());
+                    for (const auto &lightSource: lights) {
+                        auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
+                        auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
+                        l += {cl.r(), cl.g(), cl.b()};
+                    }
                 }
-                 */
 
-                // Linearization of light:
-                // Here we do homogination and de-homogination part to do the same as we did for textures
-                Vec3DUint l = l1*dehom_abg.x() + l2*dehom_abg.y() + l3*dehom_abg.z();
-
-                // Constant for the whole triangle
-                //Vec3DUint l = l1;
-
-                //TODO: we need to handle light aliasing problem (some sort of mini-mapping, but for normals and lighting...)
+                //TODO: we need to handle light aliasing problem (some sort of mip-mapping, but for normals and lighting...)
 
                 Color resColor(std::clamp<int>(color.r()*l.r/255, 0, 255),
                                std::clamp<int>(color.g()*l.g/255, 0, 255),
@@ -422,10 +464,23 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
             uv_hom += uv_hom_dx;
         }
     }
+
+    // Drawing edge
+    if(_enableTriangleBorders) {
+        drawLine(Vec2D(projectedTriangle[0]), Vec2D(projectedTriangle[1]), Color::BLACK);
+        drawLine(Vec2D(projectedTriangle[1]), Vec2D(projectedTriangle[2]), Color::BLACK);
+        drawLine(Vec2D(projectedTriangle[2]), Vec2D(projectedTriangle[0]), Color::BLACK);
+    }
 }
 
 void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
                                       const std::vector<std::shared_ptr<LightSource>> &lights, const Color &color) {
+
+    if(!_enableLighting) {
+        drawTriangle(projectedTriangle, color);
+        return;
+    }
+
     // Filling inside
     auto x_min = std::clamp<uint16_t>(std::ceil(std::min({projectedTriangle[0].x(), projectedTriangle[1].x(), projectedTriangle[2].x()})), 0, _width - 1);
     auto y_min = std::clamp<uint16_t>(std::ceil(std::min({projectedTriangle[0].y(), projectedTriangle[1].y(), projectedTriangle[2].y()})), 0, _height - 1);
@@ -460,12 +515,25 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
             if (checkPixelDepth(x, y, non_linear_z_hom) && isInsideTriangleAbg(abg, Consts::EPS)) {
                 Vec3D dehom_abg(abg.x() * tc[0].z() / z_hom, abg.y() * tc[1].z() / z_hom, abg.z() * tc[2].z() / z_hom);
 
-                // Linearization of light:
-                // Here we do homogination and de-homogination part to do the same as we did for textures
-                Vec3DUint l = l1*dehom_abg.x() + l2*dehom_abg.y() + l3*dehom_abg.z();
+                Vec3DUint l;
+                if(!_enableTrueLighting) {
+                    // Linearization of light:
+                    l = l1*dehom_abg.x() + l2*dehom_abg.y() + l3*dehom_abg.z();
 
-                // Constant for the whole triangle
-                //Vec3DUint l = l1;
+                    // Constant for the whole triangle
+                    //Vec3DUint l = l1;
+
+                } else {
+                    auto dehomPixelPosition = Vec4D(
+                            Mtriangle[0] * dehom_abg.x() +
+                            Mtriangle[1] * dehom_abg.y() +
+                            Mtriangle[2] * dehom_abg.z());
+                    for (const auto &lightSource: lights) {
+                        auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
+                        auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
+                        l += {cl.r(), cl.g(), cl.b()};
+                    }
+                }
 
                 Color resColor(std::clamp<int>(color.r()*l.r/255, 0, 255),
                                std::clamp<int>(color.g()*l.g/255, 0, 255),
@@ -477,17 +545,19 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
             abg += abg_dx;
         }
     }
+
+    // Drawing edge
+    if(_enableTriangleBorders) {
+        drawLine(Vec2D(projectedTriangle[0]), Vec2D(projectedTriangle[1]), Color::BLACK);
+        drawLine(Vec2D(projectedTriangle[1]), Vec2D(projectedTriangle[2]), Color::BLACK);
+        drawLine(Vec2D(projectedTriangle[2]), Vec2D(projectedTriangle[0]), Color::BLACK);
+    }
 }
 
 void Screen::drawTriangle(const Triangle &triangle, Material *material) {
-    // Drawing edge
-    //drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Color::BLACK);
-    //drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Color::BLACK);
-    //drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Color::BLACK);
-
-    if (material == nullptr || material->texture() == nullptr) {
+    if (!material || !material->texture() || !_enableTexturing) {
         Color color;
-        if (material == nullptr) {
+        if (!material) {
             color = Color::RED;
         } else {
             color = material->ambient();
@@ -535,7 +605,11 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
         // Instead of exact area we compute average for each horizontal line:
         Vec3D uv_hom_x_avr = uv_hom_origin + uv_hom_dy*(y-y_min) + uv_hom_dx*((x_cur_min+x_cur_max)/2 - x_min);
         Vec2D uv_dehom_x_avr(uv_hom_x_avr.x() / uv_hom_x_avr.z(), uv_hom_x_avr.y() / uv_hom_x_avr.z());
-        double area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+
+        double area = 0;
+        if(_enableMipmapping) {
+            area = areaDuDv(uv_hom_x_avr, uv_dehom_x_avr, uv_hom_dx, uv_hom_dy, (x_min+x_max)/2, y, x_min, y_min, texture->width(), texture->height());
+        }
         const Image& sample = texture->get_sample(area);
 
         for (uint16_t x = x_cur_min; x <= x_cur_max; x++) {
@@ -558,6 +632,13 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
             abg += abg_dx;
             uv_hom += uv_hom_dx;
         }
+    }
+
+    // Drawing edge
+    if(_enableTriangleBorders) {
+        drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Color::BLACK);
+        drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Color::BLACK);
+        drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Color::BLACK);
     }
 }
 
@@ -594,6 +675,13 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
             abg += abg_dx;
         }
     }
+
+    // Drawing edge
+    if(_enableTriangleBorders) {
+        drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Color::BLACK);
+        drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Color::BLACK);
+        drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Color::BLACK);
+    }
 }
 
 void Screen::setTitle(const std::string &title) {
@@ -605,22 +693,24 @@ bool Screen::isOpen() const {
     return _isOpen;
 }
 
-void Screen::drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color) {
-    drawTriangle(Triangle({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)}), color);
-    drawTriangle(Triangle({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)}), color);
+void Screen::drawRectangle(int x, int y, uint16_t width, uint16_t height, const Color &color) {
+    for(int _y = y; _y < y + height; _y++) {
+        for(int _x = x; _x < x + width; _x++) {
+            drawPixel(_x, _y, color);
+        }
+    }
 }
 
-void Screen::drawStrokeRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const Color &color,
+void Screen::drawStrokeRectangle(int x, int y, uint16_t width, uint16_t height, const Color &color,
                                  uint16_t thickness, const Color &strokeColor) {
-
     drawRectangle(x, y, width, height, color);
-    drawLine(Vec2D(x, y), Vec2D(x + width, y), strokeColor);
-    drawLine(Vec2D(x+ width, y), Vec2D(x + width, y + height), strokeColor);
-    drawLine(Vec2D(x + width, y + height), Vec2D(x, y + height), strokeColor);
-    drawLine(Vec2D(x, y + height), Vec2D(x, y), strokeColor);
+    drawLine(x, y, x + width, y, strokeColor);
+    drawLine(x+ width, y, x + width, y + height, strokeColor);
+    drawLine(x + width, y + height, x, y + height, strokeColor);
+    drawLine(x, y + height, x, y, strokeColor);
 }
 
-void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
+void Screen::drawImage(int x, int y, std::shared_ptr<Image> img) {
     for(int i = 0; i < img->width(); i++) {
         for(int j = 0; j < img->height(); j++) {
             drawPixel(i + x, j + y, img->get_pixel(i, j));
@@ -628,17 +718,25 @@ void Screen::drawImage(uint16_t x, uint16_t y, std::shared_ptr<Image> img) {
     }
 }
 
-void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t fontsize, const Color& src) {
-    TTF_Font* ourFont = ResourceManager::loadFont(Consts::DEFAULT_FONT_FILENAME)->getFont(fontsize);
+void Screen::drawText(const std::string& text, int x, int y, const Color& color, uint16_t fontsize, const std::shared_ptr<Font>& font) {
+    TTF_Font* currentFont;
+    if(!font) {
+        currentFont = ResourceManager::loadFont(Consts::DEFAULT_FONT_FILENAME)->getFont(fontsize);
+    } else {
+        currentFont = font->getFont(fontsize);
+    }
 
-    // Confirm that it was loaded
-    if(ourFont == nullptr) {
+    if(!currentFont) {
         return;
     }
 
-    SDL_Surface* surfaceText = TTF_RenderText_Solid(ourFont,
+    SDL_Surface* surfaceText = TTF_RenderText_Solid(currentFont,
                                                     text.c_str(),
                                                     {255, 255, 255, 255});
+
+    if(!surfaceText) {
+        return;
+    }
 
     uint16_t textWidth = std::min(surfaceText->w, _width - x);
     uint16_t textHeight = std::min(surfaceText->h, _height - y);
@@ -648,8 +746,8 @@ void Screen::drawText(const std::string& text, uint16_t x, uint16_t y, uint16_t 
     for (uint16_t i = 0; i < textHeight; i++) {
         for (uint16_t j = 0; j < textWidth; j++) {
             if (pixels[i * pitch + j]) {
-                size_t offset = (i + y) * _width + (j + x);
-                _pixelBuffer[offset] = src.blend(Color(_pixelBuffer[offset])).rgba();
+                if(j + x < _width && j + x > 0 && i + y < _height && i + y > 0)
+                    drawPixelUnsafe(j + x, i + y, color);
             }
         }
     }
@@ -689,7 +787,7 @@ Screen::~Screen() {
     SDL_Quit();
 }
 
-void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, int x, int y, uint16_t w, uint16_t h) {
     double minX = std::numeric_limits<double>::infinity();
     double minY = std::numeric_limits<double>::infinity();
 
@@ -714,8 +812,8 @@ void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, uint16
 
     auto [xPrev, yPrev] = data.front();
     for (const auto& [xVal, yVal] : data) {
-        drawLine(Vec2D(x + (xPrev-minX)*w/(maxX-minX), y + h - (yPrev-minY)*h/(maxY-minY)),
-                 Vec2D(x + (xVal-minX)*w/(maxX-minX), y + h - (yVal-minY)*h/(maxY-minY)), Color::RED);
+        drawLine(x + (xPrev-minX)*w/(maxX-minX), y + h - (yPrev-minY)*h/(maxY-minY),
+                 x + (xVal-minX)*w/(maxX-minX), y + h - (yVal-minY)*h/(maxY-minY), Color::RED);
 
         xPrev = xVal;
         yPrev = yVal;
@@ -724,4 +822,25 @@ void Screen::drawPlot(const std::vector<std::pair<double, double>> &data, uint16
 
 Image Screen::makeScreenShot() {
     return {_pixelBuffer, width(), height()};
+}
+
+void Screen::drawRectangle(int x, int y, uint16_t width, uint16_t height, Material *material) {
+    Triangle tri1({Vec4D(x, y), Vec4D(x+width, y), Vec4D(x, y+height)},
+             {Vec3D(0, 0, 1), Vec3D(1, 0, 1), Vec3D(0, 1, 1)});
+    Triangle tri2({Vec4D(x, y+height), Vec4D(x+width, y), Vec4D(x+width, y+height)},
+             {Vec3D(0, 1, 1), Vec3D(1, 0, 1), Vec3D(1, 1, 1)});
+
+    drawTriangle(tri1, material);
+    drawTriangle(tri2, material);
+}
+
+void Screen::drawCircle(int x, int y, uint16_t r, const Color &fillColor) {
+    for(int _y = y-r; _y <= y+r; _y++) {
+        for(int _x = x-r; _x <= x+r; _x++) {
+            double d2 = (_x-x)*(_x-x) + (_y-y)*(_y-y);
+            if(d2 <= r*r) {
+                drawPixel(_x, _y, fillColor);
+            }
+        }
+    }
 }

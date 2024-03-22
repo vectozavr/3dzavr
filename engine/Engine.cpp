@@ -63,23 +63,24 @@ void Engine::drawProjectedTriangles() {
     Time::startTimer("d rasterization");
     for (const auto& [projectedTriangle, triangle, material]: _projectedOpaqueTriangles) {
         screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, material);
-        //screen->drawTriangle(projectedTriangle, material);
     }
     for (const auto& [projectedTriangle, triangle, material]: _projectedTranspTriangles) {
         screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, material);
-        //screen->drawTriangle(projectedTriangle, material);
     }
+
     Time::stopTimer("d rasterization");
 }
 
 int Engine::handleSDLEvents() {
     SDL_Event e;
+
     while (SDL_PollEvent(&e)) {
         switch(e.type) {
             case SDL_QUIT:
                 return 1;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
+            case SDL_TEXTINPUT:
                 Keyboard::sendKeyboardEvent(e);
                 break;
             case SDL_MOUSEMOTION:
@@ -101,12 +102,19 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
     Log::log("Engine::create(): started 3dzavr. Screen size: (" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + ")");
     Time::update();
 
+    screen->setDepthTest(true);
+
     start();
     camera->setup(screenWidth, screenHeight);
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
     while (screen->isOpen()) {
+
+        Time::update();
+
+        Keyboard::clear();
+        Mouse::clear();
 
         if(handleSDLEvents()) {
             screen->close();
@@ -121,8 +129,6 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
         Time::startTimer("d clear");
         screen->clear();
         Time::stopTimer("d clear");
-
-        Time::update();
 
         if(_updateWorld) {
             Time::startTimer("d animations");
@@ -199,8 +205,8 @@ void Engine::printDebugInfo() {
         // timers:
         int timerWidth = 150;
         int plotWidth = 50;
-        float xPos = screen->width() - timerWidth - plotWidth - 10;
-        float yPos = 10;
+        float xPos = 10;
+        float yPos = 220;
         int height = 14;
 
         double totalTime = Time::elapsedTimerSeconds("d all");
@@ -225,7 +231,7 @@ void Engine::printDebugInfo() {
             screen->drawText(
                     timerName.substr(2, timerName.size()) + " (" +
                     std::to_string((int) (100 * timer.elapsedSeconds() / totalTime)) + "%)",
-                    xPos+5, yPos + (1.5*height)*i, 12, Color::BLACK);
+                    xPos+5, yPos + (1.5*height)*i, Color::BLACK, 12);
 
             screen->drawPlot(_histResources[timerName], xPos + timerWidth, yPos + (1.5*height)*i, plotWidth, height);
 
@@ -238,7 +244,7 @@ void Engine::printDebugInfo() {
                              Color(width * 255 / timerWidth, 255 - width * 255 / timerWidth, 0, 255));
 
         screen->drawText("all other stuff (" + std::to_string((int) (100 * (totalTime - timeSum) / totalTime)) + "%)",
-                         xPos+5, yPos + (1.5*height)*i, 12, Color(0, 0, 0, 150));
+                         xPos+5, yPos + (1.5*height)*i, Color(0, 0, 0, 150), 12);
 
         _histResources["d other"].emplace_back(Time::time(), totalTime - timeSum);
         screen->drawPlot(_histResources["d other"], xPos + timerWidth, yPos + (1.5*height)*i, 50, height);

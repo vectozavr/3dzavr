@@ -24,6 +24,13 @@ double Time::time() {
     return _instance->_time;
 }
 
+unsigned int Time::frame() {
+    if(!_instance) {
+        return 0;
+    }
+    return _instance->_frame;
+}
+
 double Time::deltaTime() {
     if (_instance == nullptr) {
         return 0;
@@ -58,6 +65,8 @@ void Time::update() {
         _instance->_fpsCounter = 0;
         _instance->_fpsStart = t;
     }
+
+    _instance->_frame++;
 }
 
 int Time::fps() {

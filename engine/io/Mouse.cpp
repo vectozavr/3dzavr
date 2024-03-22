@@ -12,30 +12,23 @@ Vec2D Mouse::getMousePosition() {
 }
 
 Vec2D Mouse::getMouseDisplacement() {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return Vec2D(0, 0);
     }
 
-    Vec2D motion(_instance->_motion);
-    _instance->_motion = Vec2D();
-
-    return motion;
+    return _instance->_motion;
 }
 
 Vec2D Mouse::getMouseScroll() {
-
-    if (_instance == nullptr) {
+    if (!_instance) {
         return Vec2D(0, 0);
     }
 
-    Vec2D scroll(_instance->_scroll);
-    _instance->_scroll = Vec2D();
-
-    return scroll;
+    return _instance->_scroll;
 }
 
 bool Mouse::isButtonPressed(uint8_t button) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return false;
     }
 
@@ -49,7 +42,7 @@ bool Mouse::isButtonPressed(uint8_t button) {
 }
 
 bool Mouse::isButtonTapped(uint8_t button) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return false;
     }
 
@@ -68,8 +61,7 @@ bool Mouse::isButtonTapped(uint8_t button) {
 }
 
 void Mouse::sendMouseEvent(const SDL_Event &event) {
-
-    if (_instance == nullptr) {
+    if (!_instance) {
         return;
     }
 
@@ -82,9 +74,11 @@ void Mouse::sendMouseEvent(const SDL_Event &event) {
             break;
         case SDL_MOUSEBUTTONDOWN:
             _instance->_buttons[event.button.button] = true;
+            _instance->_buttonsDown.emplace_back(event.button.button);
             break;
         case SDL_MOUSEBUTTONUP:
             _instance->_buttons[event.button.button] = false;
+            _instance->_buttonsUp.emplace_back(event.button.button);
             break;
     }
 }
@@ -107,4 +101,64 @@ void Mouse::free() {
     }
 
     Log::log("Mouse::free(): mouse was freed");
+}
+
+void Mouse::setMouseDisplacement(const Vec2D &displacement) {
+    if (!_instance) {
+        return;
+    }
+
+    _instance->_motion = displacement;
+}
+
+void Mouse::setMouseScroll(const Vec2D &scroll) {
+    if (!_instance) {
+        return;
+    }
+
+    _instance->_scroll = scroll;
+}
+
+bool Mouse::isButtonDown() {
+    if (!_instance) {
+        return false;
+    }
+
+    return !_instance->_buttonsDown.empty();
+}
+
+bool Mouse::isButtonUp() {
+    if (!_instance) {
+        return false;
+    }
+
+    return !_instance->_buttonsUp.empty();
+}
+
+void Mouse::clear() {
+    if (!_instance) {
+        return;
+    }
+
+    _instance->_motion = Vec2D(0);
+    _instance->_scroll = Vec2D(0);
+
+    _instance->_buttonsDown.clear();
+    _instance->_buttonsUp.clear();
+}
+
+std::vector<uint8_t> Mouse::buttonsDown() {
+    if (!_instance) {
+        return {};
+    }
+
+    return _instance->_buttonsDown;
+}
+
+std::vector<uint8_t> Mouse::buttonsUp() {
+    if (!_instance) {
+        return {};
+    }
+
+    return _instance->_buttonsUp;
 }

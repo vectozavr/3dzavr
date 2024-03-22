@@ -38,6 +38,8 @@ public:
 
     TTF_Font* getFont(uint16_t fontSize=14);
 
+    [[nodiscard]] std::pair<int, int> getTextSize(const std::string& text, uint16_t fontSize=14);
+
     ~Font();
 };
 

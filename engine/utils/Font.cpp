@@ -20,7 +20,7 @@ TTF_Font* Font::getFont(uint16_t fontSize) {
 
     TTF_Font* font = TTF_OpenFont(_fileName.str().c_str(), fontSize);
     // Confirm that it was loaded
-    if(font == nullptr){
+    if(!font){
         Log::log("Font::getFont(): Could not load font " + _fileName.str());
         return nullptr;
     }
@@ -37,4 +37,16 @@ Font::~Font() {
     }
 
     _fonts.clear();
+}
+
+std::pair<int, int> Font::getTextSize(const std::string &text, uint16_t fontSize) {
+    TTF_Font* font = getFont(fontSize);
+    if(!font) {
+        return {0,0};
+    }
+
+    int w, h;
+    TTF_SizeText(font, text.c_str(), &w, &h);
+
+    return {w, h};
 }

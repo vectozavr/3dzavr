@@ -7,11 +7,25 @@
 
 Texture::Texture(const FilePath &filename) {
     _texture.emplace_back(filename);
-    while (_texture.back().width() * _texture.back().height() != 1) {
-        _texture.emplace_back(_texture.back().downSampled());
-    }
 
     //Check does the texture have the transparent pixels
+    checkTransparency();
+
+    //Down sample the texture (for mini-mapping)
+    downSample();
+}
+
+Texture::Texture(Image &image) {
+    _texture.emplace_back(std::move(image));
+
+    //Check does the texture have the transparent pixels
+    checkTransparency();
+
+    //Down sample the texture (for mini-mapping)
+    downSample();
+}
+
+void Texture::checkTransparency() {
     for(int x = 0; x < width(); x++) {
         for(int y = 0; y < height(); y++) {
             auto pix = get_pixel(x, y);
@@ -20,6 +34,12 @@ Texture::Texture(const FilePath &filename) {
                 return;
             }
         }
+    }
+}
+
+void Texture::downSample() {
+    while (_texture.back().width() * _texture.back().height() != 1) {
+        _texture.emplace_back(_texture.back().downSampled());
     }
 }
 

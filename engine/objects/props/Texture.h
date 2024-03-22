@@ -14,8 +14,11 @@ private:
 
     bool _isTransparent = false;
 
+    void checkTransparency();
+    void downSample();
 public:
     explicit Texture(const FilePath& filename);
+    explicit Texture(Image& image);
 
     [[nodiscard]] Color get_pixel(uint16_t x, uint16_t y) const;
     [[nodiscard]] Color get_pixel_from_UV(const Vec2D& uv) const;

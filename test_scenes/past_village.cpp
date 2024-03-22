@@ -2,13 +2,17 @@
 
 #include <Engine.h>
 #include <io/Screen.h>
+#include <io/WorldEditorGui.h>
+#include <utils/ResourceManager.h>
 #include <utils/ObjectController.h>
 #include <objects/props/Texture.h>
 #include <objects/lighting/PointLight.h>
-#include <animation/Animations.h>
+
 
 class Test final : public Engine {
 private:
+    std::shared_ptr<WorldEditorGui> _worldEditorGui;
+
     std::shared_ptr<ObjectController> cameraController = nullptr;
     std::shared_ptr<ObjectController> objController = nullptr;
     std::shared_ptr<Object> selectedObject = nullptr;
@@ -19,6 +23,14 @@ private:
     bool isRecording = false;
 
     void start() override {
+        auto scn = screen;
+        _worldEditorGui = std::make_shared<WorldEditorGui>(
+                [scn](bool enable) { scn->setDepthTest(enable); },
+                [scn](int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness = 1) { scn->drawLine(x_from, y_from, x_to, y_to, color, thickness); },
+                [scn](int x, int y, uint16_t width, uint16_t height, const Color &color) { scn->drawRectangle(x, y, width, height, color); },
+                [scn](const std::string& text, int x, int y, const Color& color = Color::BLACK) { scn->drawText(text, x, y, color, 12); }
+        );
+
         cameraController = std::make_shared<ObjectController>(camera);
 
         for (int i = 1; i <= 8; i++) {
@@ -108,21 +120,23 @@ private:
             redCube->translateToPoint(rayCast.pointOfIntersection);
         }
 
-        // select object:
-        if (Keyboard::isKeyTapped(SDLK_o) || Mouse::isButtonTapped(SDL_BUTTON_LEFT)) {
-            if(objInFocus) {
-                objSelected = true;
-                selectedObject = rayCast.obj;
-                objController = std::make_shared<ObjectController>(selectedObject);
-                Log::log("Object " + rayCast.obj->name().str() + " selected.");
-                //Timeline::addAnimation<ATranslateToPoint>(camera, selectedObject->position() - (selectedObject->position() - camera->position()).normalized());
+        if(isControllerActive) {
+            // select object:
+            if (Keyboard::isKeyTapped(SDLK_o) || Mouse::isButtonTapped(SDL_BUTTON_LEFT)) {
+                if(objInFocus) {
+                    objSelected = true;
+                    selectedObject = rayCast.obj;
+                    objController = std::make_shared<ObjectController>(selectedObject);
+                    Log::log("Object " + rayCast.obj->name().str() + " selected.");
+                    //Timeline::addAnimation<ATranslateToPoint>(camera, selectedObject->position() - (selectedObject->position() - camera->position()).normalized());
+                }
             }
-        }
 
-        // deselect object:
-        if (Keyboard::isKeyTapped(SDLK_p)) {
-            objSelected = false;
-            selectedObject.reset();
+            // deselect object:
+            if (Keyboard::isKeyTapped(SDLK_p)) {
+                objSelected = false;
+                selectedObject.reset();
+            }
         }
 
         if(Keyboard::isKeyTapped(SDLK_F1)) {
@@ -140,6 +154,9 @@ private:
 
         if(Keyboard::isKeyTapped(SDLK_q)) {
             isControllerActive = !isControllerActive;
+
+            SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isControllerActive));
+            SDL_ShowCursor(!isControllerActive);
         }
 
         if (selectedObject && isControllerActive) {
@@ -172,14 +189,25 @@ private:
         if(Keyboard::isKeyTapped(SDLK_TAB)) {
             setDebugInfo(!showDebugInfo());
         }
+
+        _worldEditorGui->update();
+        screen->setLighting(_worldEditorGui->isEnabledLighting());
+        screen->setTrueLighting(_worldEditorGui->isEnabledTrueLighting());
+        screen->setTransparency(_worldEditorGui->isEnabledTransparency());
+        screen->setTriangleBorders(_worldEditorGui->isEnabledTriangleBorders());
+        screen->setTexturing(_worldEditorGui->isEnabledTexturing());
+        screen->setMipmapping(_worldEditorGui->isEnabledMipmapping());
+        screen->setDepthTest(_worldEditorGui->isEnabledDepthTest());
     };
 
 public:
     Test() = default;
 };
 
+
 int main(int argc, char *argv[]) {
     Test test;
     test.create();
+
     return 0;
 }

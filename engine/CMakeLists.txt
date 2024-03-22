@@ -58,6 +58,11 @@ add_library(
         io/Mouse.h
         io/Mouse.cpp
 
+        io/microui/microui.h
+        io/microui/microui.c
+        io/WorldEditorGui.h
+        io/WorldEditorGui.cpp
+
         utils/Log.h
         utils/Log.cpp
         utils/Time.h

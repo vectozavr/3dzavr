@@ -26,6 +26,7 @@ private:
     // Compatibility
     double _time = 0;
     double _deltaTime = 0;
+    unsigned int _frame = 0;
 
     static Time *_instance;
 
@@ -37,15 +38,11 @@ public:
     Time &operator=(Time &) = delete;
 
     static int fps();
-
     static double time();
-
+    static unsigned int frame();
     static double deltaTime();
-
     static void update();
-
     static void init();
-
     static void free();
 
     static void startTimer(const std::string& timerName);

@@ -39,9 +39,9 @@ private:
 public:
     Material(const MaterialTag& tag,
              std::shared_ptr<Texture> texture,
-             const Color& ambient,
-             const Color& diffuse,
-             const Color& specular,
+             const Color& ambient = Color::WHITE,
+             const Color& diffuse = Color::WHITE,
+             const Color& specular = Color::WHITE,
              uint8_t illum = 1,
              double d = 1);
 

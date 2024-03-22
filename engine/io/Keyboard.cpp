@@ -16,8 +16,7 @@ void Keyboard::init() {
 }
 
 bool Keyboard::isKeyPressed(SDL_Keycode key) {
-
-    if (_instance == nullptr) {
+    if (!_instance) {
         return false;
     }
 
@@ -31,7 +30,7 @@ bool Keyboard::isKeyPressed(SDL_Keycode key) {
 }
 
 bool Keyboard::isKeyTapped(SDL_Keycode key) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return false;
     }
 
@@ -54,9 +53,14 @@ void Keyboard::sendKeyboardEvent(const SDL_Event &event) {
         // exit if the window is closed
         case SDL_KEYDOWN:
             _instance->_keys[event.key.keysym.sym] = true;
+            _instance->_keysDown.emplace_back(event.key.keysym.sym);
             break;
         case SDL_KEYUP:
             _instance->_keys[event.key.keysym.sym] = false;
+            _instance->_keysUp.emplace_back(event.key.keysym.sym);
+            break;
+        case SDL_TEXTINPUT:
+            _instance->_inputText = event.text.text;
             break;
     }
 }
@@ -71,4 +75,54 @@ void Keyboard::free() {
     }
 
     Log::log("Keyboard::free(): keyboard was freed");
+}
+
+void Keyboard::clear() {
+    if (!_instance) {
+        return;
+    }
+
+    _instance->_keysDown.clear();
+    _instance->_keysUp.clear();
+    _instance->_inputText.clear();
+}
+
+bool Keyboard::isKeyDown() {
+    if (!_instance) {
+        return false;
+    }
+
+    return !_instance->_keysDown.empty();
+}
+
+bool Keyboard::isKeyUp() {
+    if (!_instance) {
+        return false;
+    }
+
+    return !_instance->_keysUp.empty();
+}
+
+std::vector<SDL_Keycode> Keyboard::keysDown() {
+    if (!_instance) {
+        return {};
+    }
+
+    return _instance->_keysDown;
+}
+
+std::vector<SDL_Keycode> Keyboard::keysUp() {
+    if (!_instance) {
+        return {};
+    }
+
+    return _instance->_keysUp;
+}
+
+std::string Keyboard::inputText() {
+    if (!_instance) {
+        return {};
+    }
+
+    return _instance->_inputText;
 }
