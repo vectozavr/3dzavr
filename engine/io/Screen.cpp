@@ -80,8 +80,9 @@ void Screen::startRender() {
 
     auto cmd = "ffmpeg -f rawvideo -pixel_format rgba -video_size " +
                std::to_string(_width) + "x" + std::to_string(_height) +
-               " -framerate " + std::to_string(_clipFps) + " -i - -c:v libx264 -crf 17 -pix_fmt yuv420p -tune animation film/clip_" +
+               " -framerate " + std::to_string(_clipFps) + " -i - -c:v libx264 -crf 28 -pix_fmt yuv420p film/clip_" +
                Time::getLocalTimeInfo("%F_%H-%M-%S") + ".mp4";
+
     _ffmpeg = popen(cmd.c_str(), "w");
 
     _renderVideo = true;
@@ -153,21 +154,21 @@ void Screen::plotLineLow(int x_from, int y_from, int x_to, int y_to, const Color
         yi = -1;
         dy = -dy;
     }
-    int D = (2 * dy) - dx;
+    int D = 2*dy - dx;
     int y = y_from;
 
     for (int x = x_from; x <= x_to; x++) {
         if(thickness == 1) {
             drawPixel(x, y, color);
         } else {
-            drawCircle(x, y, thickness / 2, color);
+            drawCircle(x, y, thickness/2, color);
         }
 
         if (D > 0) {
             y += yi;
-            D += 2 * (dy - dx);
+            D += 2*(dy - dx);
         } else {
-            D += 2 * dy;
+            D += 2*dy;
         }
     }
 }
@@ -180,21 +181,21 @@ void Screen::plotLineHigh(int x_from, int y_from, int x_to, int y_to, const Colo
         xi = -1;
         dx = -dx;
     }
-    int D = (2 * dx) - dy;
+    int D = 2*dx - dy;
     int x = x_from;
 
     for (int y = y_from; y <= y_to; y++) {
         if(thickness == 1) {
             drawPixel(x, y, color);
         } else {
-            drawCircle(x, y, thickness / 2, color);
+            drawCircle(x, y, thickness/2, color);
         }
 
         if (D > 0) {
             x += xi;
-            D += 2 * (dx - dy);
+            D += 2*(dx - dy);
         } else {
-            D += 2 * dx;
+            D += 2*dx;
         }
     }
 }
@@ -458,18 +459,16 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                                std::clamp<int>(color.g()*l.g/255, 0, 255),
                                std::clamp<int>(color.b()*l.b/255, 0, 255), color.a());
 
-                drawPixelUnsafe(x, y, non_linear_z_hom, resColor);
+                if(!_enableTriangleBorders || isInsideTriangleAbg(abg, -Consts::ABG_TRIANGLE_BORDER_WIDTH)) {
+                    drawPixelUnsafe(x, y, non_linear_z_hom, resColor);
+                } else {
+                    // Drawing edge
+                    drawPixelUnsafe(x, y, non_linear_z_hom, Color::BLACK);
+                }
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
         }
-    }
-
-    // Drawing edge
-    if(_enableTriangleBorders) {
-        drawLine(Vec2D(projectedTriangle[0]), Vec2D(projectedTriangle[1]), Color::BLACK);
-        drawLine(Vec2D(projectedTriangle[1]), Vec2D(projectedTriangle[2]), Color::BLACK);
-        drawLine(Vec2D(projectedTriangle[2]), Vec2D(projectedTriangle[0]), Color::BLACK);
     }
 }
 
@@ -539,18 +538,16 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                                std::clamp<int>(color.g()*l.g/255, 0, 255),
                                std::clamp<int>(color.b()*l.b/255, 0, 255), color.a());
 
-                drawPixelUnsafe(x, y, non_linear_z_hom, resColor);
+                if(!_enableTriangleBorders || isInsideTriangleAbg(abg, -Consts::ABG_TRIANGLE_BORDER_WIDTH)) {
+                    drawPixelUnsafe(x, y, non_linear_z_hom, resColor);
+                } else {
+                    // Drawing edge
+                    drawPixelUnsafe(x, y, non_linear_z_hom, Color::BLACK);
+                }
             }
 
             abg += abg_dx;
         }
-    }
-
-    // Drawing edge
-    if(_enableTriangleBorders) {
-        drawLine(Vec2D(projectedTriangle[0]), Vec2D(projectedTriangle[1]), Color::BLACK);
-        drawLine(Vec2D(projectedTriangle[1]), Vec2D(projectedTriangle[2]), Color::BLACK);
-        drawLine(Vec2D(projectedTriangle[2]), Vec2D(projectedTriangle[0]), Color::BLACK);
     }
 }
 
@@ -627,18 +624,17 @@ void Screen::drawTriangle(const Triangle &triangle, Material *material) {
                 //color = texture->get_pixel_from_UV(uv_dehom, area);
                 color = sample.get_pixel_from_UV(uv_dehom);
                 color[3] *= material->d();
-                drawPixelUnsafe(x, y, non_linear_z_hom, color);
+
+                if(!_enableTriangleBorders || isInsideTriangleAbg(abg, -Consts::ABG_TRIANGLE_BORDER_WIDTH)) {
+                    drawPixelUnsafe(x, y, non_linear_z_hom, color);
+                } else {
+                    // Drawing edge
+                    drawPixelUnsafe(x, y, non_linear_z_hom, Color::BLACK);
+                }
             }
             abg += abg_dx;
             uv_hom += uv_hom_dx;
         }
-    }
-
-    // Drawing edge
-    if(_enableTriangleBorders) {
-        drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Color::BLACK);
-        drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Color::BLACK);
-        drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Color::BLACK);
     }
 }
 
@@ -669,18 +665,17 @@ void Screen::drawTriangle(const Triangle &triangle, const Color &color) {
         for (int x = x_cur_min; x <= x_cur_max; x++) {
             if(isInsideTriangleAbg(abg, Consts::EPS)) {
                 double non_linear_z_hom = triangle[0].z() * abg.x() + triangle[1].z() * abg.y() + triangle[2].z() * abg.z();
-                drawPixelUnsafe(x, y, non_linear_z_hom, color);
+
+                if(!_enableTriangleBorders || isInsideTriangleAbg(abg, -Consts::ABG_TRIANGLE_BORDER_WIDTH)) {
+                    drawPixelUnsafe(x, y, non_linear_z_hom, color);
+                } else {
+                    // Drawing edge
+                    drawPixelUnsafe(x, y, non_linear_z_hom, Color::BLACK);
+                }
             }
 
             abg += abg_dx;
         }
-    }
-
-    // Drawing edge
-    if(_enableTriangleBorders) {
-        drawLine(Vec2D(triangle[0]), Vec2D(triangle[1]), Color::BLACK);
-        drawLine(Vec2D(triangle[1]), Vec2D(triangle[2]), Color::BLACK);
-        drawLine(Vec2D(triangle[2]), Vec2D(triangle[0]), Color::BLACK);
     }
 }
 

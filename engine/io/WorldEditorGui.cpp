@@ -148,7 +148,7 @@ void WorldEditorGui::renderSettings() {
         mu_checkbox(_ctx.get(), "Lighting", &_enableLighting);
         mu_checkbox(_ctx.get(), "Exact lighting", &_enableTrueLighting);
         mu_checkbox(_ctx.get(), "Transparent objects", &_enableTransparency);
-        mu_checkbox(_ctx.get(), "Borders", &_enableTriangleBorders);
+        mu_checkbox(_ctx.get(), "Borders of triangles", &_enableTriangleBorders);
         mu_checkbox(_ctx.get(), "Texturing", &_enableTexturing);
         mu_checkbox(_ctx.get(), "Texture antialiasing (mipmapping)", &_enableMipmapping);
         mu_checkbox(_ctx.get(), "Depth test", &_enableDepthTest);
