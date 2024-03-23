@@ -80,7 +80,7 @@ void Screen::startRender() {
 
     auto cmd = "ffmpeg -f rawvideo -pixel_format rgba -video_size " +
                std::to_string(_width) + "x" + std::to_string(_height) +
-               " -framerate " + std::to_string(_clipFps) + " -i - -c:v libx264 -crf 28 -pix_fmt yuv420p film/clip_" +
+               " -framerate " + std::to_string(_clipFps) + " -i - -c:v libx264 -crf " + std::to_string(_clipCrf) + " -pix_fmt yuv420p film/clip_" +
                Time::getLocalTimeInfo("%F_%H-%M-%S") + ".mp4";
 
     _ffmpeg = popen(cmd.c_str(), "w");
