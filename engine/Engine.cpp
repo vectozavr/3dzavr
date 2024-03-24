@@ -97,7 +97,7 @@ int Engine::handleSDLEvents() {
 
 void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& background) {
 
-    screen->open(screenWidth, screenHeight, background);
+    screen->open(Consts::STANDARD_EDITOR_WIDTH, Consts::STANDARD_EDITOR_HEIGHT, background);
 
     Log::log("Engine::create(): started 3dzavr. Screen size: (" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + ")");
     Time::update();

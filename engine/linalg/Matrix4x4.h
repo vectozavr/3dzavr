@@ -49,7 +49,7 @@ public:
     Matrix4x4 static Rotation(const Vec3D &v, double rv);
     Matrix4x4 static View(const Matrix4x4 &transformMatrix);
     Matrix4x4 static Projection(double fov = 90.0, double aspect = 1.0, double ZNear = 1.0, double ZFar = 10.0);
-    Matrix4x4 static ScreenSpace(int width, int height);
+    Matrix4x4 static ScreenSpace(uint16_t width, uint16_t height, int shiftX=0, int shiftY=0);
 };
 
 #include "Matrix4x4.inl"

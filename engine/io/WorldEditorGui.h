@@ -5,6 +5,8 @@
 #include <functional>
 #include "SDL.h"
 
+#include <objects/Group.h>
+
 extern "C" {
 #include "io/microui/microui.h"
 }
@@ -12,6 +14,8 @@ extern "C" {
 class WorldEditorGui {
 private:
     std::unique_ptr<mu_Context> _ctx;
+    std::shared_ptr<Group> _objects;
+    std::shared_ptr<Object> _selectedObject = nullptr;
 
     // Function for drawing
     std::function<void(bool)> _setDepthTest;
@@ -24,7 +28,12 @@ private:
     void processFrame();
     void renderGui();
 
+    void controlPanel();
+    void groupTree(const std::shared_ptr<Group>& group);
+    void objectEditor();
     void renderSettings();
+
+    int _operation = -1;
 
     bool _enableLighting = true;
     bool _enableTrueLighting = false;
@@ -37,7 +46,8 @@ public:
     WorldEditorGui(const std::function<void(bool)>& setDepthTestFunction,
                    const std::function<void(int, int, int, int, const Color&, uint16_t)>& drawLineFunction,
                    const std::function<void(int, int, uint16_t, uint16_t, const Color&)>& drawRectangleFunction,
-                   const std::function<void(const std::string&, int, int, const Color&)>& drawTextFunction);
+                   const std::function<void(const std::string&, int, int, const Color&)>& drawTextFunction,
+                   const std::shared_ptr<Group>& objects);
 
     void update();
 
@@ -48,6 +58,8 @@ public:
     [[nodiscard]] inline bool isEnabledTexturing() const { return _enableTexturing; }
     [[nodiscard]] inline bool isEnabledMipmapping() const { return _enableMipmapping; }
     [[nodiscard]] inline bool isEnabledDepthTest() const { return _enableDepthTest; }
+
+    [[nodiscard]] std::shared_ptr<Object> selectedObject() { return _selectedObject; }
 };
 
 

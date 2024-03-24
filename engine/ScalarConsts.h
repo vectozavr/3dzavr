@@ -6,6 +6,9 @@
 namespace Consts {
     constexpr uint16_t STANDARD_SCREEN_WIDTH = 640;
     constexpr uint16_t STANDARD_SCREEN_HEIGHT = 480;
+
+    constexpr uint16_t STANDARD_EDITOR_WIDTH = STANDARD_SCREEN_WIDTH + 300;
+    constexpr uint16_t STANDARD_EDITOR_HEIGHT = STANDARD_SCREEN_HEIGHT;
     constexpr uint16_t SCREEN_SCALE = 2;
 
     constexpr bool USE_LOG_FILE = true;

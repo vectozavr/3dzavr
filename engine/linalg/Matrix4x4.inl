@@ -171,15 +171,15 @@ inline Matrix4x4 Matrix4x4::Projection(double fov, double aspect, double ZNear, 
     return p;
 }
 
-inline Matrix4x4 Matrix4x4::ScreenSpace(int width, int height) {
+inline Matrix4x4 Matrix4x4::ScreenSpace(uint16_t width, uint16_t height, int shiftX, int shiftY) {
     Matrix4x4 s{};
 
     s._arr[0][0] = -0.5 * width;
     s._arr[1][1] = -0.5 * height;
     s._arr[2][2] = 1.0;
 
-    s._arr[0][3] = 0.5 * width;
-    s._arr[1][3] = 0.5 * height;
+    s._arr[0][3] = 0.5 * width + shiftX;
+    s._arr[1][3] = 0.5 * height + shiftY;
 
     s._arr[3][3] = 1.0;
 

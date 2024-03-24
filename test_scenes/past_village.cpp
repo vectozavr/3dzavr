@@ -28,7 +28,8 @@ private:
                 [scn](bool enable) { scn->setDepthTest(enable); },
                 [scn](int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness = 1) { scn->drawLine(x_from, y_from, x_to, y_to, color, thickness); },
                 [scn](int x, int y, uint16_t width, uint16_t height, const Color &color) { scn->drawRectangle(x, y, width, height, color); },
-                [scn](const std::string& text, int x, int y, const Color& color = Color::BLACK) { scn->drawText(text, x, y, color, 12); }
+                [scn](const std::string& text, int x, int y, const Color& color = Color::BLACK) { scn->drawText(text, x, y, color, 12);},
+                world->objects()
         );
 
         cameraController = std::make_shared<ObjectController>(camera);
@@ -198,6 +199,10 @@ private:
         screen->setTexturing(_worldEditorGui->isEnabledTexturing());
         screen->setMipmapping(_worldEditorGui->isEnabledMipmapping());
         screen->setDepthTest(_worldEditorGui->isEnabledDepthTest());
+
+        if(!isControllerActive && _worldEditorGui->selectedObject()) {
+            selectedObject = _worldEditorGui->selectedObject();
+        }
     };
 
 public:
