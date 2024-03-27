@@ -13,6 +13,7 @@ int getProcessSizeMB() {
 }
 #elif defined(__linux__)
 #include <unistd.h>
+#include <fstream>
 int getProcessSizeMB() {
     std::ifstream statmFile("/proc/self/statm");
     long pageSizeMB = sysconf(_SC_PAGESIZE) / Consts::MB;
