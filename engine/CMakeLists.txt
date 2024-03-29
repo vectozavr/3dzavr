@@ -22,9 +22,11 @@ add_library(
         objects/Object.cpp
         objects/Group.h
         objects/Group.cpp
+
         objects/lighting/LightSource.h
         objects/lighting/DirectionalLight.h
         objects/lighting/PointLight.h
+        objects/lighting/SpotLight.h
 
         objects/props/Color.h
         objects/props/Color.cpp

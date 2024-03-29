@@ -19,11 +19,11 @@ public:
     }
 
     [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef = 0.0) const override {
-        auto diff = pixelPosition - fullPosition();
-        double distance = diff.abs();
-        Vec3D dir = diff.normalized();
+        auto toLight = fullPosition() - pixelPosition;
+        double distance = toLight.abs();
+        Vec3D dir = toLight.normalized();
 
-        auto dot = -std::clamp<double>(pixelNorm.dot(dir), -1, -0.2);
+        auto dot = std::clamp<double>(pixelNorm.dot(dir), 0.2, 1);
 
         // linear interpolation between exact and inexact (with dot = 0.5)
         dot = dot + (0.5 - dot)*simplCoef;

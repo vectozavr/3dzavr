@@ -7,6 +7,7 @@
 #include <utils/ObjectController.h>
 #include <objects/props/Texture.h>
 #include <objects/lighting/PointLight.h>
+#include <objects/lighting/SpotLight.h>
 
 
 class Test final : public Engine {
@@ -81,8 +82,15 @@ private:
                 ObjectTag("Point Light 1"), Vec3D(0, 0.5, -5),
                 Color::LIGHT_YELLOW, 2);
 
+        auto s_light = std::make_shared<SpotLight>(
+                ObjectTag("Spot Light 1"),
+                Vec3D(-7, 3, -12),
+                Vec3D(0,-1,0));
+
         world->add(dir_light);
         world->add(p_light);
+        world->add(s_light);
+
 
         auto lightCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("LightCube"), 0.1));
         auto lightMaterial = std::make_shared<Material>(
