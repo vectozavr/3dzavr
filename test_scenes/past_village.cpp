@@ -17,7 +17,6 @@ private:
     std::shared_ptr<ObjectController> objController = nullptr;
     std::shared_ptr<Object> selectedObject = nullptr;
     std::shared_ptr<Mesh> redCube = nullptr;
-    bool objSelected = false;
     bool objInFocus = false;
     bool isControllerActive = true;
     bool isRecording = false;
@@ -106,7 +105,7 @@ private:
         screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Color::BLACK);
 
         if(isControllerActive) {
-            if(objSelected) {
+            if(selectedObject) {
                 objController->update();
             } else {
                 cameraController->update();
@@ -125,17 +124,15 @@ private:
             // select object:
             if (Keyboard::isKeyTapped(SDLK_o) || Mouse::isButtonTapped(SDL_BUTTON_LEFT)) {
                 if(objInFocus) {
-                    objSelected = true;
                     selectedObject = rayCast.obj;
                     objController = std::make_shared<ObjectController>(selectedObject);
                     Log::log("Object " + rayCast.obj->name().str() + " selected.");
-                    //Timeline::addAnimation<ATranslateToPoint>(camera, selectedObject->position() - (selectedObject->position() - camera->position()).normalized());
+                    _worldEditorGui->setSelectedObject(selectedObject);
                 }
             }
 
             // deselect object:
             if (Keyboard::isKeyTapped(SDLK_p)) {
-                objSelected = false;
                 selectedObject.reset();
             }
         }
@@ -154,6 +151,11 @@ private:
         }
 
         if(Keyboard::isKeyTapped(SDLK_q)) {
+            if(!isControllerActive && _worldEditorGui->selectedObject()) {
+                selectedObject = _worldEditorGui->selectedObject();
+                objController = std::make_shared<ObjectController>(selectedObject);
+            }
+
             isControllerActive = !isControllerActive;
 
             SDL_SetRelativeMouseMode(static_cast<SDL_bool>(isControllerActive));
@@ -182,7 +184,6 @@ private:
             // delete object
             if (Keyboard::isKeyPressed(SDLK_DELETE)) {
                 world->remove(selectedObject->name());
-                objSelected = false;
                 selectedObject.reset();
             }
         }
@@ -199,10 +200,6 @@ private:
         screen->setTexturing(_worldEditorGui->isEnabledTexturing());
         screen->setMipmapping(_worldEditorGui->isEnabledMipmapping());
         screen->setDepthTest(_worldEditorGui->isEnabledDepthTest());
-
-        if(!isControllerActive && _worldEditorGui->selectedObject()) {
-            selectedObject = _worldEditorGui->selectedObject();
-        }
     };
 
 public:

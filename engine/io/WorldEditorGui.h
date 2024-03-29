@@ -60,6 +60,8 @@ public:
     [[nodiscard]] inline bool isEnabledDepthTest() const { return _enableDepthTest; }
 
     [[nodiscard]] std::shared_ptr<Object> selectedObject() { return _selectedObject; }
+
+    void setSelectedObject(const std::shared_ptr<Object>& object) { _selectedObject = object; }
 };
 
 
