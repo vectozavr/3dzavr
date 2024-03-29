@@ -15,7 +15,7 @@ bool HitBox::Vec3DLess::operator()(const Vec3D& lhs, const Vec3D& rhs) const noe
         return false;
 }
 
-HitBox::HitBox(const Mesh& mesh, bool useSimpleBox) {
+HitBox::HitBox(const TriangleMesh& mesh, bool useSimpleBox) {
     if (useSimpleBox) {
         generateSimple(mesh);
     } else {
@@ -23,7 +23,7 @@ HitBox::HitBox(const Mesh& mesh, bool useSimpleBox) {
     }
 }
 
-void HitBox::generateSimple(const Mesh &mesh) {
+void HitBox::generateSimple(const TriangleMesh &mesh) {
     double maxX = -std::numeric_limits<double>::max();
     double maxY = -std::numeric_limits<double>::max();
     double maxZ = -std::numeric_limits<double>::max();
@@ -68,7 +68,7 @@ void HitBox::generateSimple(const Mesh &mesh) {
     _hitBox.emplace_back(maxX, maxY, maxZ);
 }
 
-void HitBox::generateDetailed(const Mesh &mesh) {
+void HitBox::generateDetailed(const TriangleMesh &mesh) {
     // we dont need to add the same points in hit box
     std::set<Vec3D, HitBox::Vec3DLess> points;
 

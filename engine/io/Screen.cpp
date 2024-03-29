@@ -216,6 +216,86 @@ void Screen::drawLine(int x_from, int y_from, int x_to, int y_to, const Color &c
     }
 }
 
+void Screen::plotLineLow(const Vec3D &from, const Vec3D &to, const Color &color, uint16_t thickness) {
+    int dx = to.x() - from.x();
+    int dy = to.y() - from.y();
+    int yi = 1;
+    if (dy < 0) {
+        yi = -1;
+        dy = -dy;
+    }
+    int D = 2*dy - dx;
+    int y = from.y();
+
+    for (int x = from.x(); x <= to.x(); x++) {
+        double progress = std::abs((y-from.y())/(to.y() - from.y()));
+        double z = from.z() + (to.z() - from.z())*progress;
+
+        if(thickness == 1) {
+            drawPixel(x, y, z, color);
+        } else {
+            drawCircle(x, y, z, thickness/2, color);
+        }
+
+        if (D > 0) {
+            y += yi;
+            D += 2*(dy - dx);
+        } else {
+            D += 2*dy;
+        }
+    }
+}
+
+void Screen::plotLineHigh(const Vec3D &from, const Vec3D &to, const Color &color, uint16_t thickness) {
+    int dx = (int)(to.x() - from.x());
+    int dy = (int)(to.y() - from.y());
+    int xi = 1;
+    if (dx < 0) {
+        xi = -1;
+        dx = -dx;
+    }
+    int D = 2*dx - dy;
+    int x = from.x();
+
+    for (int y = from.y(); y <= to.y(); y++) {
+        double progress = std::abs((y-from.y())/(to.y() - from.y()));
+        double z = from.z() + (to.z() - from.z())*progress;
+
+        if(thickness == 1) {
+            drawPixel(x, y, z, color);
+        } else {
+            drawCircle(x, y, z, thickness/2, color);
+        }
+
+        if (D > 0) {
+            x += xi;
+            D += 2*(dx - dy);
+        } else {
+            D += 2*dx;
+        }
+    }
+}
+
+void Screen::drawLine(const Line &line, const Color &color, uint16_t thickness) {
+    Vec3D from = Vec3D(line.p1());
+    Vec3D to = Vec3D(line.p2());
+
+    if (std::abs(to.y() - from.y()) < std::abs(to.x() - from.x())) {
+        if (from.x() > to.x()) {
+            plotLineLow(to, from, color, thickness);
+        } else {
+            plotLineLow(from, to, color, thickness);
+        }
+    } else {
+        if (from.y() > to.y()) {
+            plotLineHigh(to, from, color, thickness);
+        } else {
+            plotLineHigh(from, to, color, thickness);
+        }
+    }
+}
+
+
 void Screen::drawLine(const Vec2D &from, const Vec2D &to, const Color &color, uint16_t thickness) {
     drawLine((int)from.x(), (int)from.y(), (int)to.x(), (int)to.y(), color, thickness);
 }
@@ -849,6 +929,17 @@ void Screen::drawCircle(int x, int y, uint16_t r, const Color &fillColor) {
             double d2 = (_x-x)*(_x-x) + (_y-y)*(_y-y);
             if(d2 <= r*r) {
                 drawPixel(_x, _y, fillColor);
+            }
+        }
+    }
+}
+
+void Screen::drawCircle(int x, int y, double z, uint16_t r, const Color &fillColor) {
+    for(int _y = y-r; _y <= y+r; _y++) {
+        for(int _x = x-r; _x <= x+r; _x++) {
+            double d2 = (_x-x)*(_x-x) + (_y-y)*(_y-y);
+            if(d2 <= r*r) {
+                drawPixel(_x, _y, z,fillColor);
             }
         }
     }

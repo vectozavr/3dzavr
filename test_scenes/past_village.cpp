@@ -17,7 +17,9 @@ private:
     std::shared_ptr<ObjectController> cameraController = nullptr;
     std::shared_ptr<ObjectController> objController = nullptr;
     std::shared_ptr<Object> selectedObject = nullptr;
-    std::shared_ptr<Mesh> redCube = nullptr;
+    std::shared_ptr<TriangleMesh> redCube = nullptr;
+    std::shared_ptr<LineMesh> selectedObjectBounds;
+
     bool objInFocus = false;
     bool isControllerActive = true;
     bool isRecording = false;
@@ -55,7 +57,7 @@ private:
         //skybox->scale(Vec3D{0.1, 0.1, 0.1});
 
         // For debug
-        redCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("RedCube"), 0.1));
+        redCube = std::make_shared<TriangleMesh>(TriangleMesh::Cube(ObjectTag("RedCube"), 0.1));
         redCube->setVisible(objInFocus);
         //world->add(redCube);
 
@@ -92,7 +94,7 @@ private:
         world->add(s_light);
 
 
-        auto lightCube = std::make_shared<Mesh>(Mesh::Cube(ObjectTag("LightCube"), 0.1));
+        auto lightCube = std::make_shared<TriangleMesh>(TriangleMesh::Cube(ObjectTag("LightCube"), 0.1));
         auto lightMaterial = std::make_shared<Material>(
                 MaterialTag("Point Light Material"),
                 nullptr,
@@ -104,6 +106,10 @@ private:
         lightCube->translateToPoint(p_light->position());
         lightCube->attach(p_light);
         world->add(lightCube);
+
+        selectedObjectBounds = std::make_shared<LineMesh>(LineMesh::Cube(ObjectTag("Cube_frame")));
+        selectedObjectBounds->setVisible(false);
+        world->add(selectedObjectBounds);
     };
 
     void update() override {
@@ -158,9 +164,23 @@ private:
             isRecording = !isRecording;
         }
 
+        auto meshedSelectedObj = std::dynamic_pointer_cast<TriangleMesh>(selectedObject);
+        if(meshedSelectedObj) {
+            selectedObjectBounds->setVisible(true);
+            selectedObjectBounds->undoTransformations();
+            auto Mbounds = meshedSelectedObj->bounds()*selectedObject->fullModel();
+            selectedObjectBounds->scale(Mbounds.extents*2 + Vec3D::EPS());
+            selectedObjectBounds->translate(Mbounds.center);
+        } else {
+            //selectedObjectBounds->setVisible(false);
+        }
+
+        if(!isControllerActive) {
+            selectedObject = _worldEditorGui->selectedObject();
+        }
+
         if(Keyboard::isKeyTapped(SDLK_q)) {
             if(!isControllerActive && _worldEditorGui->selectedObject()) {
-                selectedObject = _worldEditorGui->selectedObject();
                 objController = std::make_shared<ObjectController>(selectedObject);
             }
 
@@ -186,7 +206,7 @@ private:
 
             // undo transformations
             if (Keyboard::isKeyPressed(SDLK_u)) {
-                selectedObject->transform(selectedObject->invModel());
+                selectedObject->undoTransformations();
             }
 
             // delete object

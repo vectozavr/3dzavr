@@ -5,7 +5,7 @@
 
 #include <SDL_ttf.h>
 
-#include <objects/geometry/Mesh.h>
+#include <objects/geometry/TriangleMesh.h>
 #include <objects/Group.h>
 #include <utils/Font.h>
 

@@ -7,6 +7,7 @@
 #include <objects/Object.h>
 #include <utils/stack_vector.h>
 #include <objects/geometry/Triangle.h>
+#include <objects/geometry/Line.h>
 
 
 class Plane final {
@@ -36,6 +37,7 @@ public:
     [[nodiscard]] double distance(const Vec3D &point4D) const;
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const;
     void clip(std::vector<std::pair<Vec3D, Vec3D>>& input, std::vector<std::pair<Vec3D, Vec3D>>& output) const;
+    [[nodiscard]] Line clip(const Line& line, bool& isFullyOutside) const;
 };
 
 

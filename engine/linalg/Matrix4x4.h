@@ -4,7 +4,6 @@
 #include <array>
 #include <iostream>
 
-#include <linalg/Vec4D.h>
 #include <linalg/Vec3D.h>
 
 class Matrix4x4 final {

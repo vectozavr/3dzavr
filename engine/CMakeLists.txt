@@ -38,12 +38,15 @@ add_library(
         objects/geometry/Bounds.h
         objects/geometry/Triangle.h
         objects/geometry/Triangle.cpp
+        objects/geometry/Line.h
         objects/geometry/Plane.h
         objects/geometry/Plane.cpp
         objects/geometry/Sphere.h
         objects/geometry/Sphere.cpp
-        objects/geometry/Mesh.h
-        objects/geometry/Mesh.cpp
+        objects/geometry/TriangleMesh.h
+        objects/geometry/TriangleMesh.cpp
+        objects/geometry/LineMesh.h
+        objects/geometry/LineMesh.cpp
 
         physics/RigidBody.h
         physics/RigidBody.cpp

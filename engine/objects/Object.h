@@ -78,6 +78,7 @@ public:
                                     _angleLeftUpLookAt(object._angleLeftUpLookAt) {}
 
     void transform(const Matrix4x4 &t);
+    void undoTransformations() { transform(invModel()); }
     void transformRelativePoint(const Vec3D &point, const Matrix4x4 &transform);
     void translate(const Vec3D &dv);
     void translateToPoint(const Vec3D &point);

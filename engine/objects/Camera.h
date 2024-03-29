@@ -3,8 +3,9 @@
 
 #include <vector>
 
-#include "objects/geometry/Plane.h"
-#include "objects/geometry/Mesh.h"
+#include <objects/geometry/Plane.h>
+#include <objects/geometry/TriangleMesh.h>
+#include <objects/geometry/LineMesh.h>
 
 class Camera final : public Object {
 private:
@@ -14,6 +15,7 @@ private:
     double _fov = 0;
     bool _ready = false;
     double _aspect = 0;
+
     // Internal variables to reduce allocations
     std::vector<std::pair<Vec3D, Vec3D>> _clipBuffer1;
     std::vector<std::pair<Vec3D, Vec3D>> _clipBuffer2;
@@ -26,7 +28,8 @@ public:
 
     void setup(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
 
-    std::vector<std::pair<Triangle, Triangle>> project(const Mesh& mesh);
+    std::vector<std::pair<Triangle, Triangle>> project(const TriangleMesh& triangleMesh);
+    std::vector<Line> project(const LineMesh& lineMesh);
 };
 
 

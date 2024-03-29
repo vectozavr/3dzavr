@@ -54,6 +54,8 @@ public:
     [[nodiscard]] Vec4D makePoint4D() const;
 
     static Vec3D Random();
+
+    static Vec3D EPS() { return Vec3D(Consts::EPS, Consts::EPS, Consts::EPS); }
 };
 
 #include "Vec3D.inl"

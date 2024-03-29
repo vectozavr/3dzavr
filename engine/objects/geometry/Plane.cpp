@@ -50,3 +50,31 @@ Plane::IntersectionInformation Plane::intersect(const Vec3D &from, const Vec3D &
 
     return Plane::IntersectionInformation{v, distance, k, intersected};
 }
+
+Line Plane::clip(const Line &line, bool& isFullyOutside) const {
+    double distances[2] = {distance(Vec3D(line.p1())),
+                           distance(Vec3D(line.p2()))};
+
+    isFullyOutside = false;
+    if((distances[0] < 0) && (distances[1] < 0)) {
+        // In this case the line is fully outside the clipping plane
+        isFullyOutside = true;
+        return {};
+    }
+    if((distances[0] >= 0) && (distances[1] >= 0)) {
+        // In this case the line is fully inside the clipping plane
+        return line;
+    }
+    if((distances[0] < 0) && (distances[1] >= 0)) {
+        // The first point is outside
+        auto intersection = intersect(Vec3D(line.p1()), Vec3D(line.p2()));
+        return {intersection.pointOfIntersection.makePoint4D(), line.p2()};
+    }
+    if((distances[0] >= 0) && (distances[1] < 0)) {
+        // The second point is outside
+        auto intersection = intersect(Vec3D(line.p1()), Vec3D(line.p2()));
+        return {line.p1(), intersection.pointOfIntersection.makePoint4D()};
+    }
+
+    return {};
+}

@@ -1,7 +1,7 @@
 #ifndef PHYSICS_HITBOX_H
 #define PHYSICS_HITBOX_H
 
-#include "objects/geometry/Mesh.h"
+#include "objects/geometry/TriangleMesh.h"
 
 class HitBox final {
 private:
@@ -11,13 +11,13 @@ private:
 
     std::vector<Vec3D> _hitBox;
 
-    void generateSimple(const Mesh &mesh);
-    void generateDetailed(const Mesh &mesh);
+    void generateSimple(const TriangleMesh &mesh);
+    void generateDetailed(const TriangleMesh &mesh);
 public:
     HitBox() = default;
     HitBox(const HitBox &hitBox) = default;
 
-    explicit HitBox(const Mesh &mesh, bool useSimpleBox = true);
+    explicit HitBox(const TriangleMesh &mesh, bool useSimpleBox = true);
 
     [[nodiscard]] std::vector<Vec3D>::iterator begin() { return _hitBox.begin(); }
 

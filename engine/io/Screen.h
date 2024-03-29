@@ -5,13 +5,13 @@
 #include <map>
 
 #include "SDL.h"
-#include "utils/Font.h"
 
-#include <objects/geometry/Triangle.h>
-#include <utils/Time.h>
 #include <Consts.h>
-#include <objects/geometry/Mesh.h>
+#include <utils/Font.h>
+#include <utils/Time.h>
 #include <objects/Camera.h>
+#include <objects/geometry/Triangle.h>
+#include <objects/geometry/TriangleMesh.h>
 #include <objects/lighting/LightSource.h>
 
 
@@ -58,6 +58,10 @@ private:
 
     void plotLineLow(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness);
     void plotLineHigh(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness);
+
+    void plotLineLow(const Vec3D& from, const Vec3D& to, const Color &color, uint16_t thickness);
+    void plotLineHigh(const Vec3D& from, const Vec3D& to, const Color &color, uint16_t thickness);
+
     void drawLine(const Vec2D& from, const Vec2D& to, const Color &color, uint16_t thickness = 1);
 
 public:
@@ -72,11 +76,13 @@ public:
     void drawPixel(int x, int y, const Color& color); // Without using depth buffer
     void drawPixel(int x, int y, double z, const Color& color); // With using depth buffer
     void drawLine(int x_from, int y_from, int x_to, int y_to, const Color &color, uint16_t thickness = 1);
+    void drawLine(const Line& line, const Color &color, uint16_t thickness = 1);
     void drawTriangle(const Triangle &triangle, Material* material = nullptr);
     void drawTriangle(const Triangle &triangle, const Color &color);
     void drawRectangle(int x, int y, uint16_t width, uint16_t height, const Color &color);
     void drawRectangle(int x, int y, uint16_t width, uint16_t height, Material* material = nullptr);
     void drawCircle(int x, int y, uint16_t r, const Color &fillColor);
+    void drawCircle(int x, int y, double z, uint16_t r, const Color &fillColor);
     void drawStrokeRectangle(int x, int y, uint16_t width, uint16_t height,
                              const Color &color, uint16_t thickness = 1, const Color &strokeColor = Color::BLACK);
     void drawText(const std::string& text, int x, int y, const Color& color = Color::BLACK, uint16_t fontsize = 12, const std::shared_ptr<Font>& font = nullptr);

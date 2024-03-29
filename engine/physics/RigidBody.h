@@ -6,8 +6,9 @@
 #include <vector>
 #include <memory>
 
-#include "objects/geometry/Triangle.h"
-#include "objects/geometry/Mesh.h"
+#include <objects/geometry/Triangle.h>
+#include <objects/geometry/TriangleMesh.h>
+#include <objects/geometry/LineMesh.h>
 #include <physics/Simplex.h>
 #include <physics/HitBox.h>
 
@@ -33,7 +34,7 @@ struct NextSimplex final {
 // TODO: implement Rag-Doll support for Rigid Body objects (bones, connections, constraints, skeleton and humanoids)
 
 
-class RigidBody : public Mesh {
+class RigidBody : public TriangleMesh {
 private:
     Vec3D _velocity{0, 0, 0};
     Vec3D _acceleration{0, 0, 0};
@@ -63,10 +64,11 @@ private:
     _addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces, size_t a,
                      size_t b);
 public:
-    explicit RigidBody(const ObjectTag& tag) : Mesh(tag) {};
+    explicit RigidBody(const ObjectTag& tag) : TriangleMesh(tag) {};
     RigidBody(const RigidBody &rigidBody) = default;
     RigidBody(const ObjectTag& tag, const RigidBody &rigidBody);
-    explicit RigidBody(const Mesh &mesh, bool useSimpleBox = true);
+    explicit RigidBody(const TriangleMesh &triangleMesh, bool useSimpleBox = true);
+    explicit RigidBody(const LineMesh &lineMesh, bool useSimpleBox = true);
     RigidBody(const ObjectTag& tag,
               const FilePath &meshFile,
               const Vec3D &scale = Vec3D{1, 1, 1},

@@ -12,19 +12,13 @@
  * https://wiki.libsdl.org/SDL2_net/CategoryAPI
  */
 
-/*
- * TODO: implement different types of lighting: Point Lights, Spot Lights, Directional Lights, Area Lights
- * see examples on https://docs.unity3d.com/Manual/Lighting.html
- */
-
-
-
 class Engine {
 private:
     bool _updateWorld = true;
 
     std::vector<std::tuple<Triangle, Triangle, Material*>> _projectedOpaqueTriangles;
     std::vector<std::tuple<Triangle, Triangle, Material*>> _projectedTranspTriangles;
+    std::vector<std::pair<Line, Color>> _projectedLines;
 
     std::vector<std::shared_ptr<LightSource>> _lightSources;
 

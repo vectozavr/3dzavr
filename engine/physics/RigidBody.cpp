@@ -9,12 +9,13 @@
 RigidBody::RigidBody(const ObjectTag& tag,
                      const FilePath &meshFile,
                      const Vec3D &scale,
-                     bool useSimpleBox) : Mesh(tag),
+                     bool useSimpleBox) : TriangleMesh(tag),
                      _hitBox(*this, useSimpleBox) {
     // TODO: implement this (or delete)
 }
 
-RigidBody::RigidBody(const Mesh &mesh, bool useSimpleBox) : Mesh(mesh), _hitBox(mesh, useSimpleBox) {
+RigidBody::RigidBody(const TriangleMesh &triangleMesh, bool useSimpleBox) :
+TriangleMesh(triangleMesh), _hitBox(triangleMesh, useSimpleBox) {
 }
 
 Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
@@ -346,7 +347,7 @@ void RigidBody::setAcceleration(const Vec3D &acceleration) {
 }
 
 RigidBody::RigidBody(const ObjectTag &tag, const RigidBody &rigidBody) :
-Mesh(tag, rigidBody),
+TriangleMesh(tag, rigidBody),
 _velocity(rigidBody._velocity), _acceleration(rigidBody._acceleration), _hasCollision(rigidBody._hasCollision),
 _isCollider(rigidBody._isCollider), _isTrigger(rigidBody._isTrigger), _hitBox(rigidBody._hitBox),
 _inCollision(rigidBody._inCollision), _collisionNormal(rigidBody._collisionNormal) {

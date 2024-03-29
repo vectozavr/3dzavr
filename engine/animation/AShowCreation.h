@@ -2,7 +2,7 @@
 #define ANIMATION_ASHOWCREATION_H
 
 #include <animation/Animation.h>
-#include <objects/geometry/Mesh.h>
+#include <objects/geometry/TriangleMesh.h>
 #include <Consts.h>
 
 class AShowCreation final : public Animation {

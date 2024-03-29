@@ -18,7 +18,7 @@ Engine::Engine() {
 
 void Engine::projectGroup(const Group &group) {
     for(const auto& [objTag, obj] : group) {
-        std::shared_ptr<Mesh> subMesh = std::dynamic_pointer_cast<Mesh>(obj);
+        std::shared_ptr<TriangleMesh> subMesh = std::dynamic_pointer_cast<TriangleMesh>(obj);
         if(subMesh) {
             auto projected = camera->project(*subMesh);
             std::shared_ptr<Material> material = subMesh->getMaterial();
@@ -38,6 +38,13 @@ void Engine::projectGroup(const Group &group) {
         if(subGroup) {
             // We need to recursively continue to draw subgroup
             projectGroup(*subGroup);
+        }
+        std::shared_ptr<LineMesh> subLineMesh = std::dynamic_pointer_cast<LineMesh>(obj);
+        if(subLineMesh) {
+            auto projectedLines = camera->project(*subLineMesh);
+            for(const auto& projectedLine: projectedLines) {
+                _projectedLines.emplace_back(projectedLine, subLineMesh->getColor());
+            }
         }
 
         std::shared_ptr<LightSource> l = std::dynamic_pointer_cast<LightSource>(obj);
@@ -62,11 +69,17 @@ void Engine::drawProjectedTriangles() {
 
     Time::startTimer("d rasterization");
     auto cameraPosition = camera->fullPosition();
+    // Draw opaque (non-transparent) triangles
     for (const auto& [projectedTriangle, triangle, material]: _projectedOpaqueTriangles) {
         screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, cameraPosition, material);
     }
+    // Draw transparent triangles
     for (const auto& [projectedTriangle, triangle, material]: _projectedTranspTriangles) {
         screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, cameraPosition, material);
+    }
+    // Draw lines
+    for (const auto& [line, color]: _projectedLines) {
+        screen->drawLine(line, color);
     }
 
     Time::stopTimer("d rasterization");
@@ -150,6 +163,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
         drawProjectedTriangles();
         _projectedOpaqueTriangles.clear();
         _projectedTranspTriangles.clear();
+        _projectedLines.clear();
 
         Time::stopTimer("d projections");
         Time::stopTimer("d rasterization");

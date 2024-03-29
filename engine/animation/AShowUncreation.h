@@ -2,7 +2,7 @@
 #define ANIMATION_ASHOWUNCREATION_H
 
 #include <animation/Animation.h>
-#include <objects/geometry/Mesh.h>
+#include <objects/geometry/TriangleMesh.h>
 
 class AShowUncreation final : public Animation {
 private:

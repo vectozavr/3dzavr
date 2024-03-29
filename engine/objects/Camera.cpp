@@ -1,36 +1,28 @@
 #include <cmath>
 
-#include "utils/Log.h"
-#include "Camera.h"
-#include "Consts.h"
+#include <utils/Log.h>
+#include <objects/Camera.h>
+#include <Consts.h>
 
-std::vector<std::pair<Triangle, Triangle>> Camera::project(const Mesh& mesh) {
+std::vector<std::pair<Triangle, Triangle>> Camera::project(const TriangleMesh& triangleMesh) {
 
     std::vector<std::pair<Triangle, Triangle>> result{};
 
     if (!_ready) {
-        Log::log("Camera::project(): cannot project _tris without camera initialization ( Camera::setup() ) ");
+        Log::log("Camera::project(): cannot project triangularMesh without camera initialization ( Camera::setup(); ) ");
         return result;
     }
 
-    if (!mesh.isVisible()) {
+    if (!triangleMesh.isVisible()) {
         return result;
     }
     // Model transform matrix: translate _tris in the origin of body.
-    Matrix4x4 objectToCamera = fullInvModel() * mesh.fullModel();
+    Matrix4x4 objectToCamera = fullInvModel() * triangleMesh.fullModel();
 
     Matrix4x4 cameraToWorld = fullModel();
 
     // Transform mesh bounds into camera coordinates
-    Vec3D center = Vec3D(objectToCamera * mesh.bounds().center.makePoint4D());
-    Vec3D left = objectToCamera.x() * mesh.bounds().extents.x();
-    Vec3D up = objectToCamera.y() * mesh.bounds().extents.y();
-    Vec3D forward = objectToCamera.z() * mesh.bounds().extents.z();
-    Vec3D extents(
-        std::abs(left.x()) + std::abs(up.x()) + std::abs(forward.x()),
-        std::abs(left.y()) + std::abs(up.y()) + std::abs(forward.y()),
-        std::abs(left.z()) + std::abs(up.z()) + std::abs(forward.z())
-    );
+    auto [center, extents] = triangleMesh.bounds()*objectToCamera;
 
     // Check if object bounds is inside camera frustum
     for (auto &plane : _clipPlanes) {
@@ -43,7 +35,7 @@ std::vector<std::pair<Triangle, Triangle>> Camera::project(const Mesh& mesh) {
             return result;
     }
 
-    for (auto &t : mesh.triangles()) {
+    for (auto &t : triangleMesh.triangles()) {
 
         // TODO: here we apply the same objectToCamera matrix every single frame. Might be improved by cashing.
         Triangle MTriangle = t * objectToCamera;
@@ -144,4 +136,62 @@ void Camera::setup(int width, int height, double fov, double ZNear, double ZFar)
 
     _ready = true;
     Log::log("Camera::init(): camera successfully initialized.");
+}
+
+std::vector<Line> Camera::project(const LineMesh &lineMesh) {
+    std::vector<Line> result{};
+
+    if (!_ready) {
+        Log::log("Camera::project(): cannot project lineMesh without camera initialization ( Camera::setup(); ) ");
+        return result;
+    }
+
+    if (!lineMesh.isVisible()) {
+        return result;
+    }
+    // Model transform matrix: translate _tris in the origin of body.
+    Matrix4x4 objectToCamera = fullInvModel() * lineMesh.fullModel();
+
+    // Transform mesh bounds into camera coordinates
+    auto [center, extents] = lineMesh.bounds()*objectToCamera;
+
+    // Check if object bounds is inside camera frustum
+    for (auto &plane : _clipPlanes) {
+        double r =
+                extents.x() * std::abs(plane.normal.x()) +
+                extents.y() * std::abs(plane.normal.y()) +
+                extents.z() * std::abs(plane.normal.z());
+
+        if (plane.distance(center) + r < 0)
+            return result;
+    }
+
+    for (auto &line : lineMesh.lines()) {
+
+        // TODO: here we apply the same objectToCamera matrix every single frame. Might be improved by cashing.
+
+        Line MLine = line * objectToCamera;
+
+        // In the beginning we need to translate lines from object local coordinate to world coordinates:
+        // After that we apply clipping for all planes from _clipPlanes
+        bool isFullyOutside = false;
+        Line _clippedLine = MLine;
+        for (auto &plane : _clipPlanes) {
+            _clippedLine = plane.clip(_clippedLine, isFullyOutside);
+            if(isFullyOutside) {
+                break;
+            }
+        }
+        if(isFullyOutside) {
+            continue;
+        }
+
+        Line _projectedLine = _clippedLine*_SP;
+        Line _projectedDehomLine = {_projectedLine.p1()/_projectedLine.p1().w(),
+                                    _projectedLine.p2()/_projectedLine.p2().w() };
+
+        result.emplace_back(_projectedDehomLine);
+    }
+
+    return result;
 }

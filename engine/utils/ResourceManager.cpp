@@ -154,7 +154,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     // On each step we will check did we read all the information to be able to create a new material
     auto addObject = [objects, &materials, &objName, &materialName, &tris] {
         if((!objName.empty() || !materialName.empty()) && !tris.empty()) {
-            objects->add(std::make_shared<Mesh>(
+            objects->add(std::make_shared<TriangleMesh>(
                     ObjectTag(objName + "_" + materialName + "_" + std::to_string(objects->size())), tris,
                     materials[MaterialTag(materialName)]));
 

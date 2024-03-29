@@ -3,8 +3,6 @@
 
 #include <linalg/Vec4D.h>
 #include <linalg/Vec3D.h>
-#include <linalg/Vec2D.h>
-#include <objects/props/Color.h>
 #include <linalg/Matrix4x4.h>
 #include <Consts.h>
 
