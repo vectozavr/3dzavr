@@ -47,6 +47,9 @@ private:
     bool _enableTexturing = true;
     bool _enableMipmapping = true;
 
+    double _lightingLODNearDistance = Consts::LIGHTING_LOD_NEAR_DISTANCE;
+    double _lightingLODFarDistance = Consts::LIGHTING_LOD_FAR_DISTANCE;
+
     // returns true if z is smaller than what is stored in the _depthBuffer
     [[nodiscard]] bool checkPixelDepth(uint16_t x, uint16_t y, double z) const;
 
@@ -81,9 +84,11 @@ public:
     void drawPlot(const std::vector<std::pair<double, double>>& data, int x, int y, uint16_t w, uint16_t h);
 
     void drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
-                                  const std::vector<std::shared_ptr<LightSource>>& lights, Material* material = nullptr);
+                                  const std::vector<std::shared_ptr<LightSource>>& lights,
+                                  const Vec3D& cameraPosition, Material* material = nullptr);
     void drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
-                                  const std::vector<std::shared_ptr<LightSource>>& lights, const Color &color);
+                                  const std::vector<std::shared_ptr<LightSource>>& lights,
+                                  const Vec3D& cameraPosition, const Color &color);
 
     void setTitle(const std::string &title);
     void setDepthTest(bool enable) { _depthTest = enable; };
@@ -94,6 +99,8 @@ public:
     void setTriangleBorders(bool enable) { _enableTriangleBorders = enable; }
     void setTexturing(bool enable) { _enableTexturing = enable; }
     void setMipmapping(bool enable) { _enableMipmapping = enable; }
+    void setLightingLODNearDistance(double distance) { _lightingLODNearDistance = distance; }
+    void setLightingLODFarDistance(double distance) { _lightingLODFarDistance = distance; }
 
     [[nodiscard]] std::string title() const { return _title; };
     [[nodiscard]] bool isOpen() const;

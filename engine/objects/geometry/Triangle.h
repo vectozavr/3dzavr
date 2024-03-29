@@ -39,7 +39,7 @@ public:
 
     Triangle &operator=(const Triangle &) = default;
     [[nodiscard]] inline const Vec4D& operator[](int i) const { return _points[i]; }
-    [[nodiscard]] inline Vec3D position() const { return Vec3D(_points[0] + _points[1] + _points[2])/3; }
+    [[nodiscard]] inline Vec3D centroid() const { return Vec3D(_points[0] + _points[1] + _points[2])/3; }
     [[nodiscard]] inline Vec3D norm() const { return _normal; }
 
     // Operations with Matrix4x4

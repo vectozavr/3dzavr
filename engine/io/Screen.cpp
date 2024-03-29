@@ -319,14 +319,26 @@ struct Vec3DUint {
 
 
 std::tuple<Vec3DUint, Vec3DUint, Vec3DUint> computeLightingForThreePoints(const Triangle &Mtriangle,
-                                                    const std::vector<std::shared_ptr<LightSource>>& lights) {
+                                                    const std::vector<std::shared_ptr<LightSource>>& lights, const Vec3D& cameraPos,
+                                                    double nearDistance, double farDistance) {
     Vec3DUint l1, l2, l3;
+
+    Vec3D fromTriToCamera = cameraPos - Vec3D(Mtriangle[0]);
+    double distance = fromTriToCamera.abs();
+
+    double simplCoef = 0.0;
+    if(distance > farDistance) {
+        simplCoef = 1.0;
+    } else if (distance > nearDistance && distance <= farDistance) {
+        simplCoef = (distance-nearDistance)/(farDistance - nearDistance);
+    }
 
     for (const auto& lightSource: lights) {
         auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
-        auto c1 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[0]));
-        auto c2 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[1]));
-        auto c3 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[2]));
+
+        auto c1 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[0]), simplCoef);
+        auto c2 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[1]), simplCoef);
+        auto c3 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[2]), simplCoef);
 
         l1 += {c1.r(), c1.g(), c1.b()};
         l2 += {c2.r(), c2.g(), c2.b()};
@@ -338,7 +350,8 @@ std::tuple<Vec3DUint, Vec3DUint, Vec3DUint> computeLightingForThreePoints(const 
 
 
 void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
-                                      const std::vector<std::shared_ptr<LightSource>>& lights, Material* material) {
+                                      const std::vector<std::shared_ptr<LightSource>>& lights,
+                                      const Vec3D& cameraPosition, Material* material) {
 
     if(!_enableLighting) {
         drawTriangle(projectedTriangle, material);
@@ -353,7 +366,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
             color = material->ambient();
             color[3] *= material->d();
         }
-        drawTriangleWithLighting(projectedTriangle, Mtriangle, lights, color);
+        drawTriangleWithLighting(projectedTriangle, Mtriangle, lights, cameraPosition, color);
         return;
     }
 
@@ -390,7 +403,8 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
     uv_hom_dy = (tc[1] - tc[0]) * abg_dy.y() + (tc[2] - tc[0]) * abg_dy.z();
 
     // Let us try to do lighting not for every pixel, but for the triangle.
-    auto [l1, l2, l3] = computeLightingForThreePoints(Mtriangle, lights);
+    auto [l1, l2, l3] = computeLightingForThreePoints(Mtriangle, lights, cameraPosition,
+                                                      _lightingLODNearDistance, _lightingLODFarDistance);
 
     for (uint16_t y = y_min; y <= y_max; y++) {
         uint16_t x_cur_min, x_cur_max;
@@ -453,8 +467,6 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                     }
                 }
 
-                //TODO: we need to handle light aliasing problem (some sort of mip-mapping, but for normals and lighting...)
-
                 Color resColor(std::clamp<int>(color.r()*l.r/255, 0, 255),
                                std::clamp<int>(color.g()*l.g/255, 0, 255),
                                std::clamp<int>(color.b()*l.b/255, 0, 255), color.a());
@@ -473,7 +485,8 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
 }
 
 void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const Triangle &Mtriangle,
-                                      const std::vector<std::shared_ptr<LightSource>> &lights, const Color &color) {
+                                      const std::vector<std::shared_ptr<LightSource>> &lights,
+                                      const Vec3D& cameraPosition, const Color &color) {
 
     if(!_enableLighting) {
         drawTriangle(projectedTriangle, color);
@@ -499,7 +512,8 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
     auto abg_dx = projectedTriangle.abgBarycCoord(Vec2D(projectedTriangle[0]) + Vec2D(1, 0)) - Vec3D(1, 0, 0);
     auto abg_dy = projectedTriangle.abgBarycCoord(Vec2D(projectedTriangle[0]) + Vec2D(0, 1)) - Vec3D(1, 0, 0);
 
-    auto [l1, l2, l3] = computeLightingForThreePoints(Mtriangle, lights);
+    auto [l1, l2, l3] = computeLightingForThreePoints(Mtriangle, lights, cameraPosition,
+                                                      _lightingLODNearDistance, _lightingLODFarDistance);
 
     for (uint16_t y = y_min; y <= y_max; y++) {
         uint16_t x_cur_min, x_cur_max;

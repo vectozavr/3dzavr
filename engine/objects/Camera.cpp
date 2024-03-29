@@ -47,7 +47,7 @@ std::vector<std::pair<Triangle, Triangle>> Camera::project(const Mesh& mesh) {
 
         // TODO: here we apply the same objectToCamera matrix every single frame. Might be improved by cashing.
         Triangle MTriangle = t * objectToCamera;
-        double dot = MTriangle.norm().dot(MTriangle.position());
+        double dot = MTriangle.norm().dot(Vec3D(MTriangle[0]));
 
         if (dot > 0) {
             continue;

@@ -170,13 +170,25 @@ void WorldEditorGui::renderSettings() {
     auto ctx = _ctx.get();
 
     if (mu_begin_treenode(ctx, "Render Settings")) {
-        mu_checkbox(ctx, "Lighting", &_enableLighting);
-        mu_checkbox(ctx, "Exact lighting", &_enableTrueLighting);
+
         mu_checkbox(ctx, "Transparent objects", &_enableTransparency);
         mu_checkbox(ctx, "Borders of triangles", &_enableTriangleBorders);
         mu_checkbox(ctx, "Texturing", &_enableTexturing);
         mu_checkbox(ctx, "Texture antialiasing (mipmapping)", &_enableMipmapping);
         mu_checkbox(ctx, "Depth test", &_enableDepthTest);
+
+        if (mu_begin_treenode(ctx, "Lighting")) {
+            mu_checkbox(ctx, "Lighting", &_enableLighting);
+            mu_checkbox(ctx, "Exact lighting", &_enableTrueLighting);
+
+            mu_layout_begin_column(ctx);
+            mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
+            mu_label(ctx, "LOD near");   mu_slider(ctx, &_lightingLODNearDistance, 0, 100);
+            mu_label(ctx, "LOD far"); mu_slider(ctx, &_lightingLODFarDistance, _lightingLODNearDistance, _lightingLODNearDistance+100);
+            mu_layout_end_column(ctx);
+
+            mu_end_treenode(ctx);
+        }
 
         mu_end_treenode(ctx);
     }

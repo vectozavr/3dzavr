@@ -18,6 +18,9 @@ namespace Consts {
     constexpr double EPS = 0.00000000001;
     constexpr double ABG_TRIANGLE_BORDER_WIDTH = 0.01;
 
+    constexpr double LIGHTING_LOD_NEAR_DISTANCE = 5;
+    constexpr double LIGHTING_LOD_FAR_DISTANCE = 10;
+
     constexpr double EPA_EPS = 0.0001;
 
     constexpr double LARGEST_TIME_STEP = 1.0 / 15.0;

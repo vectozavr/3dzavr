@@ -21,7 +21,12 @@ public:
     [[nodiscard]] inline Color color() const { return _color; };
     [[nodiscard]] inline double intensity() const { return _intensity; };
 
-    [[nodiscard]] virtual Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition) const = 0;
+    /*
+     * simplCoef is in range [0, 1], where 0 means exact computation and 1 means simplified.
+     * All values between 0 and 1 can be handled in any reasonable way
+     * (e.g. linear interpolation between exact and simplified).
+     */
+    [[nodiscard]] virtual Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef = 0.0) const = 0;
 };
 
 

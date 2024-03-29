@@ -200,6 +200,8 @@ private:
         screen->setTexturing(_worldEditorGui->isEnabledTexturing());
         screen->setMipmapping(_worldEditorGui->isEnabledMipmapping());
         screen->setDepthTest(_worldEditorGui->isEnabledDepthTest());
+        screen->setLightingLODNearDistance(_worldEditorGui->getLightingLODNearDistance());
+        screen->setLightingLODFarDistance(_worldEditorGui->getLightingLODFarDistance());
     };
 
 public:

@@ -42,6 +42,9 @@ private:
     bool _enableTexturing = true;
     bool _enableMipmapping = true;
     bool _enableDepthTest = true;
+
+    float _lightingLODNearDistance = Consts::LIGHTING_LOD_NEAR_DISTANCE;
+    float _lightingLODFarDistance = Consts::LIGHTING_LOD_FAR_DISTANCE;
 public:
     WorldEditorGui(const std::function<void(bool)>& setDepthTestFunction,
                    const std::function<void(int, int, int, int, const Color&, uint16_t)>& drawLineFunction,
@@ -62,6 +65,9 @@ public:
     [[nodiscard]] std::shared_ptr<Object> selectedObject() { return _selectedObject; }
 
     void setSelectedObject(const std::shared_ptr<Object>& object) { _selectedObject = object; }
+
+    [[nodiscard]] inline double getLightingLODNearDistance() const { return _lightingLODNearDistance; }
+    [[nodiscard]] inline double getLightingLODFarDistance() const { return _lightingLODFarDistance; }
 };
 
 

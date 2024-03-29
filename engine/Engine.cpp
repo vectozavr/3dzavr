@@ -61,11 +61,12 @@ void Engine::drawProjectedTriangles() {
     Time::stopTimer("d sort triangles");
 
     Time::startTimer("d rasterization");
+    auto cameraPosition = camera->fullPosition();
     for (const auto& [projectedTriangle, triangle, material]: _projectedOpaqueTriangles) {
-        screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, material);
+        screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, cameraPosition, material);
     }
     for (const auto& [projectedTriangle, triangle, material]: _projectedTranspTriangles) {
-        screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, material);
+        screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, cameraPosition, material);
     }
 
     Time::stopTimer("d rasterization");
