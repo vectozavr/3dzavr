@@ -59,7 +59,7 @@ void Engine::drawProjectedTriangles() {
     Time::startTimer("d sort triangles");
     std::sort(_projectedTranspTriangles.begin(), _projectedTranspTriangles.end(), [](const auto& e1, const auto& e2){
         const auto& [projT1, t1, material1] = e1;
-        const auto& [projT2, t2, material2] = e1;
+        const auto& [projT2, t2, material2] = e2;
 
         double z1 = projT1[0].z() + projT1[1].z() + projT1[2].z();
         double z2 = projT2[0].z() + projT2[1].z() + projT2[2].z();

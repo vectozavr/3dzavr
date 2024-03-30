@@ -2,21 +2,16 @@
 
 #include <Engine.h>
 #include <io/Screen.h>
-#include <utils/ObjectController.h>
+#include <utils/WorldEditor.h>
 #include <objects/props/Texture.h>
 #include <animation/Animations.h>
 
 class Test final : public Engine {
 private:
-    std::shared_ptr<ObjectController> cameraController = nullptr;
-    std::shared_ptr<ObjectController> objController = nullptr;
-    std::shared_ptr<Object> selectedObject = nullptr;
-    bool objSelected = false;
-    bool objInFocus = false;
-    bool isControllerActive = true;
+    std::shared_ptr<WorldEditor> _worldEditor;
 
     void start() override {
-        cameraController = std::make_shared<ObjectController>(camera);
+        _worldEditor = std::make_shared<WorldEditor>(screen, world, camera);
 
         auto car = world->loadObject(
                 ObjectTag("car_1"),
@@ -29,7 +24,7 @@ private:
         Timeline::addAnimation<AWait>(0);
         Timeline::addAnimation<AAttractToPoint>(car, Vec3D(0), 3);
         Timeline::addAnimation<AWait>(0);
-        auto car_mesh = std::dynamic_pointer_cast<Mesh>(car->object(ObjectTag("Car_car_mat_0")));
+        auto car_mesh = std::dynamic_pointer_cast<TriangleMesh>(car->object(ObjectTag("Car_car_mat_0")));
         if(car_mesh) {
             Timeline::addAnimation<AShowUncreation>(car_mesh, 5);
             Timeline::addAnimation<AWait>(0);
@@ -67,61 +62,7 @@ private:
     void update() override {
         screen->setTitle("3dzavr, " + std::to_string(Time::fps()) + "fps");
 
-        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Color::BLACK);
-        screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Color::BLACK);
-
-        if(isControllerActive) {
-            if(objSelected) {
-                objController->update();
-            } else {
-                cameraController->update();
-            }
-        }
-
-
-        auto rayCast = world->rayCast(camera->position(), camera->position() + camera->lookAt(), {});
-
-        objInFocus = rayCast.intersected;
-
-        // select object:
-        if (Keyboard::isKeyTapped(SDLK_o)) {
-            if(objInFocus) {
-                objSelected = true;
-                selectedObject = rayCast.obj;
-                objController = std::make_shared<ObjectController>(selectedObject);
-                Log::log("Object " + rayCast.objectName.str() + " selected.");
-            }
-        }
-
-        // deselect object:
-        if (Keyboard::isKeyTapped(SDLK_p)) {
-            objSelected = false;
-            selectedObject.reset();
-        }
-
-        if(Keyboard::isKeyTapped(SDLK_q)) {
-            isControllerActive = !isControllerActive;
-        }
-
-        if (selectedObject && isControllerActive) {
-            // object scale x:
-            if (Keyboard::isKeyPressed(SDLK_UP)) {
-                selectedObject->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));
-            }
-            // object scale y:
-            if (Keyboard::isKeyPressed(SDLK_DOWN)) {
-                selectedObject->scaleInside(Vec3D(1, 1 + Time::deltaTime(), 1));
-            }
-            // object scale z:
-            if (Keyboard::isKeyPressed(SDLK_LEFT)) {
-                selectedObject->scaleInside(Vec3D(1, 1, 1 + Time::deltaTime()));
-            }
-
-            // undo transformations
-            if (Keyboard::isKeyPressed(SDLK_u)) {
-                selectedObject->transform(selectedObject->invModel());
-            }
-        }
+        _worldEditor->update();
 
         if(Keyboard::isKeyTapped(SDLK_TAB)) {
             setDebugInfo(!showDebugInfo());

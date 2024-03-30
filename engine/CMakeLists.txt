@@ -65,8 +65,6 @@ add_library(
 
         io/microui/microui.h
         io/microui/microui.c
-        io/WorldEditorGui.h
-        io/WorldEditorGui.cpp
 
         utils/Log.h
         utils/Log.cpp
@@ -84,6 +82,8 @@ add_library(
         utils/Font.cpp
         utils/ObjectController.h
         utils/ObjectController.cpp
+        utils/WorldEditor.h
+        utils/WorldEditor.cpp
         utils/stack_vector.h
         utils/math.h
         utils/math.cpp
