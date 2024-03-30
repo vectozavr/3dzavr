@@ -8,6 +8,7 @@
 #include <objects/props/Texture.h>
 #include <objects/lighting/PointLight.h>
 #include <objects/lighting/SpotLight.h>
+#include <animation/Animations.h>
 
 
 class Test final : public Engine {
@@ -51,7 +52,24 @@ private:
         PastVillage->translate(Vec3D{0,-0.3,-14.5});
         camera->rotateUp(Consts::PI);
 
-        auto skybox = world->loadObject(ObjectTag("skybox"), FilePath("resources/obj/skybox/midday/skyboxShape.obj"));
+        auto skybox = std::make_shared<Group>(ObjectTag("skybox"));
+        auto skyboxBack = ResourceManager::loadObject(ObjectTag("skybox_back"), FilePath("resources/obj/skybox/midday/skyboxShape.obj"));
+        auto skyboxBigClouds = ResourceManager::loadObject(ObjectTag("skybox_big_clouds"), FilePath("resources/obj/skybox/midday/skybox1Shape.obj"));
+        auto skyboxSmallClouds = ResourceManager::loadObject(ObjectTag("skybox_small_clouds"), FilePath("resources/obj/skybox/midday/skybox2Shape.obj"));
+        if(skyboxBack && skyboxBigClouds && skyboxSmallClouds) {
+            skybox->add(skyboxBack);
+            skybox->add(skyboxBigClouds);
+            skybox->add(skyboxSmallClouds);
+
+            Timeline::addAnimation<ARotate>(AnimationListTag("cloud_animation"),
+                                            skyboxBigClouds, Vec3D(0, 0.003, 0), 1,
+                                            Animation::LoopOut::Continue);
+            Timeline::addAnimation<ARotate>(AnimationListTag("cloud_animation"),
+                                            skyboxSmallClouds, Vec3D(0, 0.005, 0), 1,
+                                            Animation::LoopOut::Continue);
+        }
+        world->add(skybox);
+
         //auto skybox = world->loadObject(ObjectTag("skybox"), FilePath("resources/obj/skybox/sunset/skybox.obj"));
 
         //skybox->scale(Vec3D{0.1, 0.1, 0.1});

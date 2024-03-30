@@ -6,7 +6,7 @@
 
 class AShowUncreation final : public Animation {
 private:
-    const std::weak_ptr<Mesh> _mesh;
+    const std::weak_ptr<TriangleMesh> _mesh;
     const std::vector<Triangle> _triangles;
     double _shift; // value from 0 to 1
 
@@ -46,10 +46,10 @@ private:
     }
 
 public:
-    AShowUncreation(const std::weak_ptr<Mesh>& mesh, double duration = 1, double shift = 0.005, LoopOut looped = LoopOut::None,
+    AShowUncreation(const std::weak_ptr<TriangleMesh>& triangleMesh, double duration = 1, double shift = 0.005, LoopOut looped = LoopOut::None,
            InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                         interpolationType),
-                                                                              _mesh(mesh), _triangles(mesh.lock()->triangles()) {
+                                                                              _mesh(triangleMesh), _triangles(triangleMesh.lock()->triangles()) {
         _shift = std::clamp<double>(shift, 0.0, 1.0);
     }
 };

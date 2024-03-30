@@ -7,7 +7,7 @@
 
 class ADecompose final : public Animation {
 private:
-    const std::weak_ptr<Mesh> _mesh;
+    const std::weak_ptr<TriangleMesh> _mesh;
     std::vector<Triangle> _triangles;
 
     double _value;
@@ -30,16 +30,16 @@ private:
         newTriangles.reserve(_triangles.size());
 
         for(auto &t : _triangles) {
-            newTriangles.emplace_back((t * Matrix4x4::Translation(t.position().normalized()*progress()*_value)));
+            newTriangles.emplace_back((t * Matrix4x4::Translation(t.centroid().normalized()*progress()*_value)));
         }
         mesh->setTriangles(std::move(newTriangles));
     }
 
 public:
-    ADecompose(const std::weak_ptr<Mesh>& mesh, double value, double duration = 1, LoopOut looped = LoopOut::None,
+    ADecompose(const std::weak_ptr<TriangleMesh>& triangleMesh, double value, double duration = 1, LoopOut looped = LoopOut::None,
                InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                                interpolationType),
-                                                                                  _value(value), _mesh(mesh) {}
+                                                                                  _value(value), _mesh(triangleMesh) {}
 };
 
 #endif //ANIMATION_ADECOMPOSE_H
