@@ -298,8 +298,10 @@ void WorldEditor::updateScreenSettings() {
 
 void WorldEditor::updateControllers() {
 
-    _screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Color::BLACK);
-    _screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Color::BLACK);
+    if(_isControllerActive) {
+        _screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-1, Consts::STANDARD_SCREEN_HEIGHT/2-7, 1, 14, Color::BLACK);
+        _screen->drawStrokeRectangle(Consts::STANDARD_SCREEN_WIDTH/2-7, Consts::STANDARD_SCREEN_HEIGHT/2-1, 14, 1, Color::BLACK);
+    }
 
     if(_isControllerActive) {
         if(_selectedObject) {
@@ -396,7 +398,11 @@ void WorldEditor::updateControllers() {
 }
 
 void WorldEditor::update() {
-    handleInputEvents();
+
+    if(!_isControllerActive) {
+        handleInputEvents();
+    }
+
     processFrame();
 
     updateScreenSettings();
