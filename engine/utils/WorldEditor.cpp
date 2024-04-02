@@ -53,6 +53,7 @@ WorldEditor::WorldEditor(std::shared_ptr<Screen> screen, std::shared_ptr<World> 
     // For debug
     _redCube = std::make_shared<TriangleMesh>(TriangleMesh::Cube(ObjectTag("RedCube"), 0.1));
     _redCube->setVisible(_objInFocus);
+
 #ifndef NDEBUG
     _world->add(_redCube);
 #endif
@@ -202,7 +203,7 @@ void WorldEditor::objectEditor() {
         mu_text(ctx, ("Object name: " + _selectedObject->name().str()).c_str());
 
 
-        auto pos = _selectedObject->position();
+        auto pos = _selectedObject->fullPosition();
         mu_text(ctx, ("X / Y / Z: " + std::to_string(pos.x()) + " / " + std::to_string(pos.y()) + " / " + std::to_string(pos.z()) ).c_str());
 
 
@@ -213,35 +214,39 @@ void WorldEditor::objectEditor() {
         if (mu_button(ctx, "Scale")) { _operation = 1; }
         if (mu_button(ctx, "Rotate")) { _operation = 2; }
 
-        float x, y, z;
+        float x = 0;
+        float y = 0;
+        float z = 0;
 
         switch (_operation) {
             case 0:
                 mu_layout_begin_column(ctx);
                 mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
-                mu_label(ctx, "Translate X:");   mu_slider(ctx, &x, -30*Time::deltaTime(), 30*Time::deltaTime());
-                mu_label(ctx, "Translate Y:"); mu_slider(ctx, &y, -30*Time::deltaTime(), 30*Time::deltaTime());
-                mu_label(ctx, "Translate Z:");  mu_slider(ctx, &z, -30*Time::deltaTime(), 30*Time::deltaTime());
+                mu_label(ctx, "Translate X:");   mu_slider(ctx, &x, -30, 30);
+                mu_label(ctx, "Translate Y:"); mu_slider(ctx, &y, -30, 30);
+                mu_label(ctx, "Translate Z:");  mu_slider(ctx, &z, -30, 30);
                 mu_layout_end_column(ctx);
-                _selectedObject->translate(Vec3D(x, y, z));
+                _selectedObject->translate(Vec3D(x, y, z)*Time::deltaTime());
                 break;
             case 1:
                 mu_layout_begin_column(ctx);
                 mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
-                mu_label(ctx, "Scale X:");   mu_slider(ctx, &x, -3*Time::deltaTime(), 3*Time::deltaTime());
-                mu_label(ctx, "Scale Y:"); mu_slider(ctx, &y, -3*Time::deltaTime(), 3*Time::deltaTime());
-                mu_label(ctx, "Scale Z:");  mu_slider(ctx, &z, -3*Time::deltaTime(), 3*Time::deltaTime());
+                mu_label(ctx, "Scale X:");   mu_slider(ctx, &x, -3, 3);
+                mu_label(ctx, "Scale Y:"); mu_slider(ctx, &y, -3, 3);
+                mu_label(ctx, "Scale Z:");  mu_slider(ctx, &z, -3, 3);
                 mu_layout_end_column(ctx);
-                _selectedObject->scale(Vec3D(1 + x, 1 + y, 1 + z));
+                _selectedObject->scaleInside(Vec3D(1 + x*Time::deltaTime(),
+                                                   1 + y*Time::deltaTime(),
+                                                   1 + z*Time::deltaTime()));
                 break;
             case 2:
                 mu_layout_begin_column(ctx);
                 mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
-                mu_label(ctx, "Rotate X:");   mu_slider(ctx, &x, -3*Time::deltaTime(), 3*Time::deltaTime());
-                mu_label(ctx, "Rotate Y:"); mu_slider(ctx, &y, -3*Time::deltaTime(), 3*Time::deltaTime());
-                mu_label(ctx, "Rotate Z:");  mu_slider(ctx, &z, -3*Time::deltaTime(), 3*Time::deltaTime());
+                mu_label(ctx, "Rotate X:");   mu_slider(ctx, &x, -3, 3);
+                mu_label(ctx, "Rotate Y:"); mu_slider(ctx, &y, -3, 3);
+                mu_label(ctx, "Rotate Z:");  mu_slider(ctx, &z, -3, 3);
                 mu_layout_end_column(ctx);
-                _selectedObject->rotate(Vec3D(x, y, z));
+                _selectedObject->rotateRelativePoint(_selectedObject->position(), Vec3D(x, y, z)*Time::deltaTime());
                 break;
         }
 
@@ -311,18 +316,21 @@ void WorldEditor::updateControllers() {
         }
     }
 
-    auto rayCast = _world->rayCast(_camera->position(), _camera->position() + _camera->lookAt(), {_redCube->name()});
-
-    _objInFocus = rayCast.intersected;
+#ifndef NDEBUG
+    auto debugRayCast = _world->rayCast(_camera->position(), _camera->position() + _camera->lookAt(), {_redCube->name()});
+    _objInFocus = debugRayCast.intersected;
     _redCube->setVisible(_objInFocus);
     if(_objInFocus) {
-        _redCube->translateToPoint(rayCast.pointOfIntersection);
+        _redCube->translateToPoint(debugRayCast.pointOfIntersection);
     }
+#endif
 
     if(_isControllerActive) {
         // select object:
         if (Keyboard::isKeyTapped(SDLK_o) || Mouse::isButtonTapped(SDL_BUTTON_LEFT)) {
-            if(_objInFocus) {
+            auto rayCast = _world->rayCast(_camera->position(), _camera->position() + _camera->lookAt(), {_redCube->name()});
+
+            if(rayCast.intersected) {
                 _selectedObject = rayCast.obj;
                 _objController = std::make_shared<ObjectController>(_selectedObject);
                 Log::log("Object " + rayCast.obj->name().str() + " selected.");

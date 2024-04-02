@@ -1,6 +1,8 @@
 #include <cmath>
 
 #include <ScalarConsts.h>
+#include "Matrix4x4.h"
+
 
 inline Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
     Matrix4x4 result = Matrix4x4::Zero();
@@ -9,6 +11,7 @@ inline Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &matrix4X4) const {
         for (int j = 0; j < 4; j++)
             for (int k = 0; k < 4; k++)
                 result._arr[i][j] += _arr[i][k] * matrix4X4._arr[k][j];
+
     return result;
 }
 
@@ -186,68 +189,6 @@ inline Matrix4x4 Matrix4x4::ScreenSpace(uint16_t width, uint16_t height, int shi
     return s;
 }
 
-inline Matrix4x4 Matrix4x4::View(const Matrix4x4 &transformMatrix) {
-    Matrix4x4 V = Zero();
-
-    Vec3D left   = transformMatrix.x();
-    Vec3D up     = transformMatrix.y();
-    Vec3D lookAt = transformMatrix.z();
-    Vec3D eye    = transformMatrix.w();
-
-    double left_sqrAbs   = left.sqrAbs();
-    double up_sqrAbs     = up.sqrAbs();
-    double lookAt_sqrAbs = lookAt.sqrAbs();
-
-    // TODO: what is the optimal EPS here? If EPS will be too small -> we will not use fast calculations.
-    //  If the EPS is large -> operations might become unstable.
-    if((std::abs(left.dot(up)) < Consts::EPS) &&
-       (std::abs(left.dot(lookAt)) < Consts::EPS) &&
-       (std::abs(up.dot(lookAt)) < Consts::EPS)) {
-        // When left, up and lookAt are perpendicular to each other
-
-        V._arr[0][0] = left.x()/left_sqrAbs;
-        V._arr[0][1] = left.y()/left_sqrAbs;
-        V._arr[0][2] = left.z()/left_sqrAbs;
-
-        V._arr[1][0] = up.x()/up_sqrAbs;
-        V._arr[1][1] = up.y()/up_sqrAbs;
-        V._arr[1][2] = up.z()/up_sqrAbs;
-
-        V._arr[2][0] = lookAt.x()/lookAt_sqrAbs;
-        V._arr[2][1] = lookAt.y()/lookAt_sqrAbs;
-        V._arr[2][2] = lookAt.z()/lookAt_sqrAbs;
-
-    } else {
-        // General case: up and lookAt are not necessary perpendicular
-
-        std::array<std::array<double, 4>, 4> m = transformMatrix._arr;
-
-        double det = m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
-                     m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
-                     m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
-
-        V._arr[0][0] = (m[1][1] * m[2][2] - m[2][1] * m[1][2]) / det;
-        V._arr[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) / det;
-        V._arr[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) / det;
-
-        V._arr[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) / det;
-        V._arr[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) / det;
-        V._arr[1][2] = (m[1][0] * m[0][2] - m[0][0] * m[1][2]) / det;
-
-        V._arr[2][0] = (m[1][0] * m[2][1] - m[2][0] * m[1][1]) / det;
-        V._arr[2][1] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) / det;
-        V._arr[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) / det;
-    }
-
-    V._arr[0][3] = -eye.dot(left)/left_sqrAbs;
-    V._arr[1][3] = -eye.dot(up)/up_sqrAbs;
-    V._arr[2][3] = -eye.dot(lookAt)/lookAt_sqrAbs;
-
-    V._arr[3][3] = 1.0;
-
-    return V;
-}
-
 inline Vec3D Matrix4x4::x() const {
     return Vec3D(_arr[0][0], _arr[1][0], _arr[2][0]);
 }
@@ -309,8 +250,48 @@ inline Matrix4x4 Matrix4x4::operator-(const Matrix4x4 &matrix4X4) const {
     return result;
 }
 
-inline Matrix4x4 Matrix4x4::inverse() const {
+inline Matrix4x4 Matrix4x4::View(const Matrix4x4 &transformMatrix) {
+    Matrix4x4 V = Zero();
 
+    if(transformMatrix.arePerpendicularAxis()) {
+        // When left, up and lookAt are perpendicular to each other
+
+        Vec3D left   = transformMatrix.x();
+        Vec3D up     = transformMatrix.y();
+        Vec3D lookAt = transformMatrix.z();
+        Vec3D eye    = transformMatrix.w();
+
+        double left_sqrAbs   = left.sqrAbs();
+        double up_sqrAbs     = up.sqrAbs();
+        double lookAt_sqrAbs = lookAt.sqrAbs();
+
+        V._arr[0][0] = left.x()/left_sqrAbs;
+        V._arr[0][1] = left.y()/left_sqrAbs;
+        V._arr[0][2] = left.z()/left_sqrAbs;
+
+        V._arr[1][0] = up.x()/up_sqrAbs;
+        V._arr[1][1] = up.y()/up_sqrAbs;
+        V._arr[1][2] = up.z()/up_sqrAbs;
+
+        V._arr[2][0] = lookAt.x()/lookAt_sqrAbs;
+        V._arr[2][1] = lookAt.y()/lookAt_sqrAbs;
+        V._arr[2][2] = lookAt.z()/lookAt_sqrAbs;
+
+        V._arr[0][3] = -eye.dot(left)/left_sqrAbs;
+        V._arr[1][3] = -eye.dot(up)/up_sqrAbs;
+        V._arr[2][3] = -eye.dot(lookAt)/lookAt_sqrAbs;
+
+        V._arr[3][3] = 1.0;
+
+    } else {
+        // General case: up and lookAt are not necessary perpendicular
+        return transformMatrix.inverse();
+    }
+
+    return V;
+}
+
+inline Matrix4x4 Matrix4x4::inverse() const {
     std::array<std::array<double, 4>, 4> m = _arr;
 
     double A2323 = m[2][2] * m[3][3] - m[2][3] * m[3][2];
@@ -334,9 +315,9 @@ inline Matrix4x4 Matrix4x4::inverse() const {
 
     double det =
             m[0][0] * ( m[1][1] * A2323 - m[1][2] * A1323 + m[1][3] * A1223 )
-          - m[0][1] * ( m[1][0] * A2323 - m[1][2] * A0323 + m[1][3] * A0223 )
-          + m[0][2] * ( m[1][0] * A1323 - m[1][1] * A0323 + m[1][3] * A0123 )
-          - m[0][3] * ( m[1][0] * A1223 - m[1][1] * A0223 + m[1][2] * A0123 );
+            - m[0][1] * ( m[1][0] * A2323 - m[1][2] * A0323 + m[1][3] * A0223 )
+            + m[0][2] * ( m[1][0] * A1323 - m[1][1] * A0323 + m[1][3] * A0123 )
+            - m[0][3] * ( m[1][0] * A1223 - m[1][1] * A0223 + m[1][2] * A0123 );
 
     if(std::abs(det) < Consts::EPS) {
         throw std::domain_error{"Matrix4x4::inverse(): singular matrix."};
@@ -364,4 +345,24 @@ inline Matrix4x4 Matrix4x4::inverse() const {
     inv._arr[3][3] = det *   ( m[0][0] * A1212 - m[0][1] * A0212 + m[0][2] * A0112 );
 
     return inv;
+}
+
+inline bool Matrix4x4::arePerpendicularAxis() const {
+    /*
+     * left   = x();
+     * up     = y();
+     * lookAt = z();
+     * eye    = w();
+     */
+
+    // TODO: what is the optimal EPS here? If EPS will be too small -> we will not use fast calculations.
+    //  If the EPS is large -> operations might become unstable.
+    if((std::abs(x().dot(y())) < Consts::EPS) &&
+       (std::abs(x().dot(z())) < Consts::EPS) &&
+       (std::abs(y().dot(z())) < Consts::EPS)) {
+        // When left, up and lookAt are perpendicular to each other
+        return true;
+    }
+
+    return false;
 }

@@ -10,6 +10,7 @@ class Matrix4x4 final {
 private:
     std::array<std::array<double, 4>, 4> _arr{};
 
+    [[nodiscard]] bool arePerpendicularAxis() const;
 public:
     Matrix4x4() = default;
     explicit Matrix4x4(const std::array<std::array<double, 4>, 4>& matrix) : _arr(matrix) {};
@@ -30,7 +31,11 @@ public:
     [[nodiscard]] Vec3D z() const;
     [[nodiscard]] Vec3D w() const;
 
-    // This function is computationally inefficient. It is better to use View() method.
+    /*
+     * This function is computationally inefficient.
+     * It is better to use View() method for 3D applications, where you do not need the inverse of 4x4 matrix,
+     * but the inverse of 3x3 matrix + inverse translation.
+     */
     [[nodiscard]] Matrix4x4 inverse() const;
 
     [[nodiscard]] double abs() const;

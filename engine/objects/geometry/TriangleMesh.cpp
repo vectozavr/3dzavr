@@ -158,10 +158,9 @@ void TriangleMesh::setTriangles(std::vector<Triangle>&& t) {
 Object::IntersectionInformation TriangleMesh::intersect(const Vec3D &from, const Vec3D &to) {
 
     bool intersected = false;
-    Vec3D point{};
+    Vec3D point;
     double minDistance = std::numeric_limits<double>::infinity();
     Vec3D norm;
-    Color color;
     Triangle triangle;
 
     Matrix4x4 model = this->fullModel();
@@ -174,7 +173,6 @@ Object::IntersectionInformation TriangleMesh::intersect(const Vec3D &from, const
     Vec3D d_model = invModel*d;
     Vec3D from_model = Vec3D(invModel*from.makePoint4D());
     Vec3D to_model = Vec3D(invModel*to.makePoint4D());
-
 
     for (auto &tri : triangles()) {
 
