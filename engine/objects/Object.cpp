@@ -100,3 +100,12 @@ Object::~Object() {
 
     unattachAll();
 }
+
+void Object::updateComponents() {
+    for(const auto& component : _components) {
+        component->update();
+    }
+    for(const auto& [name, obj] : _attached) {
+        obj->updateComponents();
+    }
+}

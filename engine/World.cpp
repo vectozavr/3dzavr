@@ -23,14 +23,18 @@ TriangleMesh::IntersectionInformation World::rayCast(const Vec3D &from, const Ve
 }
 
 void World::update() {
+    updateComponents();
+
     // TODO: we need to update physics state of all RigidObject inside all groups
     // so now it is incorrect and should be fixed later..
+    /*
     for (auto &[name, obj] : _attached) {
         std::shared_ptr<RigidObject> rigidBodyObj = std::dynamic_pointer_cast<RigidObject>(obj);
         if(rigidBodyObj) {
             checkCollision(name);
         }
     }
+     */
 }
 
 void World::checkCollision(const ObjectTag &tag) {

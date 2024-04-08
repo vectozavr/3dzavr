@@ -44,15 +44,6 @@ private:
     //Object* _attachedTo = nullptr;
     Object* _attachedTo = nullptr;
 
-    template<typename T>
-    bool hasComponent() const {
-        for (const auto& cmp : _components) {
-            if (std::dynamic_pointer_cast<T>(cmp)) {
-                return true;
-            }
-        }
-        return false;
-    }
     void copyComponentsFromObject(const Object &object);
 protected:
     std::map<ObjectTag, std::shared_ptr<Object>> _attached;
@@ -104,6 +95,18 @@ public:
         }
         return nullptr;
     }
+
+    template<typename T>
+    bool hasComponent() const {
+        for (const auto& cmp : _components) {
+            if (std::dynamic_pointer_cast<T>(cmp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void updateComponents();
 
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator begin() { return _attached.begin(); }
     std::map<ObjectTag, std::shared_ptr<Object>>::iterator end() { return _attached.end(); }
