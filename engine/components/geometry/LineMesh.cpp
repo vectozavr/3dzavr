@@ -1,4 +1,4 @@
-#include <objects/geometry/LineMesh.h>
+#include "LineMesh.h"
 
 LineMesh &LineMesh::operator*=(const Matrix4x4 &matrix4X4) {
     std::vector<Line> newLines;
@@ -39,18 +39,12 @@ void LineMesh::calculateBounds() {
 }
 
 LineMesh::LineMesh(const LineMesh &lineMesh, bool deepCopy):
-Object(lineMesh), _color(lineMesh._color), _visible(lineMesh._visible) {
+TransformMatrix(lineMesh), _color(lineMesh._color), _visible(lineMesh._visible) {
     copyLines(lineMesh, deepCopy);
 }
 
-LineMesh::LineMesh(const ObjectTag &tag, const LineMesh &lineMesh, bool deepCopy):
-Object(tag, lineMesh), _color(lineMesh._color), _visible(lineMesh._visible) {
-    copyLines(lineMesh, deepCopy);
-}
-
-LineMesh::LineMesh(const ObjectTag &tag, const std::vector<Line> &lines,
-                   const Color& color): Object(tag), _lines(lines), _color(color) {
-
+LineMesh::LineMesh(const std::vector<Line> &lines,
+                   const Color& color): _lines(lines), _color(color) {
     calculateBounds();
 }
 
@@ -59,8 +53,8 @@ void LineMesh::setLines(std::vector<Line> &&lines) {
     calculateBounds();
 }
 
-LineMesh LineMesh::Cube(const ObjectTag &tag, double size) {
-    LineMesh cube(tag);
+LineMesh LineMesh::Cube(double size) {
+    LineMesh cube;
 
     cube.setLines(std::move(std::vector<Line>{
             {Vec4D{-0.5, -0.5, -0.5, 1}, Vec4D{-0.5, 0.5, -0.5, 1}},
@@ -82,8 +76,8 @@ LineMesh LineMesh::Cube(const ObjectTag &tag, double size) {
     return cube *= Matrix4x4::Scale(Vec3D(size, size, size));
 }
 
-LineMesh LineMesh::BoundsFrame(const ObjectTag &tag, const struct Bounds& bounds) {
-    LineMesh result = LineMesh::Cube(tag);
+LineMesh LineMesh::BoundsFrame(const struct Bounds& bounds) {
+    LineMesh result = LineMesh::Cube();
 
     result.scale(bounds.extents*2);
     result.translate(bounds.center);

@@ -9,17 +9,16 @@ std::vector<std::pair<Triangle, Triangle>> Camera::project(const TriangleMesh& t
     std::vector<std::pair<Triangle, Triangle>> result{};
 
     if (!_ready) {
-        Log::log("Camera::project(): cannot project triangularMesh without camera initialization ( Camera::setup(); ) ");
-        return result;
+        init(Consts::STANDARD_SCREEN_WIDTH, Consts::STANDARD_SCREEN_HEIGHT);
     }
 
     if (!triangleMesh.isVisible()) {
         return result;
     }
     // Model transform matrix: translate _tris in the origin of body.
-    Matrix4x4 objectToCamera = fullInvModel() * triangleMesh.fullModel();
+    Matrix4x4 objectToCamera = _transformMatrix->fullInvModel() * triangleMesh.fullModel();
 
-    Matrix4x4 cameraToWorld = fullModel();
+    Matrix4x4 cameraToWorld = _transformMatrix->fullModel();
 
     // Transform mesh bounds into camera coordinates
     auto [center, extents] = triangleMesh.bounds()*objectToCamera;
@@ -106,7 +105,9 @@ std::vector<std::pair<Triangle, Triangle>> Camera::project(const TriangleMesh& t
     return result;
 }
 
-void Camera::setup(int width, int height, double fov, double ZNear, double ZFar) {
+void Camera::init(int width, int height, double fov, double ZNear, double ZFar) {
+    _transformMatrix = addComponent<TransformMatrix>();
+
     // We need to init camera only after creation or changing width, height, fov, ZNear or ZFar.
     // Because here we calculate matrix that does not change during the motion of _objects or camera
     _znear = ZNear;
@@ -142,7 +143,7 @@ std::vector<Line> Camera::project(const LineMesh &lineMesh) {
     std::vector<Line> result{};
 
     if (!_ready) {
-        Log::log("Camera::project(): cannot project lineMesh without camera initialization ( Camera::setup(); ) ");
+        Log::log("Camera::project(): cannot project lineMesh without camera initialization ( Camera::init(); ) ");
         return result;
     }
 
@@ -150,7 +151,7 @@ std::vector<Line> Camera::project(const LineMesh &lineMesh) {
         return result;
     }
     // Model transform matrix: translate _tris in the origin of body.
-    Matrix4x4 objectToCamera = fullInvModel() * lineMesh.fullModel();
+    Matrix4x4 objectToCamera = _transformMatrix->fullInvModel() * lineMesh.fullModel();
 
     // Transform mesh bounds into camera coordinates
     auto [center, extents] = lineMesh.bounds()*objectToCamera;
@@ -194,4 +195,8 @@ std::vector<Line> Camera::project(const LineMesh &lineMesh) {
     }
 
     return result;
+}
+
+std::shared_ptr<TransformMatrix> Camera::transformMatrix() const {
+    return _transformMatrix;
 }

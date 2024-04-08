@@ -16,12 +16,19 @@ Engine::Engine() {
     ResourceManager::init();
 }
 
-void Engine::projectGroup(const Group &group) {
-    for(const auto& [objTag, obj] : group) {
-        std::shared_ptr<TriangleMesh> subMesh = std::dynamic_pointer_cast<TriangleMesh>(obj);
-        if(subMesh) {
-            auto projected = camera->project(*subMesh);
-            std::shared_ptr<Material> material = subMesh->getMaterial();
+void Engine::projectObject(const Object &object) {
+    for(const auto& [objTag, obj] : object) {
+
+        std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
+        if(obj->numberOfAttached() > 0) {
+            // We need to recursively continue to project for attached objects
+            projectObject(*obj);
+        }
+
+        auto triangleMesh = obj->getComponent<TriangleMesh>();
+        if(triangleMesh) {
+            auto projected = camera->project(*triangleMesh);
+            std::shared_ptr<Material> material = triangleMesh->getMaterial();
             bool isTransparent = material->isTransparent();
 
             if(!isTransparent) {
@@ -34,22 +41,18 @@ void Engine::projectGroup(const Group &group) {
                 }
             }
         }
-        std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
-        if(subGroup) {
-            // We need to recursively continue to draw subgroup
-            projectGroup(*subGroup);
-        }
-        std::shared_ptr<LineMesh> subLineMesh = std::dynamic_pointer_cast<LineMesh>(obj);
-        if(subLineMesh) {
-            auto projectedLines = camera->project(*subLineMesh);
+
+        auto lineMesh = obj->getComponent<LineMesh>();
+        if(lineMesh) {
+            auto projectedLines = camera->project(*lineMesh);
             for(const auto& projectedLine: projectedLines) {
-                _projectedLines.emplace_back(projectedLine, subLineMesh->getColor());
+                _projectedLines.emplace_back(projectedLine, lineMesh->getColor());
             }
         }
 
-        std::shared_ptr<LightSource> l = std::dynamic_pointer_cast<LightSource>(obj);
-        if(l) {
-            _lightSources.emplace_back(l);
+        auto lightSource = obj->getComponent<LightSource>();
+        if(lightSource) {
+            _lightSources.emplace_back(lightSource);
         }
     }
 }
@@ -68,7 +71,7 @@ void Engine::drawProjectedTriangles() {
     Time::stopTimer("d sort triangles");
 
     Time::startTimer("d rasterization");
-    auto cameraPosition = camera->fullPosition();
+    auto cameraPosition = camera->transformMatrix()->fullPosition();
     // Draw opaque (non-transparent) triangles
     for (const auto& [projectedTriangle, triangle, material]: _projectedOpaqueTriangles) {
         screen->drawTriangleWithLighting(projectedTriangle, triangle, _lightSources, cameraPosition, material);
@@ -118,10 +121,11 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
 
     screen->setDepthTest(true);
 
-    start();
-    camera->setup(screenWidth, screenHeight);
+    camera->init(screenWidth, screenHeight);
 
     SDL_Init(SDL_INIT_EVERYTHING);
+
+    start();
 
     while (screen->isOpen()) {
 
@@ -157,7 +161,7 @@ void Engine::create(uint16_t screenWidth, uint16_t screenHeight, const Color& ba
         _lightSources.clear();
 
         Time::startTimer("d projections");
-        projectGroup(*world->objects());
+        projectObject(*world);
         Time::stopTimer("d projections");
 
         drawProjectedTriangles();
@@ -206,11 +210,11 @@ void Engine::printDebugInfo() {
         shift++;
         screen->drawText("fps: " + std::to_string(Time::fps()), 10, (shift++)*h + offset);
         shift++;
-        screen->drawText("X: "   + std::to_string((camera->position().x())), 10, (shift++)*h + offset);
-        screen->drawText("Y: "   + std::to_string((camera->position().y())), 10, (shift++)*h + offset);
-        screen->drawText("Z: "   + std::to_string((camera->position().z())), 10, (shift++)*h + offset);
-        screen->drawText("RY: "  + std::to_string(camera->angle().y()), 10, (shift++)*h + offset);
-        screen->drawText("RL: "  + std::to_string(camera->angleLeftUpLookAt().x()), 10, (shift++)*h + offset);
+        screen->drawText("X: "   + std::to_string((camera->transformMatrix()->position().x())), 10, (shift++)*h + offset);
+        screen->drawText("Y: "   + std::to_string((camera->transformMatrix()->position().y())), 10, (shift++)*h + offset);
+        screen->drawText("Z: "   + std::to_string((camera->transformMatrix()->position().z())), 10, (shift++)*h + offset);
+        screen->drawText("RY: "  + std::to_string(camera->transformMatrix()->angle().y()), 10, (shift++)*h + offset);
+        screen->drawText("RL: "  + std::to_string(camera->transformMatrix()->angleLeftUpLookAt().x()), 10, (shift++)*h + offset);
         shift++;
 
         //Process info:

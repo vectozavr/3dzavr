@@ -1,12 +1,12 @@
 #ifndef GEOMETRY_LINEMESH_H
 #define GEOMETRY_LINEMESH_H
 
-#include <objects/Object.h>
-#include <objects/props/Color.h>
-#include <objects/geometry/Bounds.h>
-#include <objects/geometry/Line.h>
+#include <components/TransformMatrix.h>
+#include <components/props/Color.h>
+#include <components/geometry/Bounds.h>
+#include <components/geometry/Line.h>
 
-class LineMesh : public Object {
+class LineMesh : public TransformMatrix {
 private:
     std::vector<Line> _lines;
     Color _color;
@@ -14,23 +14,20 @@ private:
 
     bool _visible = true;
 
-    LineMesh &operator*=(const Matrix4x4 &matrix4X4);
-
     void copyLines(const LineMesh& lineMesh, bool deepCopy);
     void calculateBounds();
 
 public:
-    explicit LineMesh(const ObjectTag& nameTag) : Object(nameTag) {};
+    LineMesh() = default;
 
     LineMesh &operator=(const LineMesh &lineMesh) = delete;
     LineMesh(const LineMesh &lineMesh, bool deepCopy = false);
-    LineMesh(const ObjectTag& tag, const LineMesh &lineMesh, bool deepCopy = false);
 
-    explicit LineMesh(const ObjectTag& tag, const std::vector<Line> &lines,
-                      const Color& color = Color::BLACK);
+    explicit LineMesh(const std::vector<Line> &lines, const Color& color = Color::BLACK);
 
     [[nodiscard]] std::vector<Line> const &lines() const { return _lines; }
 
+    LineMesh &operator*=(const Matrix4x4 &matrix4X4);
     void setLines(std::vector<Line>&& lines);
 
     [[nodiscard]] size_t size() const { return _lines.size() * 2; }
@@ -44,12 +41,12 @@ public:
 
     [[nodiscard]] bool isVisible() const { return _visible; }
 
-    std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
-        return std::make_shared<LineMesh>(tag, *this);
-    }
+    LineMesh static Cube(double size = 1.0);
+    LineMesh static BoundsFrame(const Bounds& bounds);
 
-    LineMesh static Cube(const ObjectTag &tag, double size = 1.0);
-    LineMesh static BoundsFrame(const ObjectTag &tag, const Bounds& bounds);
+    [[nodiscard]] std::shared_ptr<Component> copy() const override {
+        return std::make_shared<LineMesh>(*this);
+    }
 };
 
 

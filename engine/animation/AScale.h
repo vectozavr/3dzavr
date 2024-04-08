@@ -2,11 +2,11 @@
 #define ANIMATION_ASCALE_H
 
 #include <animation/Animation.h>
-#include "objects/Object.h"
+#include "components/TransformMatrix.h"
 
 class AScale final : public Animation {
 private:
-    const std::weak_ptr<Object> _object;
+    const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _scalingValue;
     Vec3D _prevScaleFactor{1, 1, 1};
 
@@ -25,7 +25,7 @@ private:
     }
 
 public:
-    AScale(const std::weak_ptr<Object>& object, const Vec3D &s, double duration = 1, LoopOut looped = LoopOut::None,
+    AScale(const std::weak_ptr<TransformMatrix>& object, const Vec3D &s, double duration = 1, LoopOut looped = LoopOut::None,
            InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                         interpolationType),
                                                                               _object(object), _scalingValue(s) {

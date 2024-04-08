@@ -2,11 +2,11 @@
 #define ANIMATION_AATTRACTTOPOINT_H
 
 #include <animation/Animation.h>
-#include "objects/Object.h"
+#include "components/TransformMatrix.h"
 
 class AAttractToPoint : public Animation {
 private:
-    const std::weak_ptr<Object> _object;
+    const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _targetPoint;
     const double _valueToAttract;
 
@@ -22,7 +22,7 @@ private:
     }
 
 public:
-    AAttractToPoint(const std::weak_ptr<Object>& object, const Vec3D &targetPoint, double valueToAttract, double duration = 1,
+    AAttractToPoint(const std::weak_ptr<TransformMatrix>& object, const Vec3D &targetPoint, double valueToAttract, double duration = 1,
                     Animation::LoopOut looped = LoopOut::None,
                     Animation::InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _targetPoint(targetPoint),

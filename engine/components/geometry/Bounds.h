@@ -5,7 +5,7 @@
 #ifndef GEOMETRY_BOUNDS_H
 #define GEOMETRY_BOUNDS_H
 
-#include <linalg/Matrix4x4.h>
+#include "linalg/Matrix4x4.h"
 
 struct Bounds {
     Vec3D center;

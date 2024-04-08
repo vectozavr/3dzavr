@@ -1,10 +1,10 @@
 #ifndef GEOMETRY_TRIANGLE_H
 #define GEOMETRY_TRIANGLE_H
 
-#include <linalg/Vec4D.h>
-#include <linalg/Vec3D.h>
-#include <linalg/Matrix4x4.h>
-#include <Consts.h>
+#include "linalg/Vec4D.h"
+#include "linalg/Vec3D.h"
+#include "linalg/Matrix4x4.h"
+#include "Consts.h"
 
 
 class Triangle final {

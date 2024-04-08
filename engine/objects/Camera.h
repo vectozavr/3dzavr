@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include <objects/geometry/Plane.h>
-#include <objects/geometry/TriangleMesh.h>
-#include <objects/geometry/LineMesh.h>
+#include <components/geometry/Plane.h>
+#include <components/geometry/TriangleMesh.h>
+#include <components/geometry/LineMesh.h>
 
 class Camera final : public Object {
 private:
@@ -21,15 +21,19 @@ private:
     std::vector<std::pair<Vec3D, Vec3D>> _clipBuffer2;
 
     Matrix4x4 _SP;
+
+    std::shared_ptr<TransformMatrix> _transformMatrix;
 public:
     Camera() : Object(ObjectTag("Camera")) {};
 
     Camera(const Camera &camera) = delete;
 
-    void setup(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
+    void init(int width, int height, double fov = 90.0, double ZNear = 0.1, double ZFar = 5000.0);
 
     std::vector<std::pair<Triangle, Triangle>> project(const TriangleMesh& triangleMesh);
     std::vector<Line> project(const LineMesh& lineMesh);
+
+    std::shared_ptr<TransformMatrix> transformMatrix() const;
 };
 
 

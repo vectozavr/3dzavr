@@ -6,11 +6,11 @@
 #include <vector>
 #include <memory>
 
-#include <objects/geometry/Triangle.h>
-#include <objects/geometry/TriangleMesh.h>
-#include <objects/geometry/LineMesh.h>
-#include <physics/Simplex.h>
-#include <physics/HitBox.h>
+#include "components/geometry/TriangleMesh.h"
+#include "components/geometry/LineMesh.h"
+#include "components/TransformMatrix.h"
+#include "Simplex.h"
+#include "HitBox.h"
 
 struct CollisionPoint final {
     const Vec3D normal;
@@ -28,13 +28,13 @@ struct NextSimplex final {
     const bool finishSearching;
 };
 
-// TODO: implement RigidBody collision detection and resolution for SDL version
+// TODO: implement RigidObject collision detection and resolution for SDL version
 // TODO: implement simulation of Rigid Body objects: forces, acceleration, momentum (to be able to simulate boxes, balls and etc)
 // TODO: implement support of restrictions for Rigid Body objects and connections between several Rigid Body.
 // TODO: implement Rag-Doll support for Rigid Body objects (bones, connections, constraints, skeleton and humanoids)
 
 
-class RigidBody : public TriangleMesh {
+class RigidObject : public TransformMatrix {
 private:
     Vec3D _velocity{0, 0, 0};
     Vec3D _acceleration{0, 0, 0};
@@ -44,13 +44,14 @@ private:
     bool _isTrigger = false;
 
     HitBox _hitBox{};
+    bool _useSimpleBox = true;
 
     bool _inCollision = false;
     Vec3D _collisionNormal{0, 0, 0};
 
     Vec3D _findFurthestPoint(const Vec3D &direction);
-    Vec3D _support(std::shared_ptr<RigidBody> obj, const Vec3D &direction);
-    std::function<void(const ObjectTag &, std::shared_ptr<RigidBody>)> _collisionCallBack;
+    Vec3D _support(const std::shared_ptr<RigidObject>& obj, const Vec3D &direction);
+    std::function<void(const ObjectTag &, std::shared_ptr<RigidObject>)> _collisionCallBack;
 
     static NextSimplex _nextSimplex(const Simplex &points);
     static NextSimplex _lineCase(const Simplex &points);
@@ -63,19 +64,15 @@ private:
     static std::vector<std::pair<size_t, size_t>>
     _addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces, size_t a,
                      size_t b);
-public:
-    explicit RigidBody(const ObjectTag& tag) : TriangleMesh(tag) {};
-    RigidBody(const RigidBody &rigidBody) = default;
-    RigidBody(const ObjectTag& tag, const RigidBody &rigidBody);
-    explicit RigidBody(const TriangleMesh &triangleMesh, bool useSimpleBox = true);
-    explicit RigidBody(const LineMesh &lineMesh, bool useSimpleBox = true);
-    RigidBody(const ObjectTag& tag,
-              const FilePath &meshFile,
-              const Vec3D &scale = Vec3D{1, 1, 1},
-              bool useSimpleBox = true);
 
-    [[nodiscard]] std::pair<bool, Simplex> checkGJKCollision(std::shared_ptr<RigidBody> obj);
-    [[nodiscard]] CollisionPoint EPA(const Simplex &simplex, std::shared_ptr<RigidBody> obj);
+    bool initHitBox();
+public:
+    explicit RigidObject(bool useSimpleBox = true) : _useSimpleBox(useSimpleBox) {};
+
+    RigidObject(const RigidObject &rigidBody) = default;
+
+    [[nodiscard]] std::pair<bool, Simplex> checkGJKCollision(const std::shared_ptr<RigidObject>& obj);
+    [[nodiscard]] CollisionPoint EPA(const Simplex &simplex, std::shared_ptr<RigidObject> obj);
     void solveCollision(const CollisionPoint &collision);
 
     [[nodiscard]] Vec3D collisionNormal() const { return _collisionNormal; }
@@ -95,18 +92,22 @@ public:
     void addVelocity(const Vec3D &velocity);
     void setAcceleration(const Vec3D &acceleration);
 
+    [[nodiscard]] size_t hitBoxSize() const { return _hitBox.size(); }
+
     [[nodiscard]] Vec3D velocity() const { return _velocity; }
     [[nodiscard]] Vec3D acceleration() const { return _acceleration; }
 
-    [[nodiscard]] const std::function<void(const ObjectTag &, std::shared_ptr<RigidBody>)> &
+    [[nodiscard]] const std::function<void(const ObjectTag &, std::shared_ptr<RigidObject>)> &
     collisionCallBack() const { return _collisionCallBack; }
 
     void setCollisionCallBack(const std::function<void(const ObjectTag &tag,
-                                                       std::shared_ptr<RigidBody>)> &f) { _collisionCallBack = f; };
+                                                       std::shared_ptr<RigidObject>)> &f) { _collisionCallBack = f; };
 
-    std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
-        return std::make_shared<RigidBody>(tag, *this);
+    [[nodiscard]] std::shared_ptr<Component> copy() const override {
+        return std::make_shared<RigidObject>(*this);
     }
+
+    void update() override;
 };
 
 

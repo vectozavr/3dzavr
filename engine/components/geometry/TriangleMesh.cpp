@@ -1,6 +1,6 @@
 #include <utility>
 
-#include <objects/geometry/TriangleMesh.h>
+#include "TriangleMesh.h"
 
 TriangleMesh &TriangleMesh::operator*=(const Matrix4x4 &matrix4X4) {
     std::vector<Triangle> newTriangles;
@@ -13,8 +13,7 @@ TriangleMesh &TriangleMesh::operator*=(const Matrix4x4 &matrix4X4) {
     return *this;
 }
 
-TriangleMesh::TriangleMesh(const ObjectTag& tag, const std::vector<Triangle> &tries, const std::shared_ptr<Material>& material) :
-    Object(tag), _tris(tries) {
+TriangleMesh::TriangleMesh(const std::vector<Triangle> &tries, const std::shared_ptr<Material>& material) : _tris(tries) {
     if(material) {
         _material = material;
     }
@@ -22,8 +21,8 @@ TriangleMesh::TriangleMesh(const ObjectTag& tag, const std::vector<Triangle> &tr
     calculateBounds();
 }
 
-TriangleMesh TriangleMesh::Surface(const ObjectTag &tag, double w, double h, const std::shared_ptr<Material>& material) {
-    TriangleMesh surface(tag);
+TriangleMesh TriangleMesh::Surface(double w, double h, const std::shared_ptr<Material>& material) {
+    TriangleMesh surface;
 
     surface.setTriangles(std::move(std::vector<Triangle>{
             { {Vec4D{w/2, 0.0, h/2, 1.0}, Vec4D{w/2, 0.0, -h/2, 1.0}, Vec4D{-w/2, 0.0, -h/2, 1.0}}, {Vec3D{0, 0, 1}, Vec3D{0, 1, 1}, Vec3D{1, 1, 1}} },
@@ -36,8 +35,8 @@ TriangleMesh TriangleMesh::Surface(const ObjectTag &tag, double w, double h, con
     return surface;
 }
 
-TriangleMesh TriangleMesh::Cube(const ObjectTag &tag, double size) {
-    TriangleMesh cube(tag);
+TriangleMesh TriangleMesh::Cube(double size) {
+    TriangleMesh cube;
 
     cube.setTriangles(std::move(std::vector<Triangle>{
             { {Vec4D{0.0, 0.0, 0.0, 1.0},    Vec4D{0.0, 1.0, 0.0, 1.0},    Vec4D{1.0, 1.0, 0.0, 1.0}} },
@@ -57,9 +56,9 @@ TriangleMesh TriangleMesh::Cube(const ObjectTag &tag, double size) {
     return cube *= Matrix4x4::Scale(Vec3D(size, size, size))*Matrix4x4::Translation(Vec3D(-0.5, -0.5, -0.5));
 }
 
-TriangleMesh TriangleMesh::LineTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, double line_width) {
+TriangleMesh TriangleMesh::LineTo(const Vec3D &from, const Vec3D &to, double line_width) {
 
-    TriangleMesh line(tag);
+    TriangleMesh line;
 
     Vec3D v1 = (to - from).normalized();
     Vec3D v2 = from.cross(from + Vec3D{1, 0, 0}).normalized();
@@ -97,9 +96,9 @@ TriangleMesh TriangleMesh::LineTo(const ObjectTag &tag, const Vec3D &from, const
 }
 
 
-TriangleMesh TriangleMesh::ArrowTo(const ObjectTag &tag, const Vec3D &from, const Vec3D &to, double line_width) {
+TriangleMesh TriangleMesh::ArrowTo(const Vec3D &from, const Vec3D &to, double line_width) {
 
-    TriangleMesh arrow(tag);
+    TriangleMesh arrow;
 
     Vec3D v1 = (to - from).normalized();
     Vec3D v2 = from.cross(from + Vec3D{1, 0, 0}).normalized();
@@ -155,7 +154,7 @@ void TriangleMesh::setTriangles(std::vector<Triangle>&& t) {
     calculateBounds();
 }
 
-Object::IntersectionInformation TriangleMesh::intersect(const Vec3D &from, const Vec3D &to) {
+TriangleMesh::IntersectionInformation TriangleMesh::intersect(const Vec3D &from, const Vec3D &to) {
 
     bool intersected = false;
     Vec3D point;
@@ -241,11 +240,6 @@ void TriangleMesh::calculateBounds() {
 }
 
 TriangleMesh::TriangleMesh(const TriangleMesh &mesh, bool deepCopy) :
-Object(mesh), _material(mesh._material), _visible(mesh._visible) {
-    copyTriangles(mesh, deepCopy);
-}
-
-TriangleMesh::TriangleMesh(const ObjectTag &tag, const TriangleMesh &mesh, bool deepCopy) :
-Object(tag, mesh), _material(mesh._material), _visible(mesh._visible) {
+TransformMatrix(mesh), _material(mesh._material), _visible(mesh._visible) {
     copyTriangles(mesh, deepCopy);
 }

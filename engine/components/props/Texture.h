@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include <io/Image.h>
-#include <utils/FilePath.h>
+#include "io/Image.h"
+#include "utils/FilePath.h"
 
 class Texture {
 private:

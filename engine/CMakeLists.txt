@@ -23,36 +23,39 @@ add_library(
         objects/Group.h
         objects/Group.cpp
 
-        objects/lighting/LightSource.h
-        objects/lighting/DirectionalLight.h
-        objects/lighting/PointLight.h
-        objects/lighting/SpotLight.h
+        components/Component.h
 
-        objects/props/Color.h
-        objects/props/Color.cpp
-        objects/props/Texture.h
-        objects/props/Texture.cpp
-        objects/props/Material.h
-        objects/props/Material.cpp
+        components/TransformMatrix.h
+        components/TransformMatrix.cpp
 
-        objects/geometry/Bounds.h
-        objects/geometry/Triangle.h
-        objects/geometry/Triangle.cpp
-        objects/geometry/Line.h
-        objects/geometry/Plane.h
-        objects/geometry/Plane.cpp
-        objects/geometry/Sphere.h
-        objects/geometry/Sphere.cpp
-        objects/geometry/TriangleMesh.h
-        objects/geometry/TriangleMesh.cpp
-        objects/geometry/LineMesh.h
-        objects/geometry/LineMesh.cpp
+        components/geometry/Bounds.h
+        components/geometry/Triangle.h
+        components/geometry/Triangle.cpp
+        components/geometry/Line.h
+        components/geometry/Plane.h
+        components/geometry/Plane.cpp
+        components/geometry/TriangleMesh.h
+        components/geometry/TriangleMesh.cpp
+        components/geometry/LineMesh.h
+        components/geometry/LineMesh.cpp
 
-        physics/RigidBody.h
-        physics/RigidBody.cpp
-        physics/Simplex.h
-        physics/HitBox.h
-        physics/HitBox.cpp
+        components/lighting/LightSource.h
+        components/lighting/DirectionalLight.h
+        components/lighting/PointLight.h
+        components/lighting/SpotLight.h
+
+        components/props/Color.h
+        components/props/Color.cpp
+        components/props/Texture.h
+        components/props/Texture.cpp
+        components/props/Material.h
+        components/props/Material.cpp
+
+        components/physics/RigidObject.h
+        components/physics/RigidObject.cpp
+        components/physics/Simplex.h
+        components/physics/HitBox.h
+        components/physics/HitBox.cpp
 
         io/Image.h
         io/Image.cpp

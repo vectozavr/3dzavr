@@ -2,7 +2,7 @@
 #include <linalg/Vec2D.h>
 #include <utils/Time.h>
 
-ObjectController::ObjectController(std::shared_ptr<Object> object) : _object(std::move(object)){}
+ObjectController::ObjectController(std::shared_ptr<TransformMatrix> transformMatrix) : _object(transformMatrix){}
 
 void ObjectController::update() {
     double speed = 5.0;

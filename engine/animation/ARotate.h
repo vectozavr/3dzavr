@@ -2,11 +2,11 @@
 #define ANIMATION_AROTATE_H
 
 #include <animation/Animation.h>
-#include "objects/Object.h"
+#include "components/TransformMatrix.h"
 
 class ARotate final : public Animation {
 private:
-    const std::weak_ptr<Object> _object;
+    const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _rotationValue;
 
     void update() override {
@@ -21,7 +21,7 @@ private:
     }
 
 public:
-    ARotate(const std::weak_ptr<Object>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
+    ARotate(const std::weak_ptr<TransformMatrix>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
             InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {
     }

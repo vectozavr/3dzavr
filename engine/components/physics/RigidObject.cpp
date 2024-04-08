@@ -1,24 +1,13 @@
 #include <cmath>
 #include <utility>
 
-#include <physics/RigidBody.h>
-#include <utils/Time.h>
-#include <utils/Log.h>
-#include <Consts.h>
+#include "RigidObject.h"
+#include "utils/Time.h"
+#include "utils/Log.h"
+#include "Consts.h"
 
-RigidBody::RigidBody(const ObjectTag& tag,
-                     const FilePath &meshFile,
-                     const Vec3D &scale,
-                     bool useSimpleBox) : TriangleMesh(tag),
-                     _hitBox(*this, useSimpleBox) {
-    // TODO: implement this (or delete)
-}
 
-RigidBody::RigidBody(const TriangleMesh &triangleMesh, bool useSimpleBox) :
-TriangleMesh(triangleMesh), _hitBox(triangleMesh, useSimpleBox) {
-}
-
-Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
+Vec3D RigidObject::_findFurthestPoint(const Vec3D &direction) {
     Vec3D maxPoint{0, 0, 0};
 
     double maxDistance = -std::numeric_limits<double>::max();
@@ -37,14 +26,14 @@ Vec3D RigidBody::_findFurthestPoint(const Vec3D &direction) {
     return Vec3D(fullModel() * maxPoint.makePoint4D());
 }
 
-Vec3D RigidBody::_support(std::shared_ptr<RigidBody> obj, const Vec3D &direction) {
+Vec3D RigidObject::_support(const std::shared_ptr<RigidObject>& obj, const Vec3D &direction) {
     Vec3D p1 = _findFurthestPoint(direction);
     Vec3D p2 = obj->_findFurthestPoint(-direction);
 
     return p1 - p2;
 }
 
-NextSimplex RigidBody::_nextSimplex(const Simplex &points) {
+NextSimplex RigidObject::_nextSimplex(const Simplex &points) {
     switch (points.type()) {
         case SimplexType::Line:
             return _lineCase(points);
@@ -54,16 +43,16 @@ NextSimplex RigidBody::_nextSimplex(const Simplex &points) {
             return _tetrahedronCase(points);
 
         default:
-            throw std::logic_error{"RigidBody::_nextSimplex: simplex is not Line, Triangle or Tetrahedron"};
+            throw std::logic_error{"RigidObject::_nextSimplex: simplex is not Line, Triangle or Tetrahedron"};
     }
 }
 
-NextSimplex RigidBody::_lineCase(const Simplex &points) {
+NextSimplex RigidObject::_lineCase(const Simplex &points) {
     Simplex newPoints(points);
     Vec3D newDirection;
 
-    Vec3D a = points[0];
-    Vec3D b = points[1];
+    const Vec3D& a = points[0];
+    const Vec3D& b = points[1];
 
     Vec3D ab = b - a;
     Vec3D ao = -a;
@@ -78,13 +67,13 @@ NextSimplex RigidBody::_lineCase(const Simplex &points) {
     return NextSimplex{newPoints, newDirection, false};
 }
 
-NextSimplex RigidBody::_triangleCase(const Simplex &points) {
+NextSimplex RigidObject::_triangleCase(const Simplex &points) {
     Simplex newPoints(points);
     Vec3D newDirection;
 
-    Vec3D a = points[0];
-    Vec3D b = points[1];
-    Vec3D c = points[2];
+    const Vec3D& a = points[0];
+    const Vec3D& b = points[1];
+    const Vec3D& c = points[2];
 
     Vec3D ab = b - a;
     Vec3D ac = c - a;
@@ -115,11 +104,11 @@ NextSimplex RigidBody::_triangleCase(const Simplex &points) {
     return NextSimplex{newPoints, newDirection, false};
 }
 
-NextSimplex RigidBody::_tetrahedronCase(const Simplex &points) {
-    Vec3D a = points[0];
-    Vec3D b = points[1];
-    Vec3D c = points[2];
-    Vec3D d = points[3];
+NextSimplex RigidObject::_tetrahedronCase(const Simplex &points) {
+    const Vec3D& a = points[0];
+    const Vec3D& b = points[1];
+    const Vec3D& c = points[2];
+    const Vec3D& d = points[3];
 
     Vec3D ab = b - a;
     Vec3D ac = c - a;
@@ -145,10 +134,10 @@ NextSimplex RigidBody::_tetrahedronCase(const Simplex &points) {
     return NextSimplex{points, Vec3D(), true};
 }
 
-std::pair<bool, Simplex> RigidBody::checkGJKCollision(std::shared_ptr<RigidBody> obj) {
+std::pair<bool, Simplex> RigidObject::checkGJKCollision(const std::shared_ptr<RigidObject>& obj) {
     // This is implementation of GJK algorithm for collision detection.
-    // It builds a simplex (a simplest shape that can select point in space) around
-    // zero for Minkowski Difference. Collision happend when zero point is inside.
+    // It builds a simplex (simplest shape that can select point in space) around
+    // zero for Minkowski Difference. Collision happened when zero point is inside.
     // See references:
     // https://www.youtube.com/watch?v=MDusDn8oTSE
     // https://blog.winter.dev/2020/gjk-algorithm/
@@ -165,7 +154,7 @@ std::pair<bool, Simplex> RigidBody::checkGJKCollision(std::shared_ptr<RigidBody>
     Vec3D direction = -support;
 
     size_t iters = 0;
-    while (iters++ < size() + obj->size()) {
+    while (iters++ < hitBoxSize() + obj->hitBoxSize()) {
         support = _support(obj, direction);
 
         if (support.dot(direction) <= 0) {
@@ -189,7 +178,7 @@ std::pair<bool, Simplex> RigidBody::checkGJKCollision(std::shared_ptr<RigidBody>
     return std::make_pair(false, points);
 }
 
-CollisionPoint RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody> obj) {
+CollisionPoint RigidObject::EPA(const Simplex &simplex, std::shared_ptr<RigidObject> obj) {
     // This is implementation of EPA algorithm for solving collision.
     // It uses a simplex from GJK around and expand it to the border.
     // The goal is to calculate the nearest normal and the intersection depth.
@@ -213,7 +202,7 @@ CollisionPoint RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody>
     double minDistance = std::numeric_limits<double>::max();
 
     size_t iters = 0;
-    while (minDistance == std::numeric_limits<double>::max() && iters++ < size() + obj->size()) {
+    while (minDistance == std::numeric_limits<double>::max() && iters++ < hitBoxSize() + obj->hitBoxSize()) {
         minNormal = normals[minFace].normal;
         minDistance = normals[minFace].distance;
 
@@ -224,7 +213,7 @@ CollisionPoint RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody>
             minDistance = std::numeric_limits<double>::max();
             std::vector<std::pair<size_t, size_t>> uniqueEdges;
 
-            size_t f = 0;
+            long f = 0;
             for (auto &normal : normals) {
                 if (normal.normal.dot(support) > 0) {
                     uniqueEdges = _addIfUniqueEdge(uniqueEdges, faces, f + 0, f + 1);
@@ -266,16 +255,16 @@ CollisionPoint RigidBody::EPA(const Simplex &simplex, std::shared_ptr<RigidBody>
 }
 
 std::pair<std::vector<FaceNormal>, size_t>
-RigidBody::_getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector<size_t> &faces) {
+RigidObject::_getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector<size_t> &faces) {
     std::vector<FaceNormal> normals;
     normals.reserve(faces.size() / 3);
     size_t nearestFaceIndex = 0;
     double minDistance = std::numeric_limits<double>::max();
 
     for (size_t i = 0; i < faces.size(); i += 3) {
-        Vec3D a = polytope[faces[i + 0]];
-        Vec3D b = polytope[faces[i + 1]];
-        Vec3D c = polytope[faces[i + 2]];
+        const Vec3D& a = polytope[faces[i + 0]];
+        const Vec3D& b = polytope[faces[i + 1]];
+        const Vec3D& c = polytope[faces[i + 2]];
 
         Vec3D normal = (b - a).cross(c - a).normalized();
 
@@ -298,8 +287,8 @@ RigidBody::_getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector
 }
 
 std::vector<std::pair<size_t, size_t>>
-RigidBody::_addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces,
-                            size_t a, size_t b) {
+RigidObject::_addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces,
+                              size_t a, size_t b) {
 
     std::vector<std::pair<size_t, size_t>> newEdges = edges;
 
@@ -319,7 +308,7 @@ RigidBody::_addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges,
     return newEdges;
 }
 
-void RigidBody::solveCollision(const CollisionPoint &collision) {
+void RigidObject::solveCollision(const CollisionPoint &collision) {
 
     Vec3D velocity_perpendicular = collision.normal * velocity().dot(collision.normal);
     Vec3D velocity_parallel = velocity() - velocity_perpendicular;
@@ -329,27 +318,44 @@ void RigidBody::solveCollision(const CollisionPoint &collision) {
     translate(-collision.normal * collision.depth);
 }
 
-void RigidBody::updatePhysicsState() {
+void RigidObject::updatePhysicsState() {
     translate(_velocity * Time::deltaTime());
     _velocity = _velocity + _acceleration * Time::deltaTime();
 }
 
-void RigidBody::setVelocity(const Vec3D &velocity) {
+void RigidObject::setVelocity(const Vec3D &velocity) {
     _velocity = velocity;
 }
 
-void RigidBody::addVelocity(const Vec3D &velocity) {
+void RigidObject::addVelocity(const Vec3D &velocity) {
     _velocity = _velocity + velocity;
 }
 
-void RigidBody::setAcceleration(const Vec3D &acceleration) {
+void RigidObject::setAcceleration(const Vec3D &acceleration) {
     _acceleration = acceleration;
 }
 
-RigidBody::RigidBody(const ObjectTag &tag, const RigidBody &rigidBody) :
-TriangleMesh(tag, rigidBody),
-_velocity(rigidBody._velocity), _acceleration(rigidBody._acceleration), _hasCollision(rigidBody._hasCollision),
-_isCollider(rigidBody._isCollider), _isTrigger(rigidBody._isTrigger), _hitBox(rigidBody._hitBox),
-_inCollision(rigidBody._inCollision), _collisionNormal(rigidBody._collisionNormal) {
+bool RigidObject::initHitBox() {
+    auto triangleMeshComponent = getComponent<TriangleMesh>();
+    if(triangleMeshComponent) {
+        _hitBox = HitBox(*triangleMeshComponent, _useSimpleBox);
+        return true;
+    }
+    auto lineMeshComponent = getComponent<LineMesh>();
+    if(lineMeshComponent) {
+        _hitBox = HitBox(*lineMeshComponent, _useSimpleBox);
+        return true;
+    }
 
+    return false;
+}
+
+void RigidObject::update() {
+    if(_hitBox.empty()) {
+        if(!initHitBox()) {
+            return;
+        }
+    }
+
+    updatePhysicsState();
 }

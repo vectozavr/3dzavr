@@ -2,8 +2,10 @@
 #include "utils/Log.h"
 #include "utils/ResourceManager.h"
 
+using IntersectionInformation = TriangleMesh::IntersectionInformation;
+
 void Group::copyObjectsFromGroup(const Group& group) {
-    for (const auto& [tag, obj] : group._objects) {
+    for (const auto& [tag, obj] : group._attached) {
         add(obj->copy(tag));
     }
 }
@@ -17,33 +19,28 @@ Group::Group(const ObjectTag& tag, const Group& group) : Object(tag, group) {
 }
 
 Group::Group(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale) : Object(tag) {
-    auto objects = ResourceManager::loadObject(tag, mesh_file);
+    auto objects = ResourceManager::loadTriangleMesh(tag, mesh_file);
     copyObjectsFromGroup(*objects);
 }
 
 void Group::add(std::shared_ptr<Object> object) {
-    if(!_objects.contains(object->name())) {
-        _objects.emplace(object->name(), object);
-        attach(object);
-        Log::log("Group::add(): inserted object '" + object->name().str() + "' in the group '" + name().str() + "'");
-    } else {
-        throw std::invalid_argument{"Group::add(): You cannot inserted 2 objects with the same name tag"};
-    }
+    attach(object);
 }
 
+
 void Group::add(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale) {
-    auto objects = ResourceManager::loadObject(tag, mesh_file);
-    objects->scale(scale);
+    auto objects = ResourceManager::loadTriangleMesh(tag, mesh_file);
+    //objects->scale(scale);
     add(objects);
 }
 
 bool Group::remove(const ObjectTag &tag) {
-    if (_objects.erase(tag) > 0) {
+    if (_attached.erase(tag) > 0) {
         unattach(tag);
         Log::log("Group::remove(): removed '" + tag.str() + "' from the group '" + name().str() + "'");
         return true;
     } else {
-        for(auto& obj : _objects) {
+        for(auto& obj : _attached) {
             std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj.second);
             if(grObj) {
                 if (grObj->remove(tag)) {
@@ -57,48 +54,33 @@ bool Group::remove(const ObjectTag &tag) {
     return false;
 }
 
-std::shared_ptr<Object> Group::object(const ObjectTag &tag) {
-    if (_objects.count(tag) != 0) {
-        return _objects.find(tag)->second;
+std::shared_ptr<Object> Group::find(const ObjectTag &tag) {
+    if (_attached.count(tag) != 0) {
+        return _attached.find(tag)->second;
     }
 
-    for(const auto& [name, obj] : _objects) {
+    for(const auto& [name, obj] : _attached) {
 
         std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj);
         if(grObj) {
-            auto res = grObj->object(tag);
+            auto res = grObj->find(tag);
             if (res) {
                 return res;
             }
         }
     }
 
-    Log::log("Group::object(): no object with tag '" + tag.str() + "' in the group '" + name().str() + "'");
     return nullptr;
 }
 
-Object::IntersectionInformation Group::intersect(const Vec3D &from, const Vec3D &to) {
-    std::unique_ptr<IntersectionInformation> minIntersection;
-
-    for(const auto& [name, obj]: _objects) {
-        auto intersection = obj->intersect(from, to);
-        if(intersection.distanceToObject < minIntersection->distanceToObject) {
-            minIntersection = std::make_unique<IntersectionInformation>(intersection);
-        }
-    }
-
-    return *minIntersection;
-}
-
-Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &to,
-                                               const std::set<ObjectTag> &skipTags) const {
-    std::shared_ptr<IntersectionInformation> minIntersection = std::make_shared<IntersectionInformation>();
+IntersectionInformation Group::intersect(const Vec3D &from, const Vec3D &to, const std::set<ObjectTag> &skipTags) const {
+    IntersectionInformation minIntersection;
 
     if(skipTags.contains(name())) {
-        return *minIntersection;
+        return minIntersection;
     }
 
-    for(const auto& [tag, obj]: _objects) {
+    for(const auto& [tag, obj]: _attached) {
 
         if(skipTags.contains(tag)) {
             continue;
@@ -106,23 +88,27 @@ Object::IntersectionInformation Group::rayCast(const Vec3D &from, const Vec3D &t
 
         std::shared_ptr<Group> grObj = std::dynamic_pointer_cast<Group>(obj);
 
-        std::shared_ptr<IntersectionInformation> intersection;
+        IntersectionInformation intersection;
         if(grObj) {
-            intersection = std::make_shared<IntersectionInformation>(grObj->rayCast(from, to, skipTags));
+            intersection = grObj->intersect(from, to, skipTags);
         } else {
-            intersection = std::make_shared<IntersectionInformation>(obj->intersect(from, to));
+
+            auto objTriangleMeshComponent = obj->getComponent<TriangleMesh>();
+            if(objTriangleMeshComponent) {
+                intersection = objTriangleMeshComponent->intersect(from, to);
+            }
         }
 
-        if(intersection->intersected && (intersection->distanceToObject < minIntersection->distanceToObject) && (intersection->distanceToObject > 0)) {
+        if(intersection.intersected && (intersection.distanceToObject < minIntersection.distanceToObject) && (intersection.distanceToObject > 0)) {
             minIntersection = intersection;
         }
     }
 
-    return *minIntersection;
+    return minIntersection;
 }
 
 void Group::clear() {
-    _objects.clear();
+    unattachAll();
 }
 
 Group::~Group() {

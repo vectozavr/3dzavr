@@ -20,8 +20,8 @@ private:
     std::shared_ptr<Camera> _camera;
 
     std::shared_ptr<Object> _selectedObject = nullptr;
-    std::shared_ptr<LineMesh> _selectedObjectBounds = nullptr;
-    std::shared_ptr<TriangleMesh> _redCube = nullptr;
+    std::shared_ptr<Object> _selectedObjectBounds = nullptr;
+    std::shared_ptr<Object> _redCube = nullptr;
 
     std::shared_ptr<ObjectController> _objController = nullptr;
     std::shared_ptr<ObjectController> _cameraController = nullptr;
@@ -49,7 +49,7 @@ private:
     void renderGui();
 
     void controlPanel();
-    void groupTree(const std::shared_ptr<Group>& group);
+    void objectTree(const std::shared_ptr<Object>& object);
     void objectEditor();
     void renderSettings();
 

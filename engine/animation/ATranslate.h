@@ -2,11 +2,11 @@
 #define ANIMATION_ATRANSLATE_H
 
 #include <animation/Animation.h>
-#include "objects/Object.h"
+#include "components/TransformMatrix.h"
 
 class ATranslate final : public Animation {
 private:
-    const std::weak_ptr<Object> _object;
+    const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _translationValue;
 
     void update() override {
@@ -21,7 +21,7 @@ private:
     }
 
 public:
-    ATranslate(const std::weak_ptr<Object>& object, const Vec3D &t, double duration = 1, LoopOut looped = LoopOut::None,
+    ATranslate(const std::weak_ptr<TransformMatrix>& object, const Vec3D &t, double duration = 1, LoopOut looped = LoopOut::None,
                InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                             interpolationType),
                                                                                   _object(object),

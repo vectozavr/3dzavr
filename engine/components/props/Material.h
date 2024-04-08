@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <linalg/Vec3D.h>
-#include <objects/props/Texture.h>
+#include "linalg/Vec3D.h"
+#include "Texture.h"
 
 class MaterialTag final {
 private:

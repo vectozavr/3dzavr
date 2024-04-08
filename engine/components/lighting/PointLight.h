@@ -5,20 +5,15 @@
 #ifndef LIGHTING_POINTLIGHT_H
 #define LIGHTING_POINTLIGHT_H
 
-#include <objects/lighting/LightSource.h>
+#include "LightSource.h"
 
-class PointLight : public LightSource {
+class PointLight final : public LightSource {
 public:
-    PointLight(const ObjectTag& tag, const Vec3D& position, const Color& color = Color::WHITE, double intensity = 1.0):
-            LightSource(tag, color, intensity) { translate(position); };
-    PointLight(const ObjectTag& tag, const PointLight& pointLight):
-            LightSource(tag, pointLight) { translate(pointLight.position()); };
+    explicit PointLight(const Vec3D& position, const Color& color = Color::WHITE, double intensity = 1.0):
+            LightSource(color, intensity) { translate(position); };
+    PointLight(const PointLight& pointLight): LightSource(pointLight) { translate(pointLight.position()); };
 
-    std::shared_ptr<Object> copy(const ObjectTag& tag) const override {
-        return std::make_shared<PointLight>(tag, *this);
-    }
-
-    [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef = 0.0) const override {
+    [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef) const override {
         auto toLight = fullPosition() - pixelPosition;
         double distance = toLight.abs();
         Vec3D dir = toLight.normalized();
@@ -33,6 +28,10 @@ public:
         return Color(std::clamp<int>(dot*color().r()*energy, 0, 255),
                      std::clamp<int>(dot*color().g()*energy, 0, 255),
                      std::clamp<int>(dot*color().b()*energy, 0, 255));
+    }
+
+    [[nodiscard]] std::shared_ptr<Component> copy() const override {
+        return std::make_shared<PointLight>(*this);
     }
 };
 

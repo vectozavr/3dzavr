@@ -4,6 +4,8 @@
 #include <io/Keyboard.h>
 #include <io/Mouse.h>
 
+#include <utility>
+
 static const char button_map[256] = {
         [ SDL_BUTTON_LEFT   & 0xff ] =  MU_MOUSE_LEFT,
         [ SDL_BUTTON_RIGHT  & 0xff ] =  MU_MOUSE_RIGHT,
@@ -27,7 +29,7 @@ int textWidth(mu_Font font, const char *text, int len) {
     int res = 0;
     for (const char *p = text; *p && len--; p++) {
         if ((*p & 0xc0) == 0x80) { continue; }
-        res += f->getTextSize(std::string(1, *p), 12).first;;
+        res += f->getTextSize(std::string(1, *p), 12).first;
     }
     return res;
 }
@@ -37,10 +39,13 @@ int textHeight(mu_Font font) {
 }
 
 WorldEditor::WorldEditor(std::shared_ptr<Screen> screen, std::shared_ptr<World> world, std::shared_ptr<Camera> camera):
-        _screen(screen), _world(world), _camera(camera) {
-    _cameraController = std::make_shared<ObjectController>(_camera);
-    _selectedObjectBounds = std::make_shared<LineMesh>(LineMesh::Cube(ObjectTag("Cube_frame")));
-    _selectedObjectBounds->setVisible(false);
+        _screen(std::move(screen)), _world(std::move(world)), _camera(std::move(camera)) {
+    _cameraController = std::make_shared<ObjectController>(_camera->transformMatrix());
+
+    _selectedObjectBounds = std::make_shared<Object>(ObjectTag("Cube_frame"));
+    auto lineMeshComponent = _selectedObjectBounds->addComponent<LineMesh>(LineMesh::Cube());
+    lineMeshComponent->setVisible(false);
+
     _world->add(_selectedObjectBounds);
 
     _ctx = std::make_unique<mu_Context>();
@@ -51,8 +56,9 @@ WorldEditor::WorldEditor(std::shared_ptr<Screen> screen, std::shared_ptr<World> 
     //_ctx.get()->style->colors[MU_COLOR_WINDOWBG] = {50, 50, 50, 200};
 
     // For debug
-    _redCube = std::make_shared<TriangleMesh>(TriangleMesh::Cube(ObjectTag("RedCube"), 0.1));
-    _redCube->setVisible(_objInFocus);
+    _redCube = std::make_shared<Object>(ObjectTag("RedCube"));
+    auto triangleMeshComponent = _redCube->addComponent<TriangleMesh>(TriangleMesh::Cube(0.1));
+    triangleMeshComponent->setVisible(_objInFocus);
 
 #ifndef NDEBUG
     _world->add(_redCube);
@@ -154,7 +160,7 @@ void WorldEditor::controlPanel() {
         objectEditor();
 
         if (mu_begin_treenode(ctx, "World tree")) {
-            groupTree(_world->objects());
+            objectTree(_world);
 
             mu_end_treenode(ctx);
         }
@@ -168,22 +174,21 @@ void WorldEditor::controlPanel() {
     }
 }
 
-void WorldEditor::groupTree(const std::shared_ptr<Group> &group) {
+void WorldEditor::objectTree(const std::shared_ptr<Object> &object) {
     auto ctx = _ctx.get();
 
-    if (mu_begin_treenode(ctx, group->name().str().c_str())) {
+    if (mu_begin_treenode(ctx, object->name().str().c_str())) {
 
         mu_layout_row(ctx, 1, (int[]) { 200 }, 0);
-        if (group != _world->objects() && mu_button_ex(ctx, "Select the whole group", MU_ICON_CHECK, 1)) {
-            _selectedObject = group;
+        if (object != _world && mu_button_ex(ctx, "Select the whole group", MU_ICON_CHECK, 1)) {
+            _selectedObject = object;
         }
 
         mu_text(ctx, "The content of the group");
-        for(const auto& [objTag, obj] : *group) {
-            std::shared_ptr<Group> subGroup = std::dynamic_pointer_cast<Group>(obj);
-            if(subGroup) {
+        for(const auto& [objTag, obj] : *object) {
+            if(obj->numberOfAttached() > 0) {
                 // We need to recursively continue to draw subgroup
-                groupTree(subGroup);
+                objectTree(obj);
             } else {
                 mu_layout_row(ctx, 1, (int[]) { 200 }, 0);
                 if (mu_button(ctx, objTag.str().c_str())) {
@@ -202,10 +207,8 @@ void WorldEditor::objectEditor() {
     if (_selectedObject && mu_header_ex(ctx, "Object editor", MU_OPT_EXPANDED)) {
         mu_text(ctx, ("Object name: " + _selectedObject->name().str()).c_str());
 
-
-        auto pos = _selectedObject->fullPosition();
+        auto pos = _selectedObject->getComponent<TransformMatrix>()->fullPosition();
         mu_text(ctx, ("X / Y / Z: " + std::to_string(pos.x()) + " / " + std::to_string(pos.y()) + " / " + std::to_string(pos.z()) ).c_str());
-
 
         mu_text(ctx, "Transform object:");
 
@@ -226,7 +229,7 @@ void WorldEditor::objectEditor() {
                 mu_label(ctx, "Translate Y:"); mu_slider(ctx, &y, -30, 30);
                 mu_label(ctx, "Translate Z:");  mu_slider(ctx, &z, -30, 30);
                 mu_layout_end_column(ctx);
-                _selectedObject->translate(Vec3D(x, y, z)*Time::deltaTime());
+                _selectedObject->getComponent<TransformMatrix>()->translate(Vec3D(x, y, z)*Time::deltaTime());
                 break;
             case 1:
                 mu_layout_begin_column(ctx);
@@ -235,7 +238,7 @@ void WorldEditor::objectEditor() {
                 mu_label(ctx, "Scale Y:"); mu_slider(ctx, &y, -3, 3);
                 mu_label(ctx, "Scale Z:");  mu_slider(ctx, &z, -3, 3);
                 mu_layout_end_column(ctx);
-                _selectedObject->scaleInside(Vec3D(1 + x*Time::deltaTime(),
+                _selectedObject->getComponent<TransformMatrix>()->scaleInside(Vec3D(1 + x*Time::deltaTime(),
                                                    1 + y*Time::deltaTime(),
                                                    1 + z*Time::deltaTime()));
                 break;
@@ -246,17 +249,17 @@ void WorldEditor::objectEditor() {
                 mu_label(ctx, "Rotate Y:"); mu_slider(ctx, &y, -3, 3);
                 mu_label(ctx, "Rotate Z:");  mu_slider(ctx, &z, -3, 3);
                 mu_layout_end_column(ctx);
-                _selectedObject->rotateRelativePoint(_selectedObject->position(), Vec3D(x, y, z)*Time::deltaTime());
+                _selectedObject->getComponent<TransformMatrix>()->rotateRelativePoint(_selectedObject->getComponent<TransformMatrix>()->position(), Vec3D(x, y, z)*Time::deltaTime());
                 break;
         }
 
         mu_layout_row(ctx, 2, (int[]) { 120, 120}, 0);
         if (mu_button(ctx, "Undo Transform")) {
-            _selectedObject->transform(_selectedObject->invModel());
+            _selectedObject->getComponent<TransformMatrix>()->transform(_selectedObject->getComponent<TransformMatrix>()->invModel());
         }
         if (mu_button(ctx, "Delete object")) {
             _world->remove(_selectedObject->name());
-            _selectedObject = nullptr;
+            _selectedObject.reset();
         }
     }
 }
@@ -317,23 +320,24 @@ void WorldEditor::updateControllers() {
     }
 
 #ifndef NDEBUG
-    auto debugRayCast = _world->rayCast(_camera->position(), _camera->position() + _camera->lookAt(), {_redCube->name()});
+    auto debugRayCast = _world->rayCast(_camera->transformMatrix()->position(), _camera->transformMatrix()->position() + _camera->transformMatrix()->lookAt(), {_redCube->name()});
     _objInFocus = debugRayCast.intersected;
-    _redCube->setVisible(_objInFocus);
+    _redCube->getComponent<TriangleMesh>()->setVisible(_objInFocus);
     if(_objInFocus) {
-        _redCube->translateToPoint(debugRayCast.pointOfIntersection);
+        _redCube->getComponent<TransformMatrix>()->translateToPoint(debugRayCast.pointOfIntersection);
     }
 #endif
 
     if(_isControllerActive) {
         // select object:
         if (Keyboard::isKeyTapped(SDLK_o) || Mouse::isButtonTapped(SDL_BUTTON_LEFT)) {
-            auto rayCast = _world->rayCast(_camera->position(), _camera->position() + _camera->lookAt(), {_redCube->name()});
+            auto rayCast = _world->rayCast(_camera->transformMatrix()->position(), _camera->transformMatrix()->position() + _camera->transformMatrix()->lookAt(), {_redCube->name()});
 
             if(rayCast.intersected) {
-                _selectedObject = rayCast.obj;
-                _objController = std::make_shared<ObjectController>(_selectedObject);
-                Log::log("Object " + rayCast.obj->name().str() + " selected.");
+                _selectedObject = rayCast.triangleMesh->assignedToShared();
+
+                _objController = std::make_shared<ObjectController>(_selectedObject->getComponent<TransformMatrix>());
+                Log::log("Object " + rayCast.triangleMesh->assignedToPtr()->name().str() + " selected.");
             }
         }
 
@@ -356,20 +360,19 @@ void WorldEditor::updateControllers() {
         _isRecording = !_isRecording;
     }
 
-    auto meshedSelectedObj = std::dynamic_pointer_cast<TriangleMesh>(_selectedObject);
-    if(meshedSelectedObj) {
-        _selectedObjectBounds->setVisible(true);
-        _selectedObjectBounds->undoTransformations();
-        auto Mbounds = meshedSelectedObj->bounds()*_selectedObject->fullModel();
-        _selectedObjectBounds->scale(Mbounds.extents*2 + Vec3D::EPS());
-        _selectedObjectBounds->translate(Mbounds.center);
+    if(_selectedObject && _selectedObject->getComponent<TriangleMesh>()) {
+        _selectedObjectBounds->getComponent<LineMesh>()->setVisible(true);
+        _selectedObjectBounds->getComponent<TransformMatrix>()->undoTransformations();
+        auto Mbounds = _selectedObject->getComponent<TriangleMesh>()->bounds()*_selectedObject->getComponent<TransformMatrix>()->fullModel();
+        _selectedObjectBounds->getComponent<TransformMatrix>()->scale(Mbounds.extents*2 + Vec3D::EPS());
+        _selectedObjectBounds->getComponent<TransformMatrix>()->translate(Mbounds.center);
     } else {
-        _selectedObjectBounds->setVisible(false);
+        _selectedObjectBounds->getComponent<LineMesh>()->setVisible(false);
     }
 
     if(Keyboard::isKeyTapped(SDLK_q)) {
         if(!_isControllerActive && _selectedObject) {
-            _objController = std::make_shared<ObjectController>(_selectedObject);
+            _objController = std::make_shared<ObjectController>(_selectedObject->getComponent<TransformMatrix>());
         }
 
         _isControllerActive = !_isControllerActive;
@@ -381,20 +384,20 @@ void WorldEditor::updateControllers() {
     if (_selectedObject && _isControllerActive) {
         // object scale x:
         if (Keyboard::isKeyPressed(SDLK_UP)) {
-            _selectedObject->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));
+            _selectedObject->getComponent<TransformMatrix>()->scaleInside(Vec3D(1 + Time::deltaTime(), 1, 1));
         }
         // object scale y:
         if (Keyboard::isKeyPressed(SDLK_DOWN)) {
-            _selectedObject->scaleInside(Vec3D(1, 1 + Time::deltaTime(), 1));
+            _selectedObject->getComponent<TransformMatrix>()->scaleInside(Vec3D(1, 1 + Time::deltaTime(), 1));
         }
         // object scale z:
         if (Keyboard::isKeyPressed(SDLK_LEFT)) {
-            _selectedObject->scaleInside(Vec3D(1, 1, 1 + Time::deltaTime()));
+            _selectedObject->getComponent<TransformMatrix>()->scaleInside(Vec3D(1, 1, 1 + Time::deltaTime()));
         }
 
         // undo transformations
         if (Keyboard::isKeyPressed(SDLK_u)) {
-            _selectedObject->undoTransformations();
+            _selectedObject->getComponent<TransformMatrix>()->undoTransformations();
         }
 
         // delete object

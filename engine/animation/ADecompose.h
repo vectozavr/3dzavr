@@ -2,7 +2,7 @@
 #define ANIMATION_ADECOMPOSE_H
 
 #include <animation/Animation.h>
-#include <objects/geometry/TriangleMesh.h>
+#include <components/geometry/TriangleMesh.h>
 #include <Consts.h>
 
 class ADecompose final : public Animation {

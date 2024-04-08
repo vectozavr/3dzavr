@@ -9,7 +9,7 @@
 #include <utils/Log.h>
 #include <utils/stack_vector.h>
 #include <utils/ResourceManager.h>
-#include <objects/lighting/DirectionalLight.h>
+#include <components/lighting/DirectionalLight.h>
 
 extern "C" {
 #include "io/microui/microui.h"
@@ -542,7 +542,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                             Mtriangle[2] * dehom_abg.z());
                     for (const auto &lightSource: lights) {
                         auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
-                        auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
+                        auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition), 0);
                         l += {cl.r(), cl.g(), cl.b()};
                     }
                 }
@@ -623,7 +623,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                             Mtriangle[2] * dehom_abg.z());
                     for (const auto &lightSource: lights) {
                         auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
-                        auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition));
+                        auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition), 0);
                         l += {cl.r(), cl.g(), cl.b()};
                     }
                 }

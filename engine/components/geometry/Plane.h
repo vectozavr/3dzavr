@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include <linalg/Vec4D.h>
-#include <objects/Object.h>
-#include <utils/stack_vector.h>
-#include <objects/geometry/Triangle.h>
-#include <objects/geometry/Line.h>
+#include "linalg/Vec4D.h"
+#include "objects/Object.h"
+#include "utils/stack_vector.h"
+#include "Triangle.h"
+#include "Line.h"
 
 
 class Plane final {

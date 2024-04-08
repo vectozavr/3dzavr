@@ -125,24 +125,25 @@ std::map<MaterialTag, std::shared_ptr<Material>> ResourceManager::loadMaterials(
     return materials;
 }
 
-std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const FilePath &objFile) {
+std::shared_ptr<Group> ResourceManager::loadTriangleMesh(const ObjectTag &tag, const FilePath &meshFile) {
 
     if (_instance == nullptr) {
         return nullptr;
     }
 
     std::shared_ptr<Group> objects = std::make_shared<Group>(tag);
+    objects->addComponent<TransformMatrix>();
     std::map<MaterialTag, std::shared_ptr<Material>> materials;
 
     // If objects is already loaded - return pointer to it
-    auto it = _instance->_objects.find(objFile);
+    auto it = _instance->_objects.find(meshFile);
     if (it != _instance->_objects.end()) {
         return std::make_shared<Group>(tag, *it->second);
     }
 
-    std::ifstream file(objFile.str());
+    std::ifstream file(meshFile.str());
     if (!file.is_open()) {
-        Log::log("ResourceManager::loadObjects(): cannot open '" + objFile.str() + "'");
+        Log::log("ResourceManager::loadObjects(): cannot open '" + meshFile.str() + "'");
         return objects;
     }
 
@@ -154,9 +155,10 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     // On each step we will check did we read all the information to be able to create a new material
     auto addObject = [objects, &materials, &objName, &materialName, &tris] {
         if((!objName.empty() || !materialName.empty()) && !tris.empty()) {
-            objects->add(std::make_shared<TriangleMesh>(
-                    ObjectTag(objName + "_" + materialName + "_" + std::to_string(objects->size())), tris,
-                    materials[MaterialTag(materialName)]));
+
+            auto newObject = std::make_shared<Object>(ObjectTag(objName + "_" + materialName + "_" + std::to_string(objects->size())));
+            newObject->addComponent<TriangleMesh>(tris,materials[MaterialTag(materialName)]);
+            objects->add(newObject);
 
             // When we read all data and created a new Mesh
             // we have to clear the fields and start reading over again
@@ -241,7 +243,7 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
 
             if(!mtlFileName.empty()) {
                 materials = ResourceManager::loadMaterials(
-                        FilePath(objFile.parentPath(), mtlFileName));
+                        FilePath(meshFile.parentPath(), mtlFileName));
             }
         }
 
@@ -256,10 +258,10 @@ std::shared_ptr<Group> ResourceManager::loadObject(const ObjectTag &tag, const F
     }
 
     file.close();
-    Log::log("ResourceManager::LoadObjects(): obj '" + objFile.str() + "' was loaded");
+    Log::log("ResourceManager::LoadObjects(): obj '" + meshFile.str() + "' was loaded");
 
     // If success - remember and return vector of objects pointer
-    _instance->_objects.emplace(objFile, objects);
+    _instance->_objects.emplace(meshFile, objects);
 
     return std::make_shared<Group>(tag, *objects);
 }

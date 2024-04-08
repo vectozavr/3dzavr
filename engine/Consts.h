@@ -4,8 +4,8 @@
 #include <filesystem>
 
 #include <ScalarConsts.h>
-#include <objects/props/Material.h>
-#include <objects/props/Color.h>
+#include <components/props/Material.h>
+#include <components/props/Color.h>
 #include <linalg/Vec2D.h>
 #include <utils/FilePath.h>
 

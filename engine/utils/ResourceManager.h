@@ -5,7 +5,7 @@
 
 #include <SDL_ttf.h>
 
-#include <objects/geometry/TriangleMesh.h>
+#include <components/geometry/TriangleMesh.h>
 #include <objects/Group.h>
 #include <utils/Font.h>
 
@@ -39,7 +39,7 @@ public:
     // This function tries to load texture from the .obj file.
     // If it succeeded - the function returns a pointer to the texture.
     // Otherwise, it returns a nullptr.
-    static std::shared_ptr<Group> loadObject(const ObjectTag &tag, const FilePath &meshFile);
+    static std::shared_ptr<Group> loadTriangleMesh(const ObjectTag &tag, const FilePath &meshFile);
 
     static std::shared_ptr<Font> loadFont(const FilePath &fontFile);
 };

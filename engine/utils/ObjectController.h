@@ -1,16 +1,16 @@
 #ifndef UTILS_OBJECTCONTROLLER_H
 #define UTILS_OBJECTCONTROLLER_H
 
-#include "objects/Object.h"
+#include "components/TransformMatrix.h"
 #include <io/Keyboard.h>
 #include <io/Mouse.h>
 
 class ObjectController {
 private:
-    std::shared_ptr<Object> _object;
+    std::shared_ptr<TransformMatrix> _object;
 
 public:
-    ObjectController(std::shared_ptr<Object> object);
+    ObjectController(std::shared_ptr<TransformMatrix> transformMatrix);
 
     void update();
 };

@@ -2,11 +2,11 @@
 #define ANIMATION_AROTATELEFT_H
 
 #include <animation/Animation.h>
-#include "objects/Object.h"
+#include "components/TransformMatrix.h"
 
 class ARotateLeft final : public Animation {
 private:
-    const std::weak_ptr<Object> _object;
+    const std::weak_ptr<TransformMatrix> _object;
     const double _rotationValue;
 
     void update() override {
@@ -21,7 +21,7 @@ private:
     }
 
 public:
-    ARotateLeft(const std::weak_ptr<Object>& object, double r, double duration = 1, LoopOut looped = LoopOut::None,
+    ARotateLeft(const std::weak_ptr<TransformMatrix>& object, double r, double duration = 1, LoopOut looped = LoopOut::None,
             InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {}
 };

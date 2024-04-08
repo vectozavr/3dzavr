@@ -7,11 +7,13 @@
 #include <utility>
 #include <memory>
 
+#include <components/props/Color.h>
+#include <components/geometry/Triangle.h>
 #include <linalg/Matrix4x4.h>
 #include <linalg/Vec3D.h>
-#include <objects/props/Color.h>
 #include <Consts.h>
-#include <objects/geometry/Triangle.h>
+
+class Component;
 
 class ObjectTag final {
 private:
@@ -19,7 +21,7 @@ private:
 public:
     explicit ObjectTag(const std::string& name = "") : _name(name) {}
 
-    ObjectTag(const ObjectTag& other) : _name(other._name) {}
+    ObjectTag(const ObjectTag& other) = default;
 
     [[nodiscard]] std::string str() const { return _name; }
     [[nodiscard]] bool empty() const { return _name.empty(); }
@@ -33,104 +35,80 @@ public:
 
 
 class Object : public std::enable_shared_from_this<Object> {
-public:
-    struct IntersectionInformation final {
-        Vec3D pointOfIntersection;
-        Vec3D normal;
-        double distanceToObject = std::numeric_limits<double>::infinity();
-        std::shared_ptr<Object> obj = nullptr;
-        bool intersected = false;
-        Triangle triangle{};
-    };
 private:
     bool checkIfAttached(Object *obj);
 
     const ObjectTag _tag;
 
-    Matrix4x4 _transformMatrix = Matrix4x4::Identity();
-    /*
-     * Take into account that when you rotate a body,
-     * you change '_angle' & '_angleLeftUpLookAt' only for this particular body,
-     * not for attached objects! Therefore, during rotations
-     * '_angle' & '_angleLeftUpLookAt' stays constant for all attached objects.
-     */
-    Vec3D _angle{0, 0, 0};
-    Vec3D _angleLeftUpLookAt{0, 0, 0};
-
-    // This is all attached objects
-    std::map<ObjectTag, std::weak_ptr<Object>> _attachedObjects;
-
     // This is the object we are attached to
+    //Object* _attachedTo = nullptr;
     Object* _attachedTo = nullptr;
 
+    template<typename T>
+    bool hasComponent() const {
+        for (const auto& cmp : _components) {
+            if (std::dynamic_pointer_cast<T>(cmp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    void copyComponentsFromObject(const Object &object);
+protected:
+    std::map<ObjectTag, std::shared_ptr<Object>> _attached;
+    std::vector<std::shared_ptr<Component>> _components;
 public:
-    explicit Object(const ObjectTag& tag) : _tag(tag) {};
+    explicit Object(const ObjectTag& tag);
+    Object(const Object &object);
+    Object(const ObjectTag& tag, const Object &object);
 
-    Object(const Object &object) :  _tag(object._tag),
-                                    _transformMatrix(object._transformMatrix),
-                                    _angle(object._angle),
-                                    _angleLeftUpLookAt(object._angleLeftUpLookAt) {};
-
-    Object(const ObjectTag& tag, const Object &object) :
-                                    _tag(tag),
-                                    _transformMatrix(object._transformMatrix),
-                                    _angle(object._angle),
-                                    _angleLeftUpLookAt(object._angleLeftUpLookAt) {}
-
-    void transform(const Matrix4x4 &t);
-    void undoTransformations() { transform(invModel()); }
-    void transformRelativePoint(const Vec3D &point, const Matrix4x4 &transform);
-    void translate(const Vec3D &dv);
-    void translateToPoint(const Vec3D &point);
-    void attractToPoint(const Vec3D &point, double value);
-    void scale(const Vec3D &s);
-    void scaleInside(const Vec3D &s);
-    void rotate(const Vec3D &r);
-    void rotate(const Vec3D &v, double rv);
-    void rotateToAngle(const Vec3D &v);
-    void rotateRelativePoint(const Vec3D &s, const Vec3D &r);
-    void rotateRelativePoint(const Vec3D &s, const Vec3D &v, double r);
-    void rotateLeft(double rl);
-    void rotateUp(double ru);
-    void rotateLookAt(double rlAt);
-
-    virtual std::shared_ptr<Object> copy(const ObjectTag& tag) const {
+    [[nodiscard]] virtual std::shared_ptr<Object> copy(const ObjectTag& tag) const {
         return std::make_shared<Object>(tag, *this);
     }
 
     // This function depends on Object_Type: each Object should define how does the intersection work.
-    [[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to);
-
-    [[nodiscard]] Vec3D left() const { return _transformMatrix.x().normalized(); }
-    [[nodiscard]] Vec3D up() const { return _transformMatrix.y().normalized(); }
-    [[nodiscard]] Vec3D lookAt() const { return _transformMatrix.z().normalized(); }
-    [[nodiscard]] Vec3D position() const { return _transformMatrix.w(); }
-    [[nodiscard]] Vec3D fullPosition() const { return fullModel().w(); }
-    [[nodiscard]] Vec3D angle() const { return _angle; }
-    [[nodiscard]] Vec3D angleLeftUpLookAt() const { return _angleLeftUpLookAt; }
+    //[[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to);
 
     void attach(std::shared_ptr<Object> object);
     void unattach(const ObjectTag &tag);
-    std::shared_ptr<Object> attached(const ObjectTag &tag);
+
+    [[nodiscard]] std::shared_ptr<Object> attached(const ObjectTag &tag);
+    [[nodiscard]] Object* attachedTo() { return _attachedTo; }
+    [[nodiscard]] std::shared_ptr<Object> sharedPtr() { return shared_from_this(); }
+    [[nodiscard]] uint16_t numberOfAttached() const { return _attached.size(); }
+
+    void unattachAll();
 
     [[nodiscard]] ObjectTag name() const { return _tag; }
 
-    // model() returns the transform matrix of this object
-    [[nodiscard]] Matrix4x4 model() const;
-    /*
-     * fullModel() returns the chain of transform matrices:
-     * _attachedTo full transform matrix * (current transform matrix)
-     */
-    [[nodiscard]] Matrix4x4 fullModel() const;
+    template<typename T, typename... Args>
+    std::shared_ptr<T> addComponent(Args&&... args) {
+        static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
+        if(hasComponent<T>()) {
+            throw std::invalid_argument{"Object::addComponent(): The component T had been added already"};
+        }
+        auto component = std::make_shared<T>(std::forward<Args>(args)...);
+        component->assignTo(this);
+        component->start();
+        _components.emplace_back(component);
+        return component;
+    }
 
-    /*
-     * invModel() and fullInvModel() are fast methods to calculate the inverse.
-     * When columns of the model() matrix are perpendicular to each other
-     * invModel() will return the result of fast inverse.
-     * Otherwise, it will calculate the full inverse (computationally less efficient).
-     */
-    [[nodiscard]] Matrix4x4 invModel() const { return Matrix4x4::View(model()); }
-    [[nodiscard]] Matrix4x4 fullInvModel() const { return Matrix4x4::View(fullModel()); }
+    template<typename T>
+    std::shared_ptr<T> getComponent() const {
+        for (const auto& cmp : _components) {
+            auto ptr = std::dynamic_pointer_cast<T>(cmp);
+            if (ptr) {
+                return ptr;
+            }
+        }
+        return nullptr;
+    }
+
+    std::map<ObjectTag, std::shared_ptr<Object>>::iterator begin() { return _attached.begin(); }
+    std::map<ObjectTag, std::shared_ptr<Object>>::iterator end() { return _attached.end(); }
+    std::map<ObjectTag, std::shared_ptr<Object>>::const_iterator begin() const { return _attached.begin(); }
+    std::map<ObjectTag, std::shared_ptr<Object>>::const_iterator end() const { return _attached.end(); }
 
     virtual ~Object();
 };

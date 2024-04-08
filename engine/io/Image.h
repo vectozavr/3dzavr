@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <png.h>
 
-#include <objects/props/Color.h>
+#include <components/props/Color.h>
 #include <linalg/Vec2D.h>
 #include <linalg/Vec3D.h>
 #include <utils/FilePath.h>

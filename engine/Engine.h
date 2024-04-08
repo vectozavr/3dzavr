@@ -22,7 +22,7 @@ private:
 
     std::vector<std::shared_ptr<LightSource>> _lightSources;
 
-    void projectGroup(const Group& group);
+    void projectObject(const Object& object);
     void drawProjectedTriangles();
 
     // For debug purposes
@@ -36,7 +36,7 @@ private:
 protected:
     const std::shared_ptr<Screen> screen = std::make_shared<Screen>();
 
-    const std::shared_ptr<World> world = std::make_shared<World>();
+    const std::shared_ptr<World> world = std::make_shared<World>(ObjectTag("Main_Scene(World)"));
     const std::shared_ptr<Camera> camera = std::make_shared<Camera>();
 
     virtual void start() {};

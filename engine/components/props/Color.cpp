@@ -1,4 +1,4 @@
-#include <objects/props/Color.h>
+#include "Color.h"
 
 const Color Color::WHITE = Color(255, 255, 255);
 const Color Color::BLACK = Color(0, 0, 0);

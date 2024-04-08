@@ -10,9 +10,9 @@
 #include <utils/Font.h>
 #include <utils/Time.h>
 #include <objects/Camera.h>
-#include <objects/geometry/Triangle.h>
-#include <objects/geometry/TriangleMesh.h>
-#include <objects/lighting/LightSource.h>
+#include <components/geometry/Triangle.h>
+#include <components/geometry/TriangleMesh.h>
+#include <components/lighting/LightSource.h>
 
 
 class Screen final {
