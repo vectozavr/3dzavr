@@ -39,7 +39,7 @@ void LineMesh::calculateBounds() {
 }
 
 LineMesh::LineMesh(const LineMesh &lineMesh, bool deepCopy):
-TransformMatrix(lineMesh), _color(lineMesh._color), _visible(lineMesh._visible) {
+Component(lineMesh), _color(lineMesh._color), _visible(lineMesh._visible) {
     copyLines(lineMesh, deepCopy);
 }
 
@@ -78,9 +78,13 @@ LineMesh LineMesh::Cube(double size) {
 
 LineMesh LineMesh::BoundsFrame(const struct Bounds& bounds) {
     LineMesh result = LineMesh::Cube();
-
-    result.scale(bounds.extents*2);
-    result.translate(bounds.center);
-
+    result *= Matrix4x4::Translation(bounds.center)*Matrix4x4::Scale(bounds.extents*2);
     return result;
+}
+
+void LineMesh::start() {
+    if (!hasComponent<TransformMatrix>()) {
+        // This component requires to work with TransformMatrix component,
+        addComponent<TransformMatrix>();
+    }
 }

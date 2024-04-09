@@ -8,13 +8,15 @@
 #include "LightSource.h"
 
 class PointLight final : public LightSource {
+private:
+    Vec3D _initialPos;
 public:
     explicit PointLight(const Vec3D& position, const Color& color = Color::WHITE, double intensity = 1.0):
-            LightSource(color, intensity) { translate(position); };
-    PointLight(const PointLight& pointLight): LightSource(pointLight) { translate(pointLight.position()); };
+    LightSource(color, intensity), _initialPos(position) {};
+    PointLight(const PointLight& pointLight) = default;
 
     [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef) const override {
-        auto toLight = fullPosition() - pixelPosition;
+        auto toLight = _transformMatrix->fullPosition() - pixelPosition;
         double distance = toLight.abs();
         Vec3D dir = toLight.normalized();
 
@@ -32,6 +34,15 @@ public:
 
     [[nodiscard]] std::shared_ptr<Component> copy() const override {
         return std::make_shared<PointLight>(*this);
+    }
+
+    void start() override {
+        _transformMatrix = getComponent<TransformMatrix>();
+        if (!_transformMatrix) {
+            _transformMatrix = assignedToPtr()->addComponent<TransformMatrix>();
+        }
+
+        _transformMatrix->translate(_initialPos);
     }
 };
 

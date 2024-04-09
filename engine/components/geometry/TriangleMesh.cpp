@@ -13,6 +13,13 @@ TriangleMesh &TriangleMesh::operator*=(const Matrix4x4 &matrix4X4) {
     return *this;
 }
 
+void TriangleMesh::start() {
+    if (!hasComponent<TransformMatrix>()) {
+        // This component requires to work with TransformMatrix component,
+        addComponent<TransformMatrix>();
+    }
+}
+
 TriangleMesh::TriangleMesh(const std::vector<Triangle> &tries, const std::shared_ptr<Material>& material) : _tris(tries) {
     if(material) {
         _material = material;
@@ -75,7 +82,6 @@ TriangleMesh TriangleMesh::LineTo(const Vec3D &from, const Vec3D &to, double lin
     Vec4D p7 = (to - from + v2 * line_width / 2.0 + v3 * line_width / 2.0).makePoint4D();
     Vec4D p8 = (to - from + v2 * line_width / 2.0 - v3 * line_width / 2.0).makePoint4D();
 
-
     line.setTriangles(std::move(std::vector<Triangle>{
             {{p2, p4, p1}},
             {{p2, p3, p4}},
@@ -90,7 +96,6 @@ TriangleMesh TriangleMesh::LineTo(const Vec3D &from, const Vec3D &to, double lin
             {{p1, p8, p5}},
             {{p1, p4, p8}}
     }));
-    line.translateToPoint(from);
 
     return line;
 }
@@ -144,7 +149,6 @@ TriangleMesh TriangleMesh::ArrowTo(const Vec3D &from, const Vec3D &to, double li
             {{ p11, p12, p13 }},
             {{ p12, p9, p13  }},
     }));
-    arrow.translateToPoint(from);
 
     return arrow;
 }
@@ -162,11 +166,11 @@ TriangleMesh::IntersectionInformation TriangleMesh::intersect(const Vec3D &from,
     Vec3D norm;
     Triangle triangle;
 
-    Matrix4x4 model = this->fullModel();
+    Matrix4x4 model = getComponent<TransformMatrix>()->fullModel();
     // It is computationally more efficient not to transform all object's triangles from model to global
     // coordinate system, but translate 'from' and 'to' vectors inside once and check triangles without performing
     // many matrix multiplication.
-    Matrix4x4 invModel = this->fullInvModel();
+    Matrix4x4 invModel = getComponent<TransformMatrix>()->fullInvModel();
 
     Vec3D d = (to - from).normalized();
     Vec3D d_model = invModel*d;
@@ -240,6 +244,6 @@ void TriangleMesh::calculateBounds() {
 }
 
 TriangleMesh::TriangleMesh(const TriangleMesh &mesh, bool deepCopy) :
-TransformMatrix(mesh), _material(mesh._material), _visible(mesh._visible) {
+Component(mesh), _material(mesh._material), _visible(mesh._visible) {
     copyTriangles(mesh, deepCopy);
 }

@@ -11,7 +11,7 @@ public:
             LightSource(color, intensity), _dir(direction.normalized()) {};
     DirectionalLight(const DirectionalLight& directionalLight) = default;
 
-    [[nodiscard]] inline Vec3D direction() const { return fullModel()*_dir; };
+    [[nodiscard]] inline Vec3D direction() const { return _transformMatrix->fullModel()*_dir; };
 
     [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef) const override {
         auto dot = -std::clamp<double>(pixelNorm.dot(direction()), -1, -0.3);
@@ -27,6 +27,8 @@ public:
     [[nodiscard]] std::shared_ptr<Component> copy() const override {
         return std::make_shared<DirectionalLight>(*this);
     }
+
+
 };
 
 

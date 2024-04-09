@@ -159,6 +159,7 @@ void WorldEditor::controlPanel() {
 
         objectEditor();
 
+
         if (mu_begin_treenode(ctx, "World tree")) {
             objectTree(_world);
 
@@ -201,18 +202,21 @@ void WorldEditor::objectTree(const std::shared_ptr<Object> &object) {
     }
 }
 
-void WorldEditor::objectEditor() {
+void WorldEditor::transformMatrixEditor() {
     auto ctx = _ctx.get();
 
-    if (_selectedObject && mu_header_ex(ctx, "Object editor", MU_OPT_EXPANDED)) {
-        mu_text(ctx, ("Object name: " + _selectedObject->name().str()).c_str());
+    auto transformMatrix = _selectedObject->getComponent<TransformMatrix>();
+    if(!transformMatrix) {
+        return;
+    }
 
-        auto pos = _selectedObject->getComponent<TransformMatrix>()->fullPosition();
-        mu_text(ctx, ("X / Y / Z: " + std::to_string(pos.x()) + " / " + std::to_string(pos.y()) + " / " + std::to_string(pos.z()) ).c_str());
+    if (mu_begin_treenode(ctx, "Transform Matrix")) {
 
-        mu_text(ctx, "Transform object:");
+        auto pos = transformMatrix->fullPosition();
+        mu_text(ctx, ("X / Y / Z: " + std::to_string(pos.x()) + " / " + std::to_string(pos.y()) + " / " +
+                      std::to_string(pos.z())).c_str());
 
-        mu_layout_row(ctx, 3, (int[]) { 60, 60, 60 }, 0);
+        mu_layout_row(ctx, 3, (int[]) {60, 60, 60}, 0);
         if (mu_button(ctx, "Translate")) { _operation = 0; }
         if (mu_button(ctx, "Scale")) { _operation = 1; }
         if (mu_button(ctx, "Rotate")) { _operation = 2; }
@@ -224,43 +228,129 @@ void WorldEditor::objectEditor() {
         switch (_operation) {
             case 0:
                 mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
-                mu_label(ctx, "Translate X:");   mu_slider(ctx, &x, -30, 30);
-                mu_label(ctx, "Translate Y:"); mu_slider(ctx, &y, -30, 30);
-                mu_label(ctx, "Translate Z:");  mu_slider(ctx, &z, -30, 30);
+                mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+                mu_label(ctx, "Translate X:");
+                mu_slider(ctx, &x, -30, 30);
+                mu_label(ctx, "Translate Y:");
+                mu_slider(ctx, &y, -30, 30);
+                mu_label(ctx, "Translate Z:");
+                mu_slider(ctx, &z, -30, 30);
                 mu_layout_end_column(ctx);
-                _selectedObject->getComponent<TransformMatrix>()->translate(Vec3D(x, y, z)*Time::deltaTime());
+                transformMatrix->translate(Vec3D(x, y, z) * Time::deltaTime());
                 break;
             case 1:
                 mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
-                mu_label(ctx, "Scale X:");   mu_slider(ctx, &x, -3, 3);
-                mu_label(ctx, "Scale Y:"); mu_slider(ctx, &y, -3, 3);
-                mu_label(ctx, "Scale Z:");  mu_slider(ctx, &z, -3, 3);
+                mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+                mu_label(ctx, "Scale X:");
+                mu_slider(ctx, &x, -3, 3);
+                mu_label(ctx, "Scale Y:");
+                mu_slider(ctx, &y, -3, 3);
+                mu_label(ctx, "Scale Z:");
+                mu_slider(ctx, &z, -3, 3);
                 mu_layout_end_column(ctx);
-                _selectedObject->getComponent<TransformMatrix>()->scaleInside(Vec3D(1 + x*Time::deltaTime(),
-                                                   1 + y*Time::deltaTime(),
-                                                   1 + z*Time::deltaTime()));
+                transformMatrix->scaleInside(Vec3D(1 + x * Time::deltaTime(),
+                                                   1 + y * Time::deltaTime(),
+                                                   1 + z * Time::deltaTime()));
                 break;
             case 2:
                 mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
-                mu_label(ctx, "Rotate X:");   mu_slider(ctx, &x, -3, 3);
-                mu_label(ctx, "Rotate Y:"); mu_slider(ctx, &y, -3, 3);
-                mu_label(ctx, "Rotate Z:");  mu_slider(ctx, &z, -3, 3);
+                mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+                mu_label(ctx, "Rotate X:");
+                mu_slider(ctx, &x, -3, 3);
+                mu_label(ctx, "Rotate Y:");
+                mu_slider(ctx, &y, -3, 3);
+                mu_label(ctx, "Rotate Z:");
+                mu_slider(ctx, &z, -3, 3);
                 mu_layout_end_column(ctx);
-                _selectedObject->getComponent<TransformMatrix>()->rotateRelativePoint(_selectedObject->getComponent<TransformMatrix>()->position(), Vec3D(x, y, z)*Time::deltaTime());
+                transformMatrix->rotateRelativePoint(_selectedObject->getComponent<TransformMatrix>()->position(),
+                                                     Vec3D(x, y, z) * Time::deltaTime());
                 break;
         }
 
-        mu_layout_row(ctx, 2, (int[]) { 120, 120}, 0);
+        mu_layout_row(ctx, 1, (int[]) {120}, 0);
         if (mu_button(ctx, "Undo Transform")) {
-            _selectedObject->getComponent<TransformMatrix>()->transform(_selectedObject->getComponent<TransformMatrix>()->invModel());
+            transformMatrix->transform(_selectedObject->getComponent<TransformMatrix>()->invModel());
         }
+
+        mu_end_treenode(ctx);
+    }
+}
+
+void WorldEditor::triangleMeshEditor() {
+    auto ctx = _ctx.get();
+
+    auto triangleMesh = _selectedObject->getComponent<TriangleMesh>();
+    if(!triangleMesh) {
+        return;
+    }
+
+    if (mu_begin_treenode(ctx, "Triangle Mesh")) {
+
+        mu_end_treenode(ctx);
+    }
+}
+
+void WorldEditor::lineMeshEditor() {
+    auto ctx = _ctx.get();
+
+    auto lineMesh = _selectedObject->getComponent<LineMesh>();
+    if(!lineMesh) {
+        return;
+    }
+
+    if (mu_begin_treenode(ctx, "Line Mesh")) {
+
+        mu_end_treenode(ctx);
+    }
+}
+
+void WorldEditor::lightSourceEditor() {
+    auto ctx = _ctx.get();
+
+    auto lightSource = _selectedObject->getComponent<LightSource>();
+    if(!lightSource) {
+        return;
+    }
+
+    if (mu_begin_treenode(ctx, "Light Source")) {
+
+        mu_end_treenode(ctx);
+    }
+}
+
+void WorldEditor::rigidObjectEditor() {
+    auto ctx = _ctx.get();
+
+    auto rigidObject = _selectedObject->getComponent<RigidObject>();
+    if(!rigidObject) {
+        return;
+    }
+
+    if (mu_begin_treenode(ctx, "Rigid Object")) {
+
+        mu_end_treenode(ctx);
+    }
+}
+
+void WorldEditor::objectEditor() {
+    auto ctx = _ctx.get();
+
+    if (_selectedObject && mu_begin_treenode(ctx, "Object editor")) {
+        mu_text(ctx, ("Object name: " + _selectedObject->name().str()).c_str());
+
+        transformMatrixEditor();
+        triangleMeshEditor();
+        lineMeshEditor();
+        lightSourceEditor();
+        rigidObjectEditor();
+
+        mu_layout_row(ctx, 1, (int[]) {120}, 0);
         if (mu_button(ctx, "Delete object")) {
             _world->remove(_selectedObject->name());
             _selectedObject.reset();
         }
+
+        mu_end_treenode(ctx);
     }
 }
 

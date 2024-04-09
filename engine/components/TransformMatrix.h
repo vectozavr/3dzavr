@@ -16,6 +16,8 @@ private:
     Vec3D _angle{0, 0, 0};
     Vec3D _angleLeftUpLookAt{0, 0, 0};
 public:
+    TransformMatrix() = default;
+    TransformMatrix(const TransformMatrix& transformMatrix) = default;
 
     void transform(const Matrix4x4 &t);
     void undoTransformations() { transform(invModel()); }

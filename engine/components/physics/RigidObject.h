@@ -8,7 +8,7 @@
 
 #include "components/geometry/TriangleMesh.h"
 #include "components/geometry/LineMesh.h"
-#include "components/TransformMatrix.h"
+#include "components/Component.h"
 #include "Simplex.h"
 #include "HitBox.h"
 
@@ -34,7 +34,7 @@ struct NextSimplex final {
 // TODO: implement Rag-Doll support for Rigid Body objects (bones, connections, constraints, skeleton and humanoids)
 
 
-class RigidObject : public TransformMatrix {
+class RigidObject : public Component {
 private:
     Vec3D _velocity{0, 0, 0};
     Vec3D _acceleration{0, 0, 0};
@@ -107,6 +107,7 @@ public:
         return std::make_shared<RigidObject>(*this);
     }
 
+    void start() override;
     void update() override;
 };
 

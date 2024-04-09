@@ -6,7 +6,7 @@
 #include <components/geometry/Bounds.h>
 #include <components/geometry/Line.h>
 
-class LineMesh : public TransformMatrix {
+class LineMesh : public Component {
 private:
     std::vector<Line> _lines;
     Color _color;
@@ -16,7 +16,6 @@ private:
 
     void copyLines(const LineMesh& lineMesh, bool deepCopy);
     void calculateBounds();
-
 public:
     LineMesh() = default;
 
@@ -47,6 +46,8 @@ public:
     [[nodiscard]] std::shared_ptr<Component> copy() const override {
         return std::make_shared<LineMesh>(*this);
     }
+
+    void start() override;
 };
 
 

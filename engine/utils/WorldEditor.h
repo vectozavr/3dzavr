@@ -50,8 +50,15 @@ private:
 
     void controlPanel();
     void objectTree(const std::shared_ptr<Object>& object);
-    void objectEditor();
     void renderSettings();
+
+    void objectEditor();
+    void transformMatrixEditor();
+    void triangleMeshEditor();
+    void lineMeshEditor();
+    void lightSourceEditor();
+    void rigidObjectEditor();
+
 
     void updateScreenSettings();
     void updateControllers();

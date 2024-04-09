@@ -5,23 +5,20 @@
 
 class SpotLight final : public LightSource {
 private:
+    Vec3D _initialPos;
     Vec3D _dir;
     double _innerConeCos;
     double _outerConeCos;
 public:
     SpotLight(const Vec3D& position, const Vec3D& direction, double innerConeCos = cos(Consts::PI / 4),
               double outerConeCos = cos(Consts::PI / 3), const Color& color = Color::WHITE, double intensity = 1.0):
-            LightSource(color, intensity), _dir(direction), _innerConeCos(innerConeCos), _outerConeCos(outerConeCos) { translate(position); };
-    SpotLight(const SpotLight& spotLight):
-            LightSource(spotLight), _dir(spotLight._dir),
-            _innerConeCos(spotLight._innerConeCos), _outerConeCos(spotLight._outerConeCos) {
-        translate(spotLight.position());
-    };
+              LightSource(color, intensity), _dir(direction), _innerConeCos(innerConeCos), _outerConeCos(outerConeCos), _initialPos(position) {};
+    SpotLight(const SpotLight& spotLight) = default;
 
-    [[nodiscard]] inline Vec3D direction() const { return fullModel()*_dir; };
+    [[nodiscard]] inline Vec3D direction() const { return _transformMatrix->fullModel()*_dir; };
 
     [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef = 0.0) const override {
-        auto toLight = fullPosition() - pixelPosition;
+        auto toLight = _transformMatrix->fullPosition() - pixelPosition;
         double distance = toLight.abs();
         Vec3D dir = toLight.normalized();
 
@@ -47,6 +44,15 @@ public:
 
     [[nodiscard]] std::shared_ptr<Component> copy() const override {
         return std::make_shared<SpotLight>(*this);
+    }
+
+    void start() override {
+        _transformMatrix = getComponent<TransformMatrix>();
+        if (!_transformMatrix) {
+            _transformMatrix = assignedToPtr()->addComponent<TransformMatrix>();
+        }
+
+        _transformMatrix->translate(_initialPos);
     }
 };
 

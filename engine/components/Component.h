@@ -15,9 +15,25 @@ public:
     virtual void update() {};
 
     template<typename T>
-    std::shared_ptr<T> getComponent() const {
+    [[nodiscard]] std::shared_ptr<T> getComponent() const {
         if (_object) {
             return _object->getComponent<T>();
+        }
+        return nullptr;
+    }
+
+    template<typename T>
+    [[nodiscard]] bool hasComponent() const {
+        if (_object) {
+            return _object->hasComponent<T>();
+        }
+        return false;
+    }
+
+    template<typename T, typename... Args>
+    std::shared_ptr<T> addComponent(Args&&... args) {
+        if (_object) {
+            return _object->addComponent<T>(std::forward<Args>(args)...);
         }
         return nullptr;
     }

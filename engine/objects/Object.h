@@ -80,13 +80,13 @@ public:
         }
         auto component = std::make_shared<T>(std::forward<Args>(args)...);
         component->assignTo(this);
-        component->start();
         _components.emplace_back(component);
+        component->start();
         return component;
     }
 
     template<typename T>
-    std::shared_ptr<T> getComponent() const {
+    [[nodiscard]] std::shared_ptr<T> getComponent() const {
         for (const auto& cmp : _components) {
             auto ptr = std::dynamic_pointer_cast<T>(cmp);
             if (ptr) {
@@ -97,7 +97,7 @@ public:
     }
 
     template<typename T>
-    bool hasComponent() const {
+    [[nodiscard]] bool hasComponent() const {
         for (const auto& cmp : _components) {
             if (std::dynamic_pointer_cast<T>(cmp)) {
                 return true;

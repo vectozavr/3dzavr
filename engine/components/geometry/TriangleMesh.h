@@ -9,7 +9,7 @@
 #include <components/TransformMatrix.h>
 #include <components/props/Material.h>
 
-class TriangleMesh : public TransformMatrix, public std::enable_shared_from_this<TriangleMesh> {
+class TriangleMesh : public Component, public std::enable_shared_from_this<TriangleMesh> {
 public:
     struct IntersectionInformation final {
         Vec3D pointOfIntersection;
@@ -63,6 +63,8 @@ public:
     [[nodiscard]] std::shared_ptr<Component> copy() const override {
         return std::make_shared<TriangleMesh>(*this);
     }
+
+    void start() override;
 };
 
 #endif //GEOMETRY_MESH_H

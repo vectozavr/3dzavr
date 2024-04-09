@@ -12,7 +12,7 @@ Vec3D RigidObject::_findFurthestPoint(const Vec3D &direction) {
 
     double maxDistance = -std::numeric_limits<double>::max();
 
-    Vec3D transformedDirection = Vec3D(fullInvModel() * direction.makePoint4D()).normalized();
+    Vec3D transformedDirection = Vec3D(getComponent<TransformMatrix>()->fullInvModel() * direction.makePoint4D()).normalized();
 
     for(auto & it : _hitBox) {
         double distance = it.dot(transformedDirection);
@@ -23,7 +23,7 @@ Vec3D RigidObject::_findFurthestPoint(const Vec3D &direction) {
         }
     }
 
-    return Vec3D(fullModel() * maxPoint.makePoint4D());
+    return Vec3D(getComponent<TransformMatrix>()->fullModel() * maxPoint.makePoint4D());
 }
 
 Vec3D RigidObject::_support(const std::shared_ptr<RigidObject>& obj, const Vec3D &direction) {
@@ -315,11 +315,11 @@ void RigidObject::solveCollision(const CollisionPoint &collision) {
 
     setVelocity(velocity_parallel);
 
-    translate(-collision.normal * collision.depth);
+    getComponent<TransformMatrix>()->translate(-collision.normal * collision.depth);
 }
 
 void RigidObject::updatePhysicsState() {
-    translate(_velocity * Time::deltaTime());
+    getComponent<TransformMatrix>()->translate(_velocity * Time::deltaTime());
     _velocity = _velocity + _acceleration * Time::deltaTime();
 }
 
@@ -348,6 +348,13 @@ bool RigidObject::initHitBox() {
     }
 
     return false;
+}
+
+void RigidObject::start() {
+    if (!hasComponent<TransformMatrix>()) {
+        // This component requires to work with TransformMatrix component,
+        addComponent<TransformMatrix>();
+    }
 }
 
 void RigidObject::update() {

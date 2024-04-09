@@ -24,7 +24,9 @@ private:
 
     std::shared_ptr<TransformMatrix> _transformMatrix;
 public:
-    Camera() : Object(ObjectTag("Camera")) {};
+    Camera() : Object(ObjectTag("Camera")) {
+        _transformMatrix = addComponent<TransformMatrix>();
+    };
 
     Camera(const Camera &camera) = delete;
 
@@ -33,7 +35,7 @@ public:
     std::vector<std::pair<Triangle, Triangle>> project(const TriangleMesh& triangleMesh);
     std::vector<Line> project(const LineMesh& lineMesh);
 
-    std::shared_ptr<TransformMatrix> transformMatrix() const;
+    std::shared_ptr<TransformMatrix> transformMatrix() const { return _transformMatrix; }
 };
 
 
