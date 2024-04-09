@@ -21,6 +21,8 @@ private:
 
     bool _valid = false;
 
+    FilePath _filename;
+
     void invalidate();
 public:
     explicit Image(uint16_t width = Consts::STANDARD_SCREEN_WIDTH, uint16_t height = Consts::STANDARD_SCREEN_HEIGHT);
@@ -46,6 +48,8 @@ public:
     CODE save2png(const FilePath& file_name, uint16_t bit_depth = 8);
 
     [[nodiscard]] png_bytep data() const {return _data; }
+
+    [[nodiscard]] FilePath fileName() const { return _filename; }
 
     ~Image();
 };

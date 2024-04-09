@@ -11,7 +11,6 @@ class LightSource : public Component {
 protected:
     Color _color = Color::WHITE;
     double _intensity = 1.0;
-    std::shared_ptr<TransformMatrix> _transformMatrix = std::make_shared<TransformMatrix>();
 
 public:
     LightSource(const Color& color, double intensity): _color(color), _intensity(std::max(intensity, 0.0)) {}
@@ -29,11 +28,14 @@ public:
     [[nodiscard]] virtual Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef) const = 0;
 
     void start() override {
-        _transformMatrix = getComponent<TransformMatrix>();
-        if (!_transformMatrix) {
-            _transformMatrix = assignedToPtr()->addComponent<TransformMatrix>();
+        if (!hasComponent<TransformMatrix>()) {
+            // This component requires to work with TransformMatrix component,
+            addComponent<TransformMatrix>();
         }
     }
+
+    void setIntensity(double intensity) { _intensity = intensity; }
+    void setColor(const Color& color) { _color = color; }
 };
 
 

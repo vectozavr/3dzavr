@@ -15,10 +15,15 @@ public:
               LightSource(color, intensity), _dir(direction), _innerConeCos(innerConeCos), _outerConeCos(outerConeCos), _initialPos(position) {};
     SpotLight(const SpotLight& spotLight) = default;
 
-    [[nodiscard]] inline Vec3D direction() const { return _transformMatrix->fullModel()*_dir; };
+    [[nodiscard]] inline Vec3D direction() const { return getComponent<TransformMatrix>()->fullModel()*_dir; };
+
+    [[nodiscard]] double innerConeCos() const { return _innerConeCos; }
+    [[nodiscard]] double outerConeCos() const { return _outerConeCos; }
+    void setInnerConeCos(double innerConeCos) { _innerConeCos = innerConeCos; }
+    void setOuterConeCos(double outerConeCos) { _outerConeCos = outerConeCos; }
 
     [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef = 0.0) const override {
-        auto toLight = _transformMatrix->fullPosition() - pixelPosition;
+        auto toLight = getComponent<TransformMatrix>()->fullPosition() - pixelPosition;
         double distance = toLight.abs();
         Vec3D dir = toLight.normalized();
 
@@ -47,12 +52,12 @@ public:
     }
 
     void start() override {
-        _transformMatrix = getComponent<TransformMatrix>();
-        if (!_transformMatrix) {
-            _transformMatrix = assignedToPtr()->addComponent<TransformMatrix>();
+        if (!hasComponent<TransformMatrix>()) {
+            // This component requires to work with TransformMatrix component,
+            addComponent<TransformMatrix>();
         }
 
-        _transformMatrix->translate(_initialPos);
+        getComponent<TransformMatrix>()->translate(_initialPos);
     }
 };
 

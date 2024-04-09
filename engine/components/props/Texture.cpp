@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-Texture::Texture(const FilePath &filename) {
+Texture::Texture(const FilePath &filename) : _filename(filename) {
     _texture.emplace_back(filename);
 
     //Check does the texture have the transparent pixels
@@ -15,7 +15,7 @@ Texture::Texture(const FilePath &filename) {
     downSample();
 }
 
-Texture::Texture(Image &image) {
+Texture::Texture(Image &image) : _filename(image.fileName()) {
     _texture.emplace_back(std::move(image));
 
     //Check does the texture have the transparent pixels

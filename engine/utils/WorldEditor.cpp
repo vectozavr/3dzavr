@@ -3,6 +3,7 @@
 #include <utils/Log.h>
 #include <io/Keyboard.h>
 #include <io/Mouse.h>
+#include <components/lighting/SpotLight.h>
 
 #include <utility>
 
@@ -286,6 +287,41 @@ void WorldEditor::triangleMeshEditor() {
 
     if (mu_begin_treenode(ctx, "Triangle Mesh")) {
 
+        mu_label(ctx, ("Number of triangles: " + std::to_string(triangleMesh->size()/3)).c_str());
+        mu_label(ctx, ("Number of points: " + std::to_string(triangleMesh->size())).c_str());
+
+        auto material = triangleMesh->getMaterial();
+        mu_label(ctx, ("Material: " + material->tag().str()).c_str());
+
+        auto texture = material->texture();
+        if(texture) {
+            mu_label(ctx, ("Texture: " + texture->fileName().str()).c_str());
+        } else {
+            static float color[3] = { static_cast<float>(material->ambient().r()),
+                                      static_cast<float>(material->ambient().g()),
+                                      static_cast<float>(material->ambient().b())};
+            mu_label(ctx, "Ambient color");
+
+            mu_layout_begin_column(ctx);
+            mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+            mu_label(ctx, "Red:");   mu_slider(ctx, &color[0], 0, 255);
+            mu_label(ctx, "Green:"); mu_slider(ctx, &color[1], 0, 255);
+            mu_label(ctx, "Blue:");  mu_slider(ctx, &color[2], 0, 255);
+            mu_layout_end_column(ctx);
+            material->setAmbient(Color(color[0], color[1], color[2]));
+        }
+
+        float d = material->d();
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) {100, 130}, 0);
+        mu_label(ctx, "Transparency:"); mu_slider(ctx, &d, 0, 1);
+        mu_layout_end_column(ctx);
+        material->setTransparency(d);
+
+        bool visible = triangleMesh->isVisible();
+        mu_checkbox(ctx, "Visible", &visible);
+        triangleMesh->setVisible(visible);
+
         mu_end_treenode(ctx);
     }
 }
@@ -299,6 +335,26 @@ void WorldEditor::lineMeshEditor() {
     }
 
     if (mu_begin_treenode(ctx, "Line Mesh")) {
+        mu_label(ctx, ("Number of lines: " + std::to_string(lineMesh->size()/2)).c_str());
+        mu_label(ctx, ("Number of points: " + std::to_string(lineMesh->size())).c_str());
+
+        static float color[3] = { static_cast<float>(lineMesh->getColor().r()),
+                                  static_cast<float>(lineMesh->getColor().g()),
+                                  static_cast<float>(lineMesh->getColor().b())};
+        mu_label(ctx, "Color");
+
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+        mu_label(ctx, "Red:");   mu_slider(ctx, &color[0], 0, 255);
+        mu_label(ctx, "Green:"); mu_slider(ctx, &color[1], 0, 255);
+        mu_label(ctx, "Blue:");  mu_slider(ctx, &color[2], 0, 255);
+        mu_layout_end_column(ctx);
+
+        lineMesh->setColor(Color(color[0], color[1], color[2]));
+
+        bool visible = lineMesh->isVisible();
+        mu_checkbox(ctx, "Visible", &visible);
+        lineMesh->setVisible(visible);
 
         mu_end_treenode(ctx);
     }
@@ -314,6 +370,46 @@ void WorldEditor::lightSourceEditor() {
 
     if (mu_begin_treenode(ctx, "Light Source")) {
 
+        float intensity = lightSource->intensity();
+
+
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+        mu_label(ctx, "Intensity"); mu_slider(ctx, &intensity, 0, 15);
+        mu_layout_end_column(ctx);
+
+        lightSource->setIntensity(intensity);
+
+        static float color[3] = { static_cast<float>(lightSource->color().r()),
+                                  static_cast<float>(lightSource->color().g()),
+                                  static_cast<float>(lightSource->color().b())};
+        mu_label(ctx, "Light Color");
+
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+        mu_label(ctx, "Red:");   mu_slider(ctx, &color[0], 0, 255);
+        mu_label(ctx, "Green:"); mu_slider(ctx, &color[1], 0, 255);
+        mu_label(ctx, "Blue:");  mu_slider(ctx, &color[2], 0, 255);
+        mu_layout_end_column(ctx);
+
+        lightSource->setColor(Color(color[0], color[1], color[2]));
+
+
+        auto spotLight = _selectedObject->getComponent<SpotLight>();
+        if(spotLight) { // If this light is a spotlight
+            float innerConeCos = spotLight->innerConeCos();
+            float outerConeCos = spotLight->outerConeCos();
+
+            mu_layout_begin_column(ctx);
+            mu_layout_row(ctx, 2, (int[]) {100, 100}, 0);
+            mu_label(ctx, "Inner Cone Cos"); mu_slider(ctx, &innerConeCos, outerConeCos, 1);
+            mu_label(ctx, "Outer Cone Cos"); mu_slider(ctx, &outerConeCos, 0, 1);
+            mu_layout_end_column(ctx);
+
+            spotLight->setInnerConeCos(innerConeCos);
+            spotLight->setOuterConeCos(outerConeCos);
+        }
+
         mu_end_treenode(ctx);
     }
 }
@@ -327,6 +423,44 @@ void WorldEditor::rigidObjectEditor() {
     }
 
     if (mu_begin_treenode(ctx, "Rigid Object")) {
+        mu_label(ctx, "Velocity");
+
+        static float velocity[3] = {static_cast<float>(rigidObject->velocity().x()),
+                                 static_cast<float>(rigidObject->velocity().y()),
+                                 static_cast<float>(rigidObject->velocity().z())};
+
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+        mu_label(ctx, "Vx:");   mu_slider(ctx, &velocity[0], -50, 50);
+        mu_label(ctx, "Vy:"); mu_slider(ctx, &velocity[1], -50, 50);
+        mu_label(ctx, "Vz:");  mu_slider(ctx, &velocity[2], -50, 50);
+        mu_layout_end_column(ctx);
+
+        rigidObject->setVelocity(Vec3D(velocity[0], velocity[1], velocity[2]));
+
+        mu_label(ctx, "Acceleration");
+
+        static float acceleration[3] = {static_cast<float>(rigidObject->acceleration().x()),
+                                    static_cast<float>(rigidObject->acceleration().y()),
+                                    static_cast<float>(rigidObject->acceleration().z())};
+
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+        mu_label(ctx, "Ax:");   mu_slider(ctx, &acceleration[0], -50, 50);
+        mu_label(ctx, "Ay:"); mu_slider(ctx, &acceleration[1], -50, 50);
+        mu_label(ctx, "Az:");  mu_slider(ctx, &acceleration[2], -50, 50);
+        mu_layout_end_column(ctx);
+
+        rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
+
+        bool hasCollision = rigidObject->hasCollision();
+        bool isCollider = rigidObject->isCollider();
+
+        mu_checkbox(ctx, "Has collision", &hasCollision);
+        mu_checkbox(ctx, "Is collider", &isCollider);
+
+        rigidObject->setCollision(hasCollision);
+        rigidObject->setCollider(isCollider);
 
         mu_end_treenode(ctx);
     }

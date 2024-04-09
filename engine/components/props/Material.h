@@ -51,6 +51,9 @@ public:
     [[nodiscard]] uint8_t illum() const { return _illum; }
     [[nodiscard]] double d() const { return _d; }
 
+    void setAmbient(const Color& color);
+    void setTransparency(double d);
+
     [[nodiscard]] std::shared_ptr<Texture> texture() const {return _texture; }
 
     [[nodiscard]] MaterialTag tag() const { return _tag; }

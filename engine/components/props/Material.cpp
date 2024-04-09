@@ -17,3 +17,13 @@ Material::Material(const MaterialTag &tag, std::shared_ptr<Texture> texture, con
         _isTransparent = (ambient.a() != 255) || (d < 1.0-Consts::EPS);
     }
 }
+
+void Material::setAmbient(const Color &color) {
+    _ambient = color;
+    _isTransparent = (_ambient.a() != 255) || (_d < 1.0-Consts::EPS);
+}
+
+void Material::setTransparency(double d) {
+    _d = d;
+    _isTransparent = (_ambient.a() != 255) || (d < 1.0-Consts::EPS);
+}

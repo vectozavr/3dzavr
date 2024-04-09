@@ -41,7 +41,6 @@ private:
     const ObjectTag _tag;
 
     // This is the object we are attached to
-    //Object* _attachedTo = nullptr;
     Object* _attachedTo = nullptr;
 
     void copyComponentsFromObject(const Object &object);
@@ -56,9 +55,6 @@ public:
     [[nodiscard]] virtual std::shared_ptr<Object> copy(const ObjectTag& tag) const {
         return std::make_shared<Object>(tag, *this);
     }
-
-    // This function depends on Object_Type: each Object should define how does the intersection work.
-    //[[nodiscard]] virtual IntersectionInformation intersect(const Vec3D &from, const Vec3D &to);
 
     void attach(std::shared_ptr<Object> object);
     void unattach(const ObjectTag &tag);

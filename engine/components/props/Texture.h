@@ -11,6 +11,7 @@ private:
     // For resampling purposes we store resampled versions of the image
     // up until 1x1 image (avg color of the whole texture)
     std::vector<Image> _texture;
+    FilePath _filename;
 
     bool _isTransparent = false;
 
@@ -31,6 +32,8 @@ public:
     [[nodiscard]] uint16_t height() const { return _texture.front().height(); }
 
     [[nodiscard]] bool isTransparent() const {return _isTransparent; }
+
+    [[nodiscard]] FilePath fileName() const { return _filename; }
 };
 
 

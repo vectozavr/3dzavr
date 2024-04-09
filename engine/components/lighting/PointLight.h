@@ -16,7 +16,7 @@ public:
     PointLight(const PointLight& pointLight) = default;
 
     [[nodiscard]] Color illuminate(const Vec3D& pixelNorm, const Vec3D& pixelPosition, double simplCoef) const override {
-        auto toLight = _transformMatrix->fullPosition() - pixelPosition;
+        auto toLight = getComponent<TransformMatrix>()->fullPosition() - pixelPosition;
         double distance = toLight.abs();
         Vec3D dir = toLight.normalized();
 
@@ -37,12 +37,12 @@ public:
     }
 
     void start() override {
-        _transformMatrix = getComponent<TransformMatrix>();
-        if (!_transformMatrix) {
-            _transformMatrix = assignedToPtr()->addComponent<TransformMatrix>();
+        if (!hasComponent<TransformMatrix>()) {
+            // This component requires to work with TransformMatrix component,
+            addComponent<TransformMatrix>();
         }
 
-        _transformMatrix->translate(_initialPos);
+        getComponent<TransformMatrix>()->translate(_initialPos);
     }
 };
 

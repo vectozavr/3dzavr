@@ -17,7 +17,7 @@ Image::Image(Image&& other) noexcept : _width(other._width), _height(other._heig
     other.invalidate();
 }
 
-Image::Image(const FilePath &filename) {
+Image::Image(const FilePath &filename) : _filename(filename) {
 
     FILE *fp = fopen(filename.str().c_str(), "rb");
 
