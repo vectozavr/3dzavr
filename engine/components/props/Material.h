@@ -36,6 +36,8 @@ private:
     double _d = 1.0;
 
     bool _isTransparent = false;
+
+    void checkTransparent();
 public:
     Material(const MaterialTag& tag,
              std::shared_ptr<Texture> texture,
