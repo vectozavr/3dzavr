@@ -9,3 +9,4 @@ const Color Color::GREEN = Color(0, 255, 0);
 const Color Color::BLUE = Color(0, 0, 255);
 const Color Color::YELLOW = Color(255, 255, 0);
 const Color Color::LIGHT_YELLOW = Color(255, 255, 224);
+const Color Color::LIGHT_ORANGE = Color(255, 200, 170);

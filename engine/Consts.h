@@ -65,11 +65,8 @@ namespace Consts {
 
     const FilePath DEFAULT_TEXTURE_PATH = FilePath("engine/resources/png/texture_test.png");
     const std::shared_ptr<Material> DEFAULT_MATERIAL = std::make_shared<Material>(
-            MaterialTag("Default_material"),
-            std::make_shared<Texture>(DEFAULT_TEXTURE_PATH),
-                    Color(255, 0, 0),
-                    Color(255, 0, 0),
-                    Color(255, 0, 0));
+            MaterialTag("Default_material"), nullptr,
+            Color(255, 200, 170),Color(255, 200, 170),Color(255, 200, 170));
 
     // resources
     const FilePath DEFAULT_FONT_FILENAME = FilePath("engine/resources/fonts/Roboto/Roboto-Light.ttf");

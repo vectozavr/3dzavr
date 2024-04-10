@@ -40,8 +40,6 @@ private:
     Vec3D _acceleration{0, 0, 0};
 
     bool _hasCollision = false;
-    bool _isCollider = true;
-    bool _isTrigger = false;
 
     HitBox _hitBox{};
     bool _useSimpleBox = true;
@@ -49,21 +47,21 @@ private:
     bool _inCollision = false;
     Vec3D _collisionNormal{0, 0, 0};
 
-    Vec3D _findFurthestPoint(const Vec3D &direction);
-    Vec3D _support(const std::shared_ptr<RigidObject>& obj, const Vec3D &direction);
+    Vec3D findFurthestPoint(const Vec3D &direction);
+    Vec3D support(const std::shared_ptr<RigidObject>& obj, const Vec3D &direction);
     std::function<void(const ObjectTag &, std::shared_ptr<RigidObject>)> _collisionCallBack;
 
-    static NextSimplex _nextSimplex(const Simplex &points);
-    static NextSimplex _lineCase(const Simplex &points);
-    static NextSimplex _triangleCase(const Simplex &points);
-    static NextSimplex _tetrahedronCase(const Simplex &points);
+    static NextSimplex nextSimplex(const Simplex &points);
+    static NextSimplex lineCase(const Simplex &points);
+    static NextSimplex triangleCase(const Simplex &points);
+    static NextSimplex tetrahedronCase(const Simplex &points);
 
     static std::pair<std::vector<FaceNormal>, size_t>
-    _getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector<size_t> &faces);
+    getFaceNormals(const std::vector<Vec3D> &polytope, const std::vector<size_t> &faces);
 
     static std::vector<std::pair<size_t, size_t>>
-    _addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces, size_t a,
-                     size_t b);
+    addIfUniqueEdge(const std::vector<std::pair<size_t, size_t>> &edges, const std::vector<size_t> &faces, size_t a,
+                    size_t b);
 
     bool initHitBox();
 public:
@@ -73,20 +71,14 @@ public:
 
     [[nodiscard]] std::pair<bool, Simplex> checkGJKCollision(const std::shared_ptr<RigidObject>& obj);
     [[nodiscard]] CollisionPoint EPA(const Simplex &simplex, std::shared_ptr<RigidObject> obj);
-    void solveCollision(const CollisionPoint &collision);
 
     [[nodiscard]] Vec3D collisionNormal() const { return _collisionNormal; }
     [[nodiscard]] bool hasCollision() const { return _hasCollision; }
     [[nodiscard]] bool inCollision() const { return _inCollision; }
-    [[nodiscard]] bool isCollider() const { return _isCollider; }
-    [[nodiscard]] bool isTrigger() const { return _isTrigger; }
 
-    void setInCollision(bool c) { _inCollision = c; }
     void setCollision(bool c) { _hasCollision = c; }
-    void setCollider(bool c) { _isCollider = c; }
-    void setTrigger(bool t) { _isTrigger = t; }
 
-    void updatePhysicsState();
+    void updatePhysicsState(double deltaTime);
 
     void setVelocity(const Vec3D &velocity);
     void addVelocity(const Vec3D &velocity);
@@ -109,6 +101,10 @@ public:
 
     void start() override;
     void fixedUpdate(double deltaTime) override;
+
+    static void SolveCollision(const CollisionPoint &collision,
+                               const std::shared_ptr<RigidObject>& obj1,
+                               const std::shared_ptr<RigidObject>& obj2);
 };
 
 

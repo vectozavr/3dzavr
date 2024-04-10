@@ -24,69 +24,53 @@ TriangleMesh::IntersectionInformation World::rayCast(const Vec3D &from, const Ve
 
 void World::update() {
     updateComponents();
-
-    // TODO: we need to update physics state of all RigidObject inside all groups
-    // so now it is incorrect and should be fixed later..
-    /*
-    for (auto &[name, obj] : _attached) {
-        std::shared_ptr<RigidObject> rigidBodyObj = std::dynamic_pointer_cast<RigidObject>(obj);
-        if(rigidBodyObj) {
-            checkCollision(name);
-        }
-    }
-     */
+    checkCollision(sharedPtr());
 }
 
-void World::checkCollision(const ObjectTag &tag) {
+void World::checkCollision(const std::shared_ptr<Object> &whereToCheck) {
+    for (auto &[name, object] : *whereToCheck) {
+        auto rigidObject = object->getComponent<RigidObject>();
+        if(rigidObject && rigidObject->hasCollision()) {
+            checkCollision(sharedPtr(), object);
+            checkCollision(object);
+        }
+    }
+}
 
-    /*
-     * TODO: this is not efficient to iterate throughout all objects in the world..
-     * The solution might be to use space separation (BSP-trees of something else)
-     */
+void World::checkCollision(const std::shared_ptr<Object>& whereToCheck, const std::shared_ptr<Object>& whatToCheck) {
 
-    // TODO: we need to check collision of all RigidObject inside all groups
-    // so now it is incorrect and should be fixed later..
+    for (auto &[name, object] : *whereToCheck) {
+        // Check collision of whatToCheck with object
+        checkCollisionBetweenTwo(whatToCheck, object);
 
-    return;
+        // Check collision of whatToCheck with all children of object
+        checkCollision(object, whatToCheck);
+    }
+}
 
-    /*
-    std::shared_ptr<RigidObject> rigidBodyObj = std::dynamic_pointer_cast<RigidObject>(_attached->find(tag));
-    if (!rigidBodyObj) {
-        // The case when we cannot cast Object -> RigidObject
+void World::checkCollisionBetweenTwo(const std::shared_ptr<Object> &obj1, const std::shared_ptr<Object> &obj2) {
+    if(obj1->name() == obj2->name()) {
+        return; // We should not check the collision of the object with itself
+    }
+
+    auto rigidObj1 = obj1->getComponent<RigidObject>();
+    auto rigidObj2 = obj2->getComponent<RigidObject>();
+    if(!rigidObj2) {
         return;
     }
 
-    if (rigidBodyObj->hasCollision()) {
+    std::pair<bool, Simplex> gjk = rigidObj1->checkGJKCollision(rigidObj2);
+    if (gjk.first) {
+        CollisionPoint epa = rigidObj1->EPA(gjk.second, rigidObj2);
+        RigidObject::SolveCollision(epa, rigidObj1, rigidObj2);
 
-        rigidBodyObj->setInCollision(false);
-
-        for (auto it = _objects->begin(); it !=  _objects->end();) {
-
-            std::shared_ptr<RigidObject> obj = std::dynamic_pointer_cast<RigidObject>(it->second);
-            if (!obj) {
-                // The case when we cannot cast Object -> RigidObject
-                continue;
-            }
-
-            ObjectTag name = it->first;
-            it++;
-
-            if ((name == tag) || !(obj->isCollider() || obj->isTrigger())) {
-                continue;
-            }
-
-            std::pair<bool, Simplex> gjk = rigidBodyObj->checkGJKCollision(obj);
-            if (gjk.first) {
-                if (obj->isCollider()) {
-                    CollisionPoint epa = rigidBodyObj->EPA(gjk.second, obj);
-                    rigidBodyObj->solveCollision(epa);
-                }
-                if (rigidBodyObj->collisionCallBack() != nullptr) {
-                    rigidBodyObj->collisionCallBack()(name, obj);
-                }
-            }
-
+        if (rigidObj1->collisionCallBack() != nullptr) {
+            rigidObj1->collisionCallBack()(obj1->name(), rigidObj2);
+        }
+        if (rigidObj2->collisionCallBack() != nullptr) {
+            rigidObj2->collisionCallBack()(obj2->name(), rigidObj1);
         }
     }
-     */
+
 }
+

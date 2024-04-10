@@ -70,6 +70,7 @@ public:
     static const Color BLUE;
     static const Color YELLOW;
     static const Color LIGHT_YELLOW;
+    static const Color LIGHT_ORANGE;
 };
 
 #endif //PROPS_COLOR_H

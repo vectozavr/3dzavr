@@ -169,9 +169,14 @@ void WorldEditor::controlPanel() {
 
         renderSettings();
 
+        if (mu_begin_treenode_ex(ctx, "Info", MU_OPT_EXPANDED)) {
+            mu_text(ctx, Consts::BUILD_INFO.c_str());
+            mu_text(ctx, ("System: " + Consts::OPERATION_SYSTEM + ", " + Consts::CPU_ARCHITECTURE).c_str());
+            mu_text(ctx, "Press 'q' to enter/quit free camera mode");
 
-        mu_layout_row(ctx, 1, (int[]) { 210 }, 20);
-        mu_text(ctx, "Press 'q' to enter/quit free camera mode");
+            mu_end_treenode(ctx);
+        }
+
         mu_end_window(ctx);
     }
 }
@@ -438,13 +443,13 @@ void WorldEditor::rigidObjectEditor() {
 
         rigidObject->setVelocity(Vec3D(velocity[0], velocity[1], velocity[2]));
 
+        mu_layout_begin_column(ctx);
         mu_label(ctx, "Acceleration");
 
         static float acceleration[3] = {static_cast<float>(rigidObject->acceleration().x()),
                                     static_cast<float>(rigidObject->acceleration().y()),
                                     static_cast<float>(rigidObject->acceleration().z())};
 
-        mu_layout_begin_column(ctx);
         mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
         mu_label(ctx, "Ax:");   mu_slider(ctx, &acceleration[0], -50, 50);
         mu_label(ctx, "Ay:"); mu_slider(ctx, &acceleration[1], -50, 50);
@@ -453,14 +458,14 @@ void WorldEditor::rigidObjectEditor() {
 
         rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
 
-        bool hasCollision = rigidObject->hasCollision();
-        bool isCollider = rigidObject->isCollider();
+        mu_label(ctx, ("Hitbox size:" + std::to_string(rigidObject->hitBoxSize())).c_str());
+        mu_label(ctx, ("In collision:" + std::to_string(rigidObject->inCollision())).c_str());
 
+
+        bool hasCollision = rigidObject->hasCollision();
         mu_checkbox(ctx, "Has collision", &hasCollision);
-        mu_checkbox(ctx, "Is collider", &isCollider);
 
         rigidObject->setCollision(hasCollision);
-        rigidObject->setCollider(isCollider);
 
         mu_end_treenode(ctx);
     }
