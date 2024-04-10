@@ -8,6 +8,7 @@
 #include <string>
 
 #include <utils/Timer.h>
+#include <Consts.h>
 
 class Time final {
 private:
@@ -19,14 +20,14 @@ private:
 
     // FPS counter
     std::chrono::high_resolution_clock::time_point _fpsStart{};
-    std::chrono::milliseconds _fpsCountTime = std::chrono::milliseconds(1000);
+    std::chrono::milliseconds _fpsCountTime = std::chrono::milliseconds(500);
     int _fpsCounter = 0;
-    double _lastFps = 0;
+    unsigned int _lastFps = 0;
 
-    // Compatibility
     double _time = 0;
     double _deltaTime = 0;
     unsigned int _frame = 0;
+    double _fixedDeltaTime = Consts::FIXED_UPDATE_INTERVAL;
 
     static Time *_instance;
 
@@ -37,10 +38,6 @@ public:
 
     Time &operator=(Time &) = delete;
 
-    static int fps();
-    static double time();
-    static unsigned int frame();
-    static double deltaTime();
     static void update();
     static void init();
     static void free();
@@ -48,11 +45,19 @@ public:
     static void startTimer(const std::string& timerName);
     static void stopTimer(const std::string& timerName);
     static void pauseTimer(const std::string& timerName);
+
+    static void setFixedUpdateInterval(double fixedDeltaTime);
+
+    [[nodiscard]] static unsigned int fps();
+    [[nodiscard]] static double time();
+    [[nodiscard]] static unsigned int frame();
+    [[nodiscard]] static double deltaTime();
+    [[nodiscard]] static double fixedDeltaTime();
     [[nodiscard]] static double elapsedTimerMilliseconds(const std::string& timerName);
     [[nodiscard]] static double elapsedTimerSeconds(const std::string& timerName);
     [[nodiscard]] static std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> timers();
 
-    static std::string getLocalTimeInfo(const std::string& format = "%F %T");
+    [[nodiscard]] static std::string getLocalTimeInfo(const std::string& format = "%F %T");
 };
 
 #endif //UTILS_TIME_H

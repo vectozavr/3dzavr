@@ -23,7 +23,7 @@ namespace Consts {
 
     constexpr double EPA_EPS = 0.0001;
 
-    constexpr double LARGEST_TIME_STEP = 1.0 / 15.0;
+    constexpr double FIXED_UPDATE_INTERVAL = 0.02;
     constexpr double TAP_DELAY = 0.2;
 
     constexpr int MB = 1024*1024;

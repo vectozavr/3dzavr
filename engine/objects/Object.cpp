@@ -3,6 +3,7 @@
 #include <linalg/Matrix4x4.h>
 #include <objects/Object.h>
 #include <components/Component.h>
+#include <utils/Time.h>
 
 Object::Object(const ObjectTag &tag) : _tag(tag) {
 }
@@ -102,8 +103,16 @@ Object::~Object() {
 }
 
 void Object::updateComponents() {
+    double deltaTime = Time::time() - _lastUpdate;
+    _lastUpdate = Time::time();
+    _lag += deltaTime;
+
     for(const auto& component : _components) {
-        component->update();
+        component->update(deltaTime);
+        while (_lag >= Time::fixedDeltaTime()) {
+            component->fixedUpdate(Time::fixedDeltaTime());
+            _lag -= Time::fixedDeltaTime();
+        }
     }
     for(const auto& [name, obj] : _attached) {
         obj->updateComponents();

@@ -12,7 +12,8 @@ public:
     Component(const Component& component) = default;
 
     virtual void start() {};
-    virtual void update() {};
+    virtual void update(double deltaTime) {};
+    virtual void fixedUpdate(double deltaTime) {};
 
     template<typename T>
     [[nodiscard]] std::shared_ptr<T> getComponent() const {

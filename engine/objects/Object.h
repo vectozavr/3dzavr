@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <memory>
+#include <chrono>
 
 #include <components/props/Color.h>
 #include <components/geometry/Triangle.h>
@@ -44,6 +45,10 @@ private:
     Object* _attachedTo = nullptr;
 
     void copyComponentsFromObject(const Object &object);
+
+    // fix fixed time updates
+    double _lag = 0;
+    double _lastUpdate = 0;
 protected:
     std::map<ObjectTag, std::shared_ptr<Object>> _attached;
     std::vector<std::shared_ptr<Component>> _components;

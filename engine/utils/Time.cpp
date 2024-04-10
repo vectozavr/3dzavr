@@ -17,7 +17,7 @@ void Time::init() {
 }
 
 double Time::time() {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return 0;
     }
 
@@ -32,7 +32,7 @@ unsigned int Time::frame() {
 }
 
 double Time::deltaTime() {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return 0;
     }
 
@@ -40,7 +40,7 @@ double Time::deltaTime() {
 }
 
 void Time::update() {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return;
     }
 
@@ -48,20 +48,11 @@ void Time::update() {
 
     _instance->_deltaTime = duration<double>(t - _instance->_last).count();
     _instance->_time = duration<double>(t - _instance->_start).count();
-    // in case when fps < 10 it is useful to decrease _deltaTime (to avoid collision problems)
-    if (_instance->_deltaTime > Consts::LARGEST_TIME_STEP) {
-        _instance->_deltaTime = Consts::LARGEST_TIME_STEP;
-    }
-
     _instance->_last = t;
-
-    if (_instance->_deltaTime > 10) {
-        return;
-    }
 
     _instance->_fpsCounter++;
     if (t - _instance->_fpsStart > _instance->_fpsCountTime) {
-        _instance->_lastFps = _instance->_fpsCounter / duration<double>(t - _instance->_fpsStart).count();
+        _instance->_lastFps = static_cast<unsigned int>(_instance->_fpsCounter / duration<double>(t - _instance->_fpsStart).count());
         _instance->_fpsCounter = 0;
         _instance->_fpsStart = t;
     }
@@ -69,16 +60,16 @@ void Time::update() {
     _instance->_frame++;
 }
 
-int Time::fps() {
-    if (_instance == nullptr) {
+unsigned int Time::fps() {
+    if (!_instance) {
         return 0;
     }
     // Cast is faster than floor and has the same behavior for positive numbers
-    return static_cast<int>(_instance->_lastFps);
+    return _instance->_lastFps;
 }
 
 void Time::startTimer(const std::string &timerName) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return;
     }
 
@@ -89,7 +80,7 @@ void Time::startTimer(const std::string &timerName) {
 }
 
 void Time::pauseTimer(const std::string &timerName) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return;
     }
     if(_instance->_timers.contains(timerName)) {
@@ -98,7 +89,7 @@ void Time::pauseTimer(const std::string &timerName) {
 }
 
 void Time::stopTimer(const std::string &timerName) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return;
     }
     if(_instance->_timers.contains(timerName)) {
@@ -107,7 +98,7 @@ void Time::stopTimer(const std::string &timerName) {
 }
 
 double Time::elapsedTimerMilliseconds(const std::string &timerName) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return 0;
     }
     if(_instance->_timers.count(timerName) > 0) {
@@ -117,7 +108,7 @@ double Time::elapsedTimerMilliseconds(const std::string &timerName) {
 }
 
 double Time::elapsedTimerSeconds(const std::string &timerName) {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return 0;
     }
     if(_instance->_timers.count(timerName) > 0) {
@@ -139,7 +130,7 @@ void Time::free() {
 }
 
 std::optional<std::reference_wrapper<const std::map<std::string, Timer>>> Time::timers() {
-    if (_instance == nullptr) {
+    if (!_instance) {
         return {};
     }
 
@@ -152,4 +143,20 @@ std::string Time::getLocalTimeInfo(const std::string &format) {
     std::ostringstream result;
     result << dt;
     return result.str();
+}
+
+double Time::fixedDeltaTime() {
+    if (!_instance) {
+        return 0;
+    }
+
+    return _instance->_fixedDeltaTime;
+}
+
+void Time::setFixedUpdateInterval(double fixedDeltaTime) {
+    if (!_instance) {
+        return;
+    }
+
+    _instance->_fixedDeltaTime = fixedDeltaTime;
 }

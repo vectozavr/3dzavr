@@ -357,7 +357,7 @@ void RigidObject::start() {
     }
 }
 
-void RigidObject::update() {
+void RigidObject::fixedUpdate(double deltaTime) {
     if(_hitBox.empty()) {
         if(!initHitBox()) {
             return;

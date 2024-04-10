@@ -108,7 +108,7 @@ public:
     }
 
     void start() override;
-    void update() override;
+    void fixedUpdate(double deltaTime) override;
 };
 
 
