@@ -1,11 +1,11 @@
-#ifndef ANIMATION_AROTATELEFTUPLOOKAT_H
-#define ANIMATION_AROTATELEFTUPLOOKAT_H
+#ifndef ANIMATION_ROTATELEFTUPLOOKAT_H
+#define ANIMATION_ROTATELEFTUPLOOKAT_H
 
 #include <animation/Animation.h>
 #include "components/TransformMatrix.h"
 
 
-class ARotateLeftUpLookAt final : public Animation {
+class RotateLeftUpLookAt final : public Animation {
 private:
     const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _rotationValue;
@@ -24,9 +24,9 @@ private:
     }
 
 public:
-    ARotateLeftUpLookAt(const std::weak_ptr<TransformMatrix>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
-            InterpolationType interpolationType = InterpolationType::Bezier)
+    RotateLeftUpLookAt(const std::weak_ptr<TransformMatrix>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
+                       InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {}
 };
 
-#endif //ANIMATION_AROTATELEFTUPLOOKAT_H
+#endif //ANIMATION_ROTATELEFTUPLOOKAT_H

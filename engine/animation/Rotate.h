@@ -1,10 +1,10 @@
-#ifndef ANIMATION_AROTATE_H
-#define ANIMATION_AROTATE_H
+#ifndef ANIMATION_ROTATE_H
+#define ANIMATION_ROTATE_H
 
 #include <animation/Animation.h>
 #include "components/TransformMatrix.h"
 
-class ARotate final : public Animation {
+class Rotate final : public Animation {
 private:
     const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _rotationValue;
@@ -21,10 +21,10 @@ private:
     }
 
 public:
-    ARotate(const std::weak_ptr<TransformMatrix>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
-            InterpolationType interpolationType = InterpolationType::Bezier)
+    Rotate(const std::weak_ptr<TransformMatrix>& object, const Vec3D &r, double duration = 1, LoopOut looped = LoopOut::None,
+           InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {
     }
 };
 
-#endif //ANIMATION_AROTATE_H
+#endif //ANIMATION_ROTATE_H

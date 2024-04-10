@@ -1,10 +1,10 @@
-#ifndef ANIMATION_AROTATERELATIVEPOINT_H
-#define ANIMATION_AROTATERELATIVEPOINT_H
+#ifndef ANIMATION_ROTATERELATIVEPOINT_H
+#define ANIMATION_ROTATERELATIVEPOINT_H
 
 #include <animation/Animation.h>
 #include "components/TransformMatrix.h"
 
-class ARotateRelativePoint : public Animation {
+class RotateRelativePoint : public Animation {
 private:
     const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _targetPoint;
@@ -22,11 +22,11 @@ private:
     }
 
 public:
-    ARotateRelativePoint(const std::weak_ptr<TransformMatrix>& object, const Vec3D &targetPoint, const Vec3D &rotationValue,
-                         double duration = 1, Animation::LoopOut looped = LoopOut::None,
-                         Animation::InterpolationType interpolationType = InterpolationType::Bezier)
+    RotateRelativePoint(const std::weak_ptr<TransformMatrix>& object, const Vec3D &targetPoint, const Vec3D &rotationValue,
+                        double duration = 1, Animation::LoopOut looped = LoopOut::None,
+                        Animation::InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _targetPoint(targetPoint),
               _rotationValue(rotationValue) {}
 };
 
-#endif //ANIMATION_AROTATERELATIVEPOINT_H
+#endif //ANIMATION_ROTATERELATIVEPOINT_H

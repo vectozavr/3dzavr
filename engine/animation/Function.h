@@ -1,11 +1,11 @@
-#ifndef ANIMATION_AFUNCTION_H
-#define ANIMATION_AFUNCTION_H
+#ifndef ANIMATION_FUNCTION_H
+#define ANIMATION_FUNCTION_H
 
 #include <functional>
 
 #include <animation/Animation.h>
 
-class AFunction final : public Animation {
+class Function final : public Animation {
 private:
     int _callsCounter = 0;
     const int _allCalls = 1;
@@ -19,10 +19,10 @@ private:
     }
 
 public:
-    explicit AFunction(std::function<void()> function, int calls = 1, double duration = 1,
-                       LoopOut looped = LoopOut::None, InterpolationType interpolationType = InterpolationType::Linear)
+    explicit Function(std::function<void()> function, int calls = 1, double duration = 1,
+                      LoopOut looped = LoopOut::None, InterpolationType interpolationType = InterpolationType::Linear)
             : Animation(duration, looped, interpolationType), _callBack(std::move(function)), _allCalls(calls) {
     }
 };
 
-#endif //ANIMATION_AFUNCTION_H
+#endif //ANIMATION_FUNCTION_H

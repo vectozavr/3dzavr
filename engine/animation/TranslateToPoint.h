@@ -1,10 +1,10 @@
-#ifndef ANIMATION_ATRANSLATETOPOINT_H
-#define ANIMATION_ATRANSLATETOPOINT_H
+#ifndef ANIMATION_TRANSLATETOPOINT_H
+#define ANIMATION_TRANSLATETOPOINT_H
 
 #include <animation/Animation.h>
 #include "components/TransformMatrix.h"
 
-class ATranslateToPoint final : public Animation {
+class TranslateToPoint final : public Animation {
 private:
     const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _targetPoint;
@@ -28,10 +28,10 @@ private:
     }
 
 public:
-    ATranslateToPoint(const std::weak_ptr<TransformMatrix>& object, const Vec3D &p, double duration = 1, LoopOut looped = LoopOut::None,
-                      InterpolationType interpolationType = InterpolationType::Bezier)
+    TranslateToPoint(const std::weak_ptr<TransformMatrix>& object, const Vec3D &p, double duration = 1, LoopOut looped = LoopOut::None,
+                     InterpolationType interpolationType = InterpolationType::Bezier)
                       : Animation(duration, looped, interpolationType), _targetPoint(p), _object(object) {
     }
 };
 
-#endif //ANIMATION_ATRANSLATETOPOINT_H
+#endif //ANIMATION_TRANSLATETOPOINT_H

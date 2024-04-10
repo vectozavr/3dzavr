@@ -1,10 +1,10 @@
-#ifndef ANIMATION_ATRANSLATE_H
-#define ANIMATION_ATRANSLATE_H
+#ifndef ANIMATION_TRANSLATE_H
+#define ANIMATION_TRANSLATE_H
 
 #include <animation/Animation.h>
 #include "components/TransformMatrix.h"
 
-class ATranslate final : public Animation {
+class Translate final : public Animation {
 private:
     const std::weak_ptr<TransformMatrix> _object;
     const Vec3D _translationValue;
@@ -21,12 +21,12 @@ private:
     }
 
 public:
-    ATranslate(const std::weak_ptr<TransformMatrix>& object, const Vec3D &t, double duration = 1, LoopOut looped = LoopOut::None,
-               InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
+    Translate(const std::weak_ptr<TransformMatrix>& object, const Vec3D &t, double duration = 1, LoopOut looped = LoopOut::None,
+              InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                             interpolationType),
                                                                                   _object(object),
                                                                                   _translationValue(t) {
     }
 };
 
-#endif //ANIMATION_ATRANSLATE_H
+#endif //ANIMATION_TRANSLATE_H

@@ -1,11 +1,10 @@
-#ifndef ANIMATION_ASHOWCREATION_H
-#define ANIMATION_ASHOWCREATION_H
+#ifndef ANIMATION_SHOWUNCREATION_H
+#define ANIMATION_SHOWUNCREATION_H
 
 #include <animation/Animation.h>
 #include <components/geometry/TriangleMesh.h>
-#include <Consts.h>
 
-class AShowCreation final : public Animation {
+class ShowUncreation final : public Animation {
 private:
     const std::weak_ptr<TriangleMesh> _mesh;
     const std::vector<Triangle> _triangles;
@@ -25,13 +24,14 @@ private:
         // The time of one triangle
         double dt = 1.0/((_triangles.size()-1)*_shift + 1);
         double k = 0;
+        double progress_inv = 1 - progress();
 
         for(auto &t : _triangles) {
             auto& tc = t.textureCoordinates();
 
-            if(progress() >= dt*k*_shift) {
-                if(progress() <= dt*(k*_shift + 1)) {
-                    double triProgress = (progress() - dt*k*_shift) / dt;
+            if(progress_inv >= dt*k*_shift) {
+                if(progress_inv <= dt*(k*_shift + 1)) {
+                    double triProgress = (progress_inv - dt*k*_shift) / dt;
 
                     newTriangles.emplace_back(Triangle({t[0], t[1], t[1] + (t[2] - t[1]) * triProgress},
                                                        {tc[0], tc[1], tc[1] + (tc[2] - tc[1]) * triProgress}));
@@ -46,12 +46,12 @@ private:
     }
 
 public:
-    AShowCreation(const std::weak_ptr<TriangleMesh>& triangleMesh, double duration = 1, double shift = 0.005, LoopOut looped = LoopOut::None,
-           InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
+    ShowUncreation(const std::weak_ptr<TriangleMesh>& triangleMesh, double duration = 1, double shift = 0.005, LoopOut looped = LoopOut::None,
+                   InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                         interpolationType),
                                                                               _mesh(triangleMesh), _triangles(triangleMesh.lock()->triangles()) {
         _shift = std::clamp<double>(shift, 0.0, 1.0);
     }
 };
 
-#endif //ANIMATION_ASHOWCREATION_H
+#endif //ANIMATION_SHOWUNCREATION_H

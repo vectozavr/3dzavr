@@ -1,11 +1,11 @@
-#ifndef ANIMATION_ADECOMPOSE_H
-#define ANIMATION_ADECOMPOSE_H
+#ifndef ANIMATION_DECOMPOSE_H
+#define ANIMATION_DECOMPOSE_H
 
 #include <animation/Animation.h>
 #include <components/geometry/TriangleMesh.h>
 #include <Consts.h>
 
-class ADecompose final : public Animation {
+class Decompose final : public Animation {
 private:
     const std::weak_ptr<TriangleMesh> _mesh;
     std::vector<Triangle> _triangles;
@@ -36,10 +36,10 @@ private:
     }
 
 public:
-    ADecompose(const std::weak_ptr<TriangleMesh>& triangleMesh, double value, double duration = 1, LoopOut looped = LoopOut::None,
-               InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
+    Decompose(const std::weak_ptr<TriangleMesh>& triangleMesh, double value, double duration = 1, LoopOut looped = LoopOut::None,
+              InterpolationType interpolationType = InterpolationType::Bezier) : Animation(duration, looped,
                                                                                                interpolationType),
                                                                                   _value(value), _mesh(triangleMesh) {}
 };
 
-#endif //ANIMATION_ADECOMPOSE_H
+#endif //ANIMATION_DECOMPOSE_H

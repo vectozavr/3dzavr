@@ -99,20 +99,20 @@ add_library(
         animation/Timeline.cpp
         animation/Interpolation.h
         animation/Interpolation.cpp
-        animation/ATranslate.h
-        animation/AScale.h
-        animation/ARotate.h
-        animation/AWait.h
-        animation/AFunction.h
-        animation/AAttractToPoint.h
-        animation/ARotateRelativePoint.h
-        animation/ARotateLeft.h
+        animation/Translate.h
+        animation/Scale.h
+        animation/Rotate.h
+        animation/Wait.h
+        animation/Function.h
+        animation/AttractToPoint.h
+        animation/RotateRelativePoint.h
+        animation/RotateLeft.h
         animation/Animations.h
-        animation/AShowCreation.h
-        animation/AShowUncreation.h
-        animation/ARotateLeftUpLookAt.h
-        animation/ADecompose.h
-        animation/ATranslateToPoint.h)
+        animation/ShowCreation.h
+        animation/ShowUncreation.h
+        animation/RotateLeftUpLookAt.h
+        animation/Decompose.h
+        animation/TranslateToPoint.h)
 
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 

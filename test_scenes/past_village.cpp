@@ -45,12 +45,12 @@ private:
             skybox->add(skyboxBigClouds);
             skybox->add(skyboxSmallClouds);
 
-            Timeline::addAnimation<ARotate>(AnimationListTag("cloud_animation"),
-                                            skyboxBigClouds->getComponent<TransformMatrix>(), Vec3D(0, 0.003, 0), 1,
-                                            Animation::LoopOut::Continue);
-            Timeline::addAnimation<ARotate>(AnimationListTag("cloud_animation"),
-                                            skyboxSmallClouds->getComponent<TransformMatrix>(), Vec3D(0, 0.005, 0), 1,
-                                            Animation::LoopOut::Continue);
+            Timeline::addAnimation<Rotate>(AnimationListTag("cloud_animation"),
+                                           skyboxBigClouds->getComponent<TransformMatrix>(), Vec3D(0, 0.003, 0), 1,
+                                           Animation::LoopOut::Continue);
+            Timeline::addAnimation<Rotate>(AnimationListTag("cloud_animation"),
+                                           skyboxSmallClouds->getComponent<TransformMatrix>(), Vec3D(0, 0.005, 0), 1,
+                                           Animation::LoopOut::Continue);
         }
         world->add(skybox);
 

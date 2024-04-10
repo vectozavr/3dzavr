@@ -1,10 +1,10 @@
-#ifndef ANIMATION_AROTATELEFT_H
-#define ANIMATION_AROTATELEFT_H
+#ifndef ANIMATION_ROTATELEFT_H
+#define ANIMATION_ROTATELEFT_H
 
 #include <animation/Animation.h>
 #include "components/TransformMatrix.h"
 
-class ARotateLeft final : public Animation {
+class RotateLeft final : public Animation {
 private:
     const std::weak_ptr<TransformMatrix> _object;
     const double _rotationValue;
@@ -21,9 +21,9 @@ private:
     }
 
 public:
-    ARotateLeft(const std::weak_ptr<TransformMatrix>& object, double r, double duration = 1, LoopOut looped = LoopOut::None,
-            InterpolationType interpolationType = InterpolationType::Bezier)
+    RotateLeft(const std::weak_ptr<TransformMatrix>& object, double r, double duration = 1, LoopOut looped = LoopOut::None,
+               InterpolationType interpolationType = InterpolationType::Bezier)
             : Animation(duration, looped, interpolationType), _object(object), _rotationValue(r) {}
 };
 
-#endif //ANIMATION_AROTATELEFT_H
+#endif //ANIMATION_ROTATELEFT_H

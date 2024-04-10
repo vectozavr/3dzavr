@@ -3,19 +3,19 @@
 
 #include <animation/Timeline.h>
 
-#include <animation/AAttractToPoint.h>
-#include <animation/AFunction.h>
-#include <animation/ARotate.h>
-#include <animation/ARotateLeft.h>
-#include <animation/ARotateRelativePoint.h>
-#include <animation/AScale.h>
-#include <animation/ATranslate.h>
-#include <animation/ATranslateToPoint.h>
-#include <animation/AWait.h>
-#include <animation/AShowCreation.h>
-#include <animation/AShowUncreation.h>
-#include <animation/ARotateLeftUpLookAt.h>
-#include <animation/ADecompose.h>
+#include <animation/AttractToPoint.h>
+#include <animation/Function.h>
+#include <animation/Rotate.h>
+#include <animation/RotateLeft.h>
+#include <animation/RotateRelativePoint.h>
+#include <animation/Scale.h>
+#include <animation/Translate.h>
+#include <animation/TranslateToPoint.h>
+#include <animation/Wait.h>
+#include <animation/ShowCreation.h>
+#include <animation/ShowUncreation.h>
+#include <animation/RotateLeftUpLookAt.h>
+#include <animation/Decompose.h>
 
 
 #endif //ANIMATION_ANIMATIONS_H
