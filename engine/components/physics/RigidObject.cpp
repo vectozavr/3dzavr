@@ -1,12 +1,9 @@
 #include <cmath>
 #include <utility>
 
-#include "RigidObject.h"
-#include "utils/Time.h"
-#include "utils/Log.h"
-#include "Consts.h"
-
-#include <iostream>
+#include <components/physics/RigidObject.h>
+#include <utils/Log.h>
+#include <Consts.h>
 
 
 Vec3D RigidObject::findFurthestPoint(const Vec3D &direction) {
@@ -61,10 +58,10 @@ NextSimplex RigidObject::lineCase(const Simplex &points) {
     Vec3D ao = -a;
 
     if (ab.dot(ao) > 0) {
-        // TODO: sometimes the cross product returns zero (ab is parallel to ao)
         newDirection = ab.cross(ao).cross(ab);
+
+        // Sometimes the cross product returns zero, so we replace it with non-zero vector
         if(newDirection.abs() < Consts::EPS) {
-            int asss = 0;
             newDirection = Vec3D(1);
         }
 
@@ -90,8 +87,8 @@ NextSimplex RigidObject::triangleCase(const Simplex &points) {
 
     Vec3D abc = ab.cross(ac);
 
+    // Sometimes the cross product returns zero, so we replace it with non-zero vector
     if(abc.abs() < Consts::EPS) {
-        int asss = 0;
         abc = Vec3D(1);
     }
 
@@ -100,8 +97,9 @@ NextSimplex RigidObject::triangleCase(const Simplex &points) {
             newPoints = Simplex{a, c};
             newDirection = ac.cross(ao).cross(ac);
 
+            // Sometimes the cross product returns zero, so we replace it with non-zero vector
             if(newDirection.abs() < Consts::EPS) {
-                int asss = 0;
+                newDirection = Vec3D(1);
             }
         } else {
             return lineCase(Simplex{a, b});
@@ -137,14 +135,13 @@ NextSimplex RigidObject::tetrahedronCase(const Simplex &points) {
     Vec3D acd = ac.cross(ad);
     Vec3D adb = ad.cross(ab);
 
+    // Sometimes the cross product returns zero, so we replace it with non-zero vector
     if(abc.abs() < Consts::EPS) {
         abc = Vec3D(1);
     }
-
     if(acd.abs() < Consts::EPS) {
         acd = Vec3D(1);
     }
-
     if(adb.abs() < Consts::EPS) {
         adb = Vec3D(1);
     }
@@ -246,15 +243,7 @@ CollisionPoint RigidObject::EPA(const Simplex &simplex, std::shared_ptr<RigidObj
 
             long f = 0;
             for (size_t i = 0; i < normals.size(); i++) {
-                /* TODO:
-                 *  When checking what faces to delete you check if the normal of the triangle and the
-                 *  support point are in the same direction. This only works for some cases.
-                 *  Since you want to check if the support point is on one side of the triangle
-                 *  you want to use the support point relative to the triangle. So the check would look like this
-                 *  if (SameDirection(normals[i], sup-polytope[faces[i*3]])
-                 *  But now it does not work really, so we need to understand why
-                 */
-                if (normals[i].normal.dot(sup) > 0) {
+                if (normals[i].normal.dot(sup-polytope[faces[f]]) > 0) {
                     uniqueEdges = addIfUniqueEdge(uniqueEdges, faces, f + 0, f + 1);
                     uniqueEdges = addIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
                     uniqueEdges = addIfUniqueEdge(uniqueEdges, faces, f + 2, f + 0);
