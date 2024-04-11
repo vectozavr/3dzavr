@@ -223,15 +223,15 @@ void WorldEditor::transformMatrixEditor() {
                       std::to_string(pos.z())).c_str());
 
         mu_layout_row(ctx, 3, (int[]) {60, 60, 60}, 0);
-        if (mu_button(ctx, "Translate")) { _operation = 0; }
-        if (mu_button(ctx, "Scale")) { _operation = 1; }
-        if (mu_button(ctx, "Rotate")) { _operation = 2; }
+        if (mu_button(ctx, "Translate")) { _operationTransformMatrix = 0; }
+        if (mu_button(ctx, "Scale")) { _operationTransformMatrix = 1; }
+        if (mu_button(ctx, "Rotate")) { _operationTransformMatrix = 2; }
 
         float x = 0;
         float y = 0;
         float z = 0;
 
-        switch (_operation) {
+        switch (_operationTransformMatrix) {
             case 0:
                 mu_layout_begin_column(ctx);
                 mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
@@ -428,44 +428,54 @@ void WorldEditor::rigidObjectEditor() {
     }
 
     if (mu_begin_treenode(ctx, "Rigid Object")) {
-        mu_label(ctx, "Velocity");
 
-        static float velocity[3] = {static_cast<float>(rigidObject->velocity().x()),
-                                 static_cast<float>(rigidObject->velocity().y()),
-                                 static_cast<float>(rigidObject->velocity().z())};
-
-        mu_layout_begin_column(ctx);
-        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
-        mu_label(ctx, "Vx:");   mu_slider(ctx, &velocity[0], -50, 50);
-        mu_label(ctx, "Vy:"); mu_slider(ctx, &velocity[1], -50, 50);
-        mu_label(ctx, "Vz:");  mu_slider(ctx, &velocity[2], -50, 50);
-        mu_layout_end_column(ctx);
-
-        rigidObject->setVelocity(Vec3D(velocity[0], velocity[1], velocity[2]));
-
-        mu_layout_begin_column(ctx);
-        mu_label(ctx, "Acceleration");
-
-        static float acceleration[3] = {static_cast<float>(rigidObject->acceleration().x()),
-                                    static_cast<float>(rigidObject->acceleration().y()),
-                                    static_cast<float>(rigidObject->acceleration().z())};
-
-        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
-        mu_label(ctx, "Ax:");   mu_slider(ctx, &acceleration[0], -50, 50);
-        mu_label(ctx, "Ay:"); mu_slider(ctx, &acceleration[1], -50, 50);
-        mu_label(ctx, "Az:");  mu_slider(ctx, &acceleration[2], -50, 50);
-        mu_layout_end_column(ctx);
-
-        rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
-
-        mu_label(ctx, ("Hitbox size:" + std::to_string(rigidObject->hitBoxSize())).c_str());
-        mu_label(ctx, ("In collision:" + std::to_string(rigidObject->inCollision())).c_str());
-
+        mu_label(ctx, ("Hitbox size:" + std::to_string(rigidObject->hitBoxSize()) +
+        ". " + "In collision:" + std::to_string(rigidObject->inCollision())).c_str());
 
         bool hasCollision = rigidObject->hasCollision();
         mu_checkbox(ctx, "Has collision", &hasCollision);
-
         rigidObject->setCollision(hasCollision);
+
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, (int[]) {100, 100}, 0);
+        if (mu_button(ctx, "Velocity")) { _operationRigidObject = 0; }
+        if (mu_button(ctx, "Acceleration")) { _operationRigidObject = 1; }
+        mu_layout_end_column(ctx);
+
+        switch (_operationRigidObject) {
+            case 0:
+
+                static float velocity[3] = {static_cast<float>(rigidObject->velocity().x()),
+                                            static_cast<float>(rigidObject->velocity().y()),
+                                            static_cast<float>(rigidObject->velocity().z())};
+
+                mu_label(ctx, "Velocity");
+                mu_layout_begin_column(ctx);
+                mu_layout_row(ctx, 2, (int[]) { 30, -1 }, 0);
+                mu_label(ctx, "Vx:");   mu_slider(ctx, &velocity[0], -50, 50);
+                mu_label(ctx, "Vy:"); mu_slider(ctx, &velocity[1], -50, 50);
+                mu_label(ctx, "Vz:");  mu_slider(ctx, &velocity[2], -50, 50);
+                mu_layout_end_column(ctx);
+
+                rigidObject->setVelocity(Vec3D(velocity[0], velocity[1], velocity[2]));
+                break;
+            case 1:
+                static float acceleration[3] = {static_cast<float>(rigidObject->acceleration().x()),
+                                                static_cast<float>(rigidObject->acceleration().y()),
+                                                static_cast<float>(rigidObject->acceleration().z())};
+
+                mu_label(ctx, "Acceleration");
+                mu_layout_begin_column(ctx);
+                mu_layout_row(ctx, 2, (int[]) { 30, -1 }, 0);
+                mu_label(ctx, "Ax:");   mu_slider(ctx, &acceleration[0], -50, 50);
+                mu_label(ctx, "Ay:"); mu_slider(ctx, &acceleration[1], -50, 50);
+                mu_label(ctx, "Az:");  mu_slider(ctx, &acceleration[2], -50, 50);
+                mu_layout_end_column(ctx);
+
+                rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
+
+                break;
+        }
 
         mu_end_treenode(ctx);
     }

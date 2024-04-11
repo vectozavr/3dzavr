@@ -38,7 +38,8 @@ private:
     bool _isControllerActive = true;
     bool _isRecording = false;
 
-    int _operation = -1;
+    int _operationTransformMatrix = -1;
+    int _operationRigidObject = -1;
 
     float _lightingLODNearDistance = Consts::LIGHTING_LOD_NEAR_DISTANCE;
     float _lightingLODFarDistance = Consts::LIGHTING_LOD_FAR_DISTANCE;
