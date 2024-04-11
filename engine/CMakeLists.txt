@@ -14,6 +14,7 @@ add_library(
         linalg/Vec2D.h
         linalg/Vec3D.h
         linalg/Vec4D.h
+        linalg/Matrix3x3.h
         linalg/Matrix4x4.h
 
         objects/Camera.h
