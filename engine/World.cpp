@@ -60,17 +60,18 @@ void World::checkCollisionBetweenTwo(const std::shared_ptr<Object> &obj1, const 
     }
 
     std::pair<bool, Simplex> gjk = rigidObj1->checkGJKCollision(rigidObj2);
-    if (gjk.first) {
-        CollisionPoint epa = rigidObj1->EPA(gjk.second, rigidObj2);
-        RigidObject::SolveCollision(epa, rigidObj1, rigidObj2);
-
-        if (rigidObj1->collisionCallBack() != nullptr) {
-            rigidObj1->collisionCallBack()(obj1->name(), rigidObj2);
-        }
-        if (rigidObj2->collisionCallBack() != nullptr) {
-            rigidObj2->collisionCallBack()(obj2->name(), rigidObj1);
-        }
+    if (!gjk.first) {
+        return; // no collision
     }
 
+    CollisionPoint epa = rigidObj1->EPA(gjk.second, rigidObj2);
+    RigidObject::SolveCollision(epa, rigidObj1, rigidObj2);
+
+    if (rigidObj1->collisionCallBack() != nullptr) {
+        rigidObj1->collisionCallBack()(epa, rigidObj1, rigidObj2);
+    }
+    if (rigidObj2->collisionCallBack() != nullptr) {
+        rigidObj2->collisionCallBack()(epa, rigidObj2, rigidObj1);
+    }
 }
 

@@ -174,6 +174,9 @@ void WorldEditor::controlPanel() {
             mu_text(ctx, ("System: " + Consts::OPERATION_SYSTEM + ", " + Consts::CPU_ARCHITECTURE).c_str());
             mu_text(ctx, "Press 'q' to enter/quit free camera mode");
 
+            mu_text(ctx, "Press 'f1' to make a screenshot");
+            mu_text(ctx, "Press 'f2' to start/end screen recording");
+
             mu_end_treenode(ctx);
         }
 
@@ -432,6 +435,11 @@ void WorldEditor::rigidObjectEditor() {
         mu_label(ctx, ("Hitbox size:" + std::to_string(rigidObject->hitBoxSize()) +
         ". " + "In collision:" + std::to_string(rigidObject->inCollision())).c_str());
 
+        mu_label(ctx, ("Volume: " + std::to_string(rigidObject->volume())).c_str());
+        mu_label(ctx, ("Area: " + std::to_string(rigidObject->surfaceArea())).c_str());
+        mu_label(ctx, ("COM: (" + std::to_string(rigidObject->centerOfMass().x()) + " / " + std::to_string(rigidObject->centerOfMass().y()) + " / " + std::to_string(rigidObject->centerOfMass().z()) + ")").c_str());
+
+
         bool hasCollision = rigidObject->hasCollision();
         mu_checkbox(ctx, "Has collision", &hasCollision);
         rigidObject->setCollision(hasCollision);
@@ -440,6 +448,8 @@ void WorldEditor::rigidObjectEditor() {
         mu_layout_row(ctx, 2, (int[]) {100, 100}, 0);
         if (mu_button(ctx, "Velocity")) { _operationRigidObject = 0; }
         if (mu_button(ctx, "Acceleration")) { _operationRigidObject = 1; }
+        if (mu_button(ctx, "Friction")) { _operationRigidObject = 2; }
+        if (mu_button(ctx, "Inertia")) { _operationRigidObject = 3; }
         mu_layout_end_column(ctx);
 
         switch (_operationRigidObject) {
@@ -473,6 +483,33 @@ void WorldEditor::rigidObjectEditor() {
                 mu_layout_end_column(ctx);
 
                 rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
+
+                break;
+            case 2:
+                static float stat = rigidObject->staticFriction();
+                static float dynam = rigidObject->dynamicFriction();
+
+                mu_label(ctx, "Friction");
+                mu_layout_begin_column(ctx);
+                mu_layout_row(ctx, 2, (int[]) { 60, -1 }, 0);
+                mu_label(ctx, "Static:");   mu_slider(ctx, &stat, dynam, 1);
+                mu_label(ctx, "Dynamic:"); mu_slider(ctx, &dynam, 0, 1);
+                mu_layout_end_column(ctx);
+
+                rigidObject->setStaticFriction(stat);
+                rigidObject->setDynamicFriction(dynam);
+
+                break;
+            case 3:
+                static float mass = rigidObject->mass();
+
+                mu_label(ctx, "Inertia");
+                mu_layout_begin_column(ctx);
+                mu_layout_row(ctx, 2, (int[]) { 60, -1 }, 0);
+                mu_label(ctx, "Mass:");   mu_slider(ctx, &mass, 0, 100);
+                mu_layout_end_column(ctx);
+
+                rigidObject->setMass(mass);
 
                 break;
         }
@@ -656,7 +693,7 @@ void WorldEditor::update() {
     processFrame();
 
     updateScreenSettings();
-    updateControllers();
-
     renderGui();
+
+    updateControllers();
 }

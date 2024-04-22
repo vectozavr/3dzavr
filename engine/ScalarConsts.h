@@ -15,15 +15,17 @@ namespace Consts {
     constexpr bool SHOW_DEBUG_INFO = false;
 
     constexpr double PI = 3.14159265358979323846264338327950288;
-    constexpr double EPS = 0.00000000001;
+    constexpr double EPS = 0.00000000001; // 1e-11
     constexpr double ABG_TRIANGLE_BORDER_WIDTH = 0.01;
 
     constexpr double LIGHTING_LOD_NEAR_DISTANCE = 5;
     constexpr double LIGHTING_LOD_FAR_DISTANCE = 10;
 
-    constexpr double EPA_EPS = 0.0001;
+    constexpr unsigned int GJK_MAX_ITERATIONS = 30;
+    constexpr unsigned int EPA_MAX_ITERATIONS = 30;
+    constexpr double EPA_DEPTH_EPS = 0.0001; // 1e-4
 
-    constexpr double FIXED_UPDATE_INTERVAL = 0.02;
+    constexpr double FIXED_UPDATE_INTERVAL = 0.02; // 50 fps
     constexpr double TAP_DELAY = 0.2;
 
     constexpr int MB = 1024*1024;

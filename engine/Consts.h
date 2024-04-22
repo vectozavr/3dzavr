@@ -43,7 +43,7 @@ namespace Consts {
     const std::string CPU_ARCHITECTURE = "Unknown";
 #endif
 
-    const std::string BUILD_INFO = "3dzavr sdl v0.2.0 CPU | " + RUNNING_MODE;
+    const std::string BUILD_INFO = "3dzavr sdl v0.2.1 CPU | " + RUNNING_MODE;
 
     const Vec2D BEZIER[2] = {Vec2D{0.8, 0}, Vec2D{0.2, 1}};
 

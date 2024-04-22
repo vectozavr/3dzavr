@@ -62,6 +62,7 @@ public:
     }
 
     void attach(std::shared_ptr<Object> object);
+    void attach(const Object& object);
     void unattach(const ObjectTag &tag);
 
     [[nodiscard]] std::shared_ptr<Object> attached(const ObjectTag &tag);

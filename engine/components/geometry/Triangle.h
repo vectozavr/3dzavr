@@ -49,6 +49,7 @@ public:
     [[nodiscard]] inline const std::array<Vec3D, 3>& textureCoordinates() const { return _textureCoordinates; }
     [[nodiscard]] double distance(const Vec3D &vec) const { return norm().dot(Vec3D(_points[0]) - vec); }
     [[nodiscard]] Vec3D abgBarycCoord(const Vec2D& point) const;
+    [[nodiscard]] Vec3D abgBarycCoord(const Vec3D& point) const;
 };
 
 

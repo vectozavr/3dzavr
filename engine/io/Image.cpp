@@ -151,8 +151,8 @@ Image::CODE Image::save2png(const FilePath &file_name, uint16_t bit_depth) {
         return ERROR;
     }
 
-    FILE * fp2 = fopen(file_name.str().c_str(), "wb");
-    if (!fp2) {
+    FILE * fp = fopen(file_name.str().c_str(), "wb");
+    if (!fp) {
         return FILE_OPEN_ERROR;
     }
 
@@ -176,7 +176,7 @@ Image::CODE Image::save2png(const FilePath &file_name, uint16_t bit_depth) {
 
     // Set png info like width, height, bit depth and color type
     // in this example, I assumed grayscale image. You can change image type easily
-    png_init_io(png_ptr, fp2);
+    png_init_io(png_ptr, fp);
     png_set_IHDR(png_ptr, info_ptr, _width, _height, bit_depth, \
     PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE, \
     PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -188,6 +188,8 @@ Image::CODE Image::save2png(const FilePath &file_name, uint16_t bit_depth) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
 
     delete[] tmp_rows;
+
+    fclose(fp);
 
     return SUCCESS;
 }

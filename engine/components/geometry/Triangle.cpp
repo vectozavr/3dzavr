@@ -1,5 +1,6 @@
-#include "Triangle.h"
-#include "Consts.h"
+#include <components/geometry/Triangle.h>
+#include <linalg/Matrix3x3.h>
+#include <Consts.h>
 
 Triangle::Triangle(const std::array<Vec4D, 3>& p, const std::array<Vec3D, 3>& uv) :
     _points{p}, _textureCoordinates(uv) {
@@ -74,4 +75,35 @@ Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
     }
 
     return Vec3D{alpha, betta, gamma};
+}
+
+Vec3D Triangle::abgBarycCoord(const Vec3D &point) const {
+    Vec3D ab = Vec3D(_points[1]) - Vec3D(_points[0]);
+    Vec3D ac = Vec3D(_points[2]) - Vec3D(_points[0]);
+    Vec3D ap = point - Vec3D(_points[0]);
+
+    double len_ab = ab.abs();
+    double len_ac = ac.abs();
+
+    // Firstly we handle cases when the triangle is degenerate
+
+    if(len_ab < Consts::EPS && len_ac < Consts::EPS) { // Triangle - is a single point
+        return Vec3D{1.0, 0, 0};
+    }
+
+    if(len_ab < Consts::EPS) { // |AB| = 0
+        double projection = (ap.dot(ac) / (len_ac * len_ac));
+        return Vec3D{1.0 - projection, 0.0, projection};
+    }
+
+    if(len_ac < Consts::EPS) { // |AC| = 0
+        double projection = (ap.dot(ab) / (len_ab * len_ab));
+        return Vec3D{1.0 - projection, projection, 0.0};
+    }
+
+    Matrix3x3 system((Vec3D(_points[0])),
+                     Vec3D(_points[1]),
+                     Vec3D(_points[2]));
+
+    return system.inverse()*point;
 }

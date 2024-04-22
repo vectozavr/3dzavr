@@ -27,6 +27,23 @@ void Group::add(std::shared_ptr<Object> object) {
     attach(object);
 }
 
+void Group::add(const Object &object) {
+    attach(object);
+}
+
+void Group::replace(std::shared_ptr<Object> object) {
+    if(find(object->name())) {
+        remove(object->name());
+    }
+    add(object);
+}
+
+void Group::replace(const Object &object) {
+    if(find(object.name())) {
+        remove(object.name());
+    }
+    add(object);
+}
 
 void Group::add(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale) {
     auto objects = ResourceManager::loadTriangleMesh(tag, mesh_file);
@@ -114,4 +131,3 @@ void Group::clear() {
 Group::~Group() {
     clear();
 }
-

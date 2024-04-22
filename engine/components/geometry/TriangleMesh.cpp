@@ -97,6 +97,8 @@ TriangleMesh TriangleMesh::LineTo(const Vec3D &from, const Vec3D &to, double lin
             {{p1, p4, p8}}
     }));
 
+    line*=Matrix4x4::Translation(from);
+
     return line;
 }
 
@@ -109,7 +111,7 @@ TriangleMesh TriangleMesh::ArrowTo(const Vec3D &from, const Vec3D &to, double li
     Vec3D v2 = from.cross(from + Vec3D{1, 0, 0}).normalized();
     Vec3D v3 = v1.cross(v2).normalized();
 
-    Vec3D to_line = to - v1*0.4;
+    Vec3D to_line = to - v1*line_width*10;
 
     // from plane
     Vec4D p1 = (- v2 * line_width / 2.0 - v3 * line_width / 2.0).makePoint4D();
@@ -144,17 +146,24 @@ TriangleMesh TriangleMesh::ArrowTo(const Vec3D &from, const Vec3D &to, double li
             {{p1, p8, p5}},
             {{p1, p4, p8}},
 
-            {{ p9, p10, p13  }},
-            {{ p10, p11, p13 }},
-            {{ p11, p12, p13 }},
-            {{ p12, p9, p13  }},
+            {{p13, p10, p9}},
+            {{p13, p11, p10}},
+            {{p13, p12, p11}},
+            {{p13, p9, p12}},
     }));
+
+    arrow*=Matrix4x4::Translation(from);
 
     return arrow;
 }
 
 void TriangleMesh::setTriangles(std::vector<Triangle>&& t) {
     _tris = std::move(t);
+    calculateBounds();
+}
+
+void TriangleMesh::setTriangles(const std::vector<Triangle> &t) {
+    _tris = t;
     calculateBounds();
 }
 
@@ -246,4 +255,44 @@ void TriangleMesh::calculateBounds() {
 TriangleMesh::TriangleMesh(const TriangleMesh &mesh, bool deepCopy) :
 Component(mesh), _material(mesh._material), _visible(mesh._visible) {
     copyTriangles(mesh, deepCopy);
+}
+
+TriangleMesh TriangleMesh::Plane(const Vec3D &normal, const Vec3D &point, double size) {
+    TriangleMesh result;
+    result.setMaterial(Consts::DEFAULT_MATERIAL);
+    result.getMaterial()->setTransparency(0.3);
+
+    // Select the vector which is not parallel to normal
+    Vec3D vectorToCross;
+    if(normal.cross(Vec3D::i()).abs() > Consts::EPS) {
+        vectorToCross = Vec3D::i();
+    } else if(normal.cross(Vec3D::j()).abs() > Consts::EPS) {
+        vectorToCross = Vec3D::j();
+    } else {
+        vectorToCross = Vec3D::k();
+    }
+
+    // compute two basis vectors that define the plane
+    Vec3D v1 = normal.cross(vectorToCross).normalized();
+    Vec3D v2 = normal.cross(v1).normalized();
+
+    // generate 4 points from the plane
+    Vec4D p1 = (point + ( v1+v2)*size/2).makePoint4D(); // A
+    Vec4D p2 = (point + ( v1-v2)*size/2).makePoint4D(); // B
+    Vec4D p3 = (point + (-v1-v2)*size/2).makePoint4D(); // C
+    Vec4D p4 = (point + (-v1+v2)*size/2).makePoint4D(); // D
+
+    result.setTriangles(std::move(std::vector<Triangle>{
+            {{p1, p2, p3}},
+            {{p1, p3, p4}},
+            {{p3, p2, p1}},
+            {{p4, p3, p1}}
+    }));
+
+    return result;
+}
+
+TriangleMesh TriangleMesh::Plane(const Vec3D &p1, const Vec3D &p2, const Vec3D &p3, double size) {
+    Vec3D normal = (p2-p1).cross(p3-p1);
+    return TriangleMesh::Plane(normal.normalized(), p1, size);
 }

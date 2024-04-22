@@ -32,6 +32,8 @@ public:
     void rotateToAngle(const Vec3D &v);
     void rotateRelativePoint(const Vec3D &s, const Vec3D &r);
     void rotateRelativePoint(const Vec3D &s, const Vec3D &v, double r);
+    void rotateRelativeItself(const Vec3D &r);
+    void rotateRelativeItself(const Vec3D &v, double r);
     void rotateLeft(double rl);
     void rotateUp(double ru);
     void rotateLookAt(double rlAt);

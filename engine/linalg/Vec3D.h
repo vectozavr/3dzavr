@@ -29,6 +29,7 @@ public:
     // Boolean operations
     bool operator==(const Vec3D &vec) const;
     bool operator!=(const Vec3D &vec) const;
+    bool operator<(const Vec3D &vec) const;
 
     // Operations with Vec3D
     Vec3D &operator+=(const Vec3D &vec);
@@ -54,7 +55,9 @@ public:
     [[nodiscard]] Vec4D makePoint4D() const;
 
     static Vec3D Random();
-
+    static Vec3D i() { return Vec3D(1, 0, 0); }
+    static Vec3D j() { return Vec3D(0, 1, 0); }
+    static Vec3D k() { return Vec3D(0, 0, 1); }
     static Vec3D EPS() { return Vec3D(Consts::EPS, Consts::EPS, Consts::EPS); }
 };
 
