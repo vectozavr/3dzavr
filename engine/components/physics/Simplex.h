@@ -58,16 +58,6 @@ public:
     [[nodiscard]] auto end() const { return _points.end(); }
 
     [[nodiscard]] SimplexType type() const { return static_cast<SimplexType>(_points.size()); }
-
-    [[nodiscard]] bool alreadyHas(const SupportPoint &supportPoint) const {
-        for(const auto& point : _points) {
-            if(supportPoint.support == point.support) {
-                return true;
-            }
-        }
-        //std::any_of(_points.begin(), _points.end(), [&](const auto& point){ return supportPoint.support == point.support; });
-        return false;
-    }
 };
 
 #endif //PHYSICS_SIMPLEX_H
