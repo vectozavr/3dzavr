@@ -41,6 +41,7 @@ public:
 
     TriangleMesh &operator*=(const Matrix4x4 &matrix4X4);
     void setTriangles(std::vector<Triangle>&& t);
+    void setTriangles(const std::vector<Triangle>& t);
 
     [[nodiscard]] size_t size() const { return _tris.size() * 3; }
 
@@ -59,6 +60,8 @@ public:
     TriangleMesh static Cube(double size = 1.0);
     TriangleMesh static LineTo(const Vec3D &from, const Vec3D &to, double line_width = 0.1);
     TriangleMesh static ArrowTo(const Vec3D& from, const Vec3D& to, double line_width = 1);
+    TriangleMesh static Plane(const Vec3D& normal, const Vec3D& point, double size = 3.0);
+    TriangleMesh static Plane(const Vec3D& p1, const Vec3D& p2, const Vec3D& p3, double size = 3.0);
 
     [[nodiscard]] std::shared_ptr<Component> copy() const override {
         return std::make_shared<TriangleMesh>(*this);

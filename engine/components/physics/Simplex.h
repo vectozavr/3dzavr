@@ -13,14 +13,20 @@ enum class SimplexType {
     Tetrahedron
 };
 
+struct SupportPoint final {
+    Vec3D p1;
+    Vec3D p2;
+    Vec3D support;
+};
+
 struct Simplex final {
 private:
-    std::list<Vec3D> _points{};
+    std::list<SupportPoint> _points{};
 
 public:
     Simplex() = default;
 
-    Simplex(std::initializer_list<Vec3D> list) {
+    Simplex(std::initializer_list<SupportPoint> list) {
         for (const auto &v : list) {
             _points.push_back(v);
             if (_points.size() > 4) {
@@ -29,14 +35,14 @@ public:
         }
     }
 
-    void push_front(const Vec3D &point) {
+    void push_front(const SupportPoint &point) {
         _points.push_front(point);
         if (_points.size() > 4) {
             _points.pop_back();
         }
     }
 
-    Vec3D operator[](unsigned i) const {
+    SupportPoint operator[](unsigned i) const {
         auto it = _points.begin();
         for (unsigned k = 0; k < i; k++) {
             ++it;
@@ -52,6 +58,16 @@ public:
     [[nodiscard]] auto end() const { return _points.end(); }
 
     [[nodiscard]] SimplexType type() const { return static_cast<SimplexType>(_points.size()); }
+
+    [[nodiscard]] bool alreadyHas(const SupportPoint &supportPoint) const {
+        for(const auto& point : _points) {
+            if(supportPoint.support == point.support) {
+                return true;
+            }
+        }
+        //std::any_of(_points.begin(), _points.end(), [&](const auto& point){ return supportPoint.support == point.support; });
+        return false;
+    }
 };
 
 #endif //PHYSICS_SIMPLEX_H

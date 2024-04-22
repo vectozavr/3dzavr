@@ -1,4 +1,6 @@
-## 3Dzavr SDL
+## 🚀 3Dzavr - Light C++ Game Engine
+
+<img src="https://github.com/vectozavr/3dzavr/assets/60608292/9b411b45-9e63-4a55-a8d1-924579ae504c" width="300">
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://choosealicense.com/licenses/mit/)
 [![Community Discord](https://img.shields.io/discord/788056426324426782)](https://discord.gg/zJUxVWZnkZ)
@@ -9,14 +11,25 @@
 
 #### About:
 
-3Dzavr is a 3D engine that uses SDL as multimedia framework.
+3Dzavr is yet another 3D engine for C++ that uses SDL as multimedia framework.
 
-Basic functionality:
-* Operations with vectors, matrices, triangles etc.
-* Projections from 3D on 2D plane, movement and rotation of camera and meshes.
+#### Motivation:
+
+Initially this project was created as a Proof Of Concept in implementing <b>custom CPU render from scratch</b>. <br>
+Gradually, 3dzavr became more like a very simple version of big engines like Godot, Unity or Unreal. <br>
+Our goal is to create light and easy to use/study/contribute Open Source and free engine, which anyone can access and use in whatever purposes. <br>
+<b>But the main goal is to have fun! You are welcome to use and contribute!</b>
+
+Main functionality:
+* Operations with vectors, matrices, triangles etc
+* Projections from 3D on 2D plane, movement and rotation of camera and meshes
+* The custom light component system
+* The system of attachments and hierarchy tree
 * Advanced smooth animations by using Bézier curves for meshes and camera
-* Collision detection (GJK)
+* Collision detection (GJK) and resolution (EPA)
+* Resource manager and other useful utils
 
+<img src="https://github.com/vectozavr/3dzavr/assets/60608292/fb69b744-6057-4829-8c69-67e553b19521" width="500">
 
 ## Installation (Linux):
 

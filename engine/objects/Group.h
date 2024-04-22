@@ -18,7 +18,11 @@ public:
     Group(const ObjectTag& tag, const Group& group);
 
     void add(std::shared_ptr<Object> object);
+    void add(const Object& object);
     void add(const ObjectTag& tag, const FilePath &mesh_file, const Vec3D &scale = Vec3D{1, 1, 1});
+
+    void replace(std::shared_ptr<Object> object);
+    void replace(const Object& object);
 
     bool remove(const ObjectTag &tag);
     void clear();

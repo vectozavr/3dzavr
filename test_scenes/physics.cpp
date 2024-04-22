@@ -12,16 +12,21 @@ private:
     void start() override {
         _worldEditor = std::make_shared<WorldEditor>(screen, world, camera);
 
+        auto transparentYellow = std::make_shared<Material>(MaterialTag("yellow"),
+                                                      nullptr, Color(255, 200, 170, 100));
+
         auto cube1 = std::make_shared<Object>(ObjectTag("cube_1"));
         cube1->addComponent<RigidObject>()->setCollision(true);
-        cube1->addComponent<TriangleMesh>(TriangleMesh::Cube());
+        cube1->addComponent<TriangleMesh>(TriangleMesh::Cube())->setMaterial(transparentYellow);
 
+        //cube1->getComponent<TransformMatrix>()->translate(Vec3D(-0.1, 0.45, 3.4));
         cube1->getComponent<TransformMatrix>()->translate(Vec3D(1, 0, 3));
+
         world->add(cube1);
 
         auto cube2 = std::make_shared<Object>(ObjectTag("cube_2"));
         cube2->addComponent<RigidObject>();
-        cube2->addComponent<TriangleMesh>(TriangleMesh::Cube());
+        cube2->addComponent<TriangleMesh>(TriangleMesh::Cube())->setMaterial(transparentYellow);
 
         cube2->getComponent<TransformMatrix>()->translate(Vec3D(-1, 0, 3));
         world->add(cube2);

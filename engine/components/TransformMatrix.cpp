@@ -47,6 +47,14 @@ void TransformMatrix::rotateRelativePoint(const Vec3D &s, const Vec3D &v, double
     transformRelativePoint(s, Matrix4x4::Rotation(v, r));
 }
 
+void TransformMatrix::rotateRelativeItself(const Vec3D &r) {
+    rotateRelativePoint(position(), r);
+}
+
+void TransformMatrix::rotateRelativeItself(const Vec3D &v, double r) {
+    rotateRelativePoint(position(), v, r);
+}
+
 void TransformMatrix::rotateLeft(double rl) {
     _angleLeftUpLookAt = Vec3D{_angleLeftUpLookAt.x() + rl,
                                _angleLeftUpLookAt.y(),

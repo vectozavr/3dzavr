@@ -13,12 +13,17 @@ private:
 public:
     Matrix3x3() = default;
     explicit Matrix3x3(const std::array<std::array<double, 3>, 3>& matrix) : _arr(matrix) {};
+    Matrix3x3(const Vec3D& column1, const Vec3D& column2, const Vec3D& column3);
 
     Matrix3x3 &operator=(const Matrix3x3 &matrix3X3) = default;
+
+    Matrix3x3 &operator+=(const Matrix3x3 &matrix3x3);
 
     [[nodiscard]] Matrix3x3 operator*(const Matrix3x3 &matrix3x3) const;
     [[nodiscard]] Matrix3x3 operator+(const Matrix3x3 &matrix3x3) const;
     [[nodiscard]] Matrix3x3 operator-(const Matrix3x3 &matrix3x3) const;
+
+    [[nodiscard]] Matrix3x3 operator*(double number) const;
 
     [[nodiscard]] Vec3D operator*(const Vec3D &vec3D) const;
 
@@ -32,9 +37,11 @@ public:
 
     [[nodiscard]] double abs() const;
 
-    Matrix3x3 static Identity();
-    Matrix3x3 static Zero();
-    Matrix3x3 static Constant(double value);
+    [[nodiscard]] Matrix3x3 static Identity();
+    [[nodiscard]] Matrix3x3 static Zero();
+    [[nodiscard]] Matrix3x3 static Constant(double value);
+    [[nodiscard]] Matrix3x3 static Outer(const Vec3D &vec1, const Vec3D &vec2); // The outer product
+
 };
 
 #include "Matrix3x3.inl"

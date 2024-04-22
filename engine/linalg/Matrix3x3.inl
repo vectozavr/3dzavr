@@ -3,6 +3,12 @@
 #include <ScalarConsts.h>
 #include "Matrix3x3.h"
 
+inline Matrix3x3::Matrix3x3(const Vec3D &column1, const Vec3D &column2, const Vec3D &column3) {
+    _arr[0][0] = column1.x(); _arr[1][0] = column1.y(); _arr[2][0] = column1.z();
+    _arr[0][1] = column2.x(); _arr[1][1] = column2.y(); _arr[2][1] = column2.z();
+    _arr[0][2] = column3.x(); _arr[1][2] = column3.y(); _arr[2][2] = column3.z();
+}
+
 inline Matrix3x3 Matrix3x3::operator*(const Matrix3x3 &matrix3X3) const {
     Matrix3x3 result = Matrix3x3::Zero();
 
@@ -127,4 +133,44 @@ inline Matrix3x3 Matrix3x3::inverse() const {
     inv._arr[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) / det;
 
     return inv;
+}
+
+inline Matrix3x3 Matrix3x3::Outer(const Vec3D &vec1, const Vec3D &vec2) {
+    Matrix3x3 result;
+
+    result._arr[0][0] = vec1.x()*vec2.x();
+    result._arr[0][1] = vec1.x()*vec2.y();
+    result._arr[0][2] = vec1.x()*vec2.z();
+
+    result._arr[1][0] = vec1.y()*vec2.x();
+    result._arr[1][1] = vec1.y()*vec2.y();
+    result._arr[1][2] = vec1.y()*vec2.z();
+
+    result._arr[2][0] = vec1.z()*vec2.x();
+    result._arr[2][1] = vec1.z()*vec2.y();
+    result._arr[2][2] = vec1.z()*vec2.z();
+
+    return result;
+}
+
+inline Matrix3x3 Matrix3x3::operator*(double number) const {
+    Matrix3x3 result(*this);
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            result._arr[i][j] = _arr[i][j]*number;
+        }
+    }
+
+    return result;
+}
+
+inline Matrix3x3 &Matrix3x3::operator+=(const Matrix3x3 &matrix3x3) {
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            _arr[i][j] += matrix3x3._arr[i][j];
+        }
+    }
+
+    return *this;
 }

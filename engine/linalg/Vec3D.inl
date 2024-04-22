@@ -3,6 +3,8 @@
 #include <random>
 
 #include <ScalarConsts.h>
+#include <linalg/Vec3D.h>
+
 
 inline Vec3D::Vec3D(const Vec3D &vec) : _arr_point{vec[0], vec[1], vec[2]} {}
 
@@ -126,4 +128,14 @@ inline Vec3D Vec3D::Random() {
 
     // Use the distribution and engine to generate three random doubles and return them as a Vec3D
     return Vec3D(dist(engine), dist(engine), dist(engine));
+}
+
+inline bool Vec3D::operator<(const Vec3D &vec) const {
+    if (std::abs(x() - vec.x()) > Consts::EPS) { // if x != vec.x
+        return x() < vec.x();
+    }
+    if (std::abs(y() - vec.y()) > Consts::EPS) { // if y != vec.y
+        return y() < vec.y();
+    }
+    return z() < vec.z();
 }

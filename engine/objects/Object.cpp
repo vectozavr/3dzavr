@@ -71,6 +71,10 @@ void Object::attach(std::shared_ptr<Object> object) {
     }
 }
 
+void Object::attach(const Object &object) {
+    attach(std::make_shared<Object>(object));
+}
+
 void Object::unattach(const ObjectTag &tag) {
     if(_attached.contains(tag) && _attached[tag]) {
         _attached[tag]->_attachedTo = nullptr;

@@ -15,7 +15,7 @@ class World final : public Group {
 private:
     void checkCollision(const std::shared_ptr<Object>& whereToCheck);
     void checkCollision(const std::shared_ptr<Object>& whereToCheck, const std::shared_ptr<Object>& whatToCheck);
-    void checkCollisionBetweenTwo(const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2);
+    static void checkCollisionBetweenTwo(const std::shared_ptr<Object>& obj1, const std::shared_ptr<Object>& obj2);
 public:
     explicit World(const ObjectTag& sceneName) : Group(sceneName) {};
 
