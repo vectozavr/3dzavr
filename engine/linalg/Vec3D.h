@@ -59,6 +59,11 @@ public:
     static Vec3D j() { return Vec3D(0, 1, 0); }
     static Vec3D k() { return Vec3D(0, 0, 1); }
     static Vec3D EPS() { return Vec3D(Consts::EPS, Consts::EPS, Consts::EPS); }
+
+    /* This function returns two parameters: the closest point between two skew lines and the distance between them.
+     * When lines intersect each other the distance will be 0
+     */
+    static std::pair<Vec3D, double> intersectionOfLines(const Vec3D& A, const Vec3D& B, const Vec3D& C, const Vec3D& D);
 };
 
 #include "Vec3D.inl"

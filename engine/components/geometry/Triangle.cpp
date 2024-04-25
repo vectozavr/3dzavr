@@ -80,14 +80,16 @@ Vec3D Triangle::abgBarycCoord(const Vec2D& point) const {
 Vec3D Triangle::abgBarycCoord(const Vec3D &point) const {
     Vec3D ab = Vec3D(_points[1]) - Vec3D(_points[0]);
     Vec3D ac = Vec3D(_points[2]) - Vec3D(_points[0]);
+    Vec3D bc = Vec3D(_points[2]) - Vec3D(_points[1]);
     Vec3D ap = point - Vec3D(_points[0]);
 
     double len_ab = ab.abs();
     double len_ac = ac.abs();
+    double len_bc = bc.abs();
 
     // Firstly we handle cases when the triangle is degenerate
 
-    if(len_ab < Consts::EPS && len_ac < Consts::EPS) { // Triangle - is a single point
+    if(len_ab < Consts::EPS && len_ac < Consts::EPS && len_bc < Consts::EPS) { // Triangle - is a single point
         return Vec3D{1.0, 0, 0};
     }
 
@@ -97,6 +99,11 @@ Vec3D Triangle::abgBarycCoord(const Vec3D &point) const {
     }
 
     if(len_ac < Consts::EPS) { // |AC| = 0
+        double projection = (ap.dot(ab) / (len_ab * len_ab));
+        return Vec3D{1.0 - projection, projection, 0.0};
+    }
+
+    if(len_bc < Consts::EPS) { // |BC| = 0
         double projection = (ap.dot(ab) / (len_ab * len_ab));
         return Vec3D{1.0 - projection, projection, 0.0};
     }

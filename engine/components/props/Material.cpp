@@ -31,3 +31,7 @@ void Material::checkTransparent() {
         _isTransparent = (_ambient.a() != 255) || (_d < 1.0-Consts::EPS);
     }
 }
+
+void Material::setTexture(std::shared_ptr<Texture> texture) {
+    _texture = texture;
+}

@@ -5,8 +5,7 @@
 #include <components/Component.h>
 #include <utils/Time.h>
 
-Object::Object(const ObjectTag &tag) : _tag(tag) {
-}
+Object::Object(const ObjectTag &tag) : _tag(tag), _lastUpdate(Time::time()) {}
 
 void Object::copyComponentsFromObject(const Object &object) {
     for(const auto& cmp : object._components) {
@@ -16,11 +15,11 @@ void Object::copyComponentsFromObject(const Object &object) {
     }
 }
 
-Object::Object(const Object &object) : _tag(object._tag) {
+Object::Object(const Object &object) : _tag(object._tag), _lastUpdate(Time::time()) {
     copyComponentsFromObject(object);
 }
 
-Object::Object(const ObjectTag &tag, const Object &object) : _tag(tag) {
+Object::Object(const ObjectTag &tag, const Object &object) : _tag(tag), _lastUpdate(Time::time()) {
     copyComponentsFromObject(object);
 }
 

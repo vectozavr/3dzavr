@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include "linalg/Vec3D.h"
+#include <linalg/Vec3D.h>
 
 enum class SimplexType {
     Zero,

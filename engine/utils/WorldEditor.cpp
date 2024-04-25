@@ -435,6 +435,12 @@ void WorldEditor::rigidObjectEditor() {
         mu_label(ctx, ("Hitbox size:" + std::to_string(rigidObject->hitBoxSize()) +
         ". " + "In collision:" + std::to_string(rigidObject->inCollision())).c_str());
 
+        mu_label(ctx, ("Vel: (" + std::to_string(rigidObject->velocity().x()) + " / " + std::to_string(rigidObject->velocity().y()) + " / " + std::to_string(rigidObject->velocity().z()) + ")").c_str());
+        mu_label(ctx, ("Ang: (" + std::to_string(rigidObject->angularVelocity().x()) + " / " + std::to_string(rigidObject->angularVelocity().y()) + " / " + std::to_string(rigidObject->angularVelocity().z()) + ")").c_str());
+        mu_label(ctx, ("Acc: (" + std::to_string(rigidObject->acceleration().x()) + " / " + std::to_string(rigidObject->acceleration().y()) + " / " + std::to_string(rigidObject->acceleration().z()) + ")").c_str());
+
+
+        mu_label(ctx, ("Mass: " + std::to_string(rigidObject->mass())).c_str());
         mu_label(ctx, ("Volume: " + std::to_string(rigidObject->volume())).c_str());
         mu_label(ctx, ("Area: " + std::to_string(rigidObject->surfaceArea())).c_str());
         mu_label(ctx, ("COM: (" + std::to_string(rigidObject->centerOfMass().x()) + " / " + std::to_string(rigidObject->centerOfMass().y()) + " / " + std::to_string(rigidObject->centerOfMass().z()) + ")").c_str());

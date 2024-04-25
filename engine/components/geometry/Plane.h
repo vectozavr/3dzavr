@@ -34,7 +34,7 @@ public:
 
     Plane& operator=(const Plane &plane) = default;
 
-    [[nodiscard]] double distance(const Vec3D &point4D) const;
+    [[nodiscard]] double distance(const Vec3D &point3D) const;
     [[nodiscard]] IntersectionInformation intersect(const Vec3D &from, const Vec3D &to) const;
     void clip(std::vector<std::pair<Vec3D, Vec3D>>& input, std::vector<std::pair<Vec3D, Vec3D>>& output) const;
     [[nodiscard]] Line clip(const Line& line, bool& isFullyOutside) const;

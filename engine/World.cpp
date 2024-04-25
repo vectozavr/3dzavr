@@ -23,8 +23,12 @@ TriangleMesh::IntersectionInformation World::rayCast(const Vec3D &from, const Ve
 }
 
 void World::update() {
-    updateComponents();
+    /*TODO: checkCollision should happen not once per frame (update), but every fixedUpdate.
+     * Maybe this check should be somehow placed into RigidObject::updatePhysicsState
+     */
+
     checkCollision(sharedPtr());
+    updateComponents();
 }
 
 void World::checkCollision(const std::shared_ptr<Object> &whereToCheck) {
@@ -59,12 +63,12 @@ void World::checkCollisionBetweenTwo(const std::shared_ptr<Object> &obj1, const 
         return;
     }
 
-    std::pair<bool, Simplex> gjk = rigidObj1->checkGJKCollision(rigidObj2);
+    std::pair<bool, Simplex> gjk = GJK::checkGJKCollision(rigidObj1, rigidObj2);
     if (!gjk.first) {
         return; // no collision
     }
 
-    CollisionPoint epa = rigidObj1->EPA(gjk.second, rigidObj2);
+    auto epa = EPA::EPA(rigidObj1, rigidObj2, gjk.second);
     RigidObject::SolveCollision(epa, rigidObj1, rigidObj2);
 
     if (rigidObj1->collisionCallBack() != nullptr) {

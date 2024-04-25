@@ -55,6 +55,7 @@ public:
 
     void setAmbient(const Color& color);
     void setTransparency(double d);
+    void setTexture(std::shared_ptr<Texture> texture);
 
     [[nodiscard]] std::shared_ptr<Texture> texture() const {return _texture; }
 

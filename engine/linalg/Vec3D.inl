@@ -139,3 +139,28 @@ inline bool Vec3D::operator<(const Vec3D &vec) const {
     }
     return z() < vec.z();
 }
+
+inline std::pair<Vec3D, double> Vec3D::intersectionOfLines(const Vec3D &A, const Vec3D &B, const Vec3D &C, const Vec3D &D) {
+    /*
+     * The first line: A->B
+     * The second line: C->D
+     */
+
+    Vec3D w0 = A - C;
+    Vec3D d1 = B - A;
+    Vec3D d2 = D - C;
+
+    double d1_d1 = d1.dot(d1);
+    double d2_d2 = d2.dot(d2);
+    double d1_d2 = d1.dot(d2);
+    double w0_d1 = w0.dot(d1);
+    double w0_d2 = w0.dot(d2);
+
+    double t = (w0_d2*d1_d2 - d2_d2*w0_d1)/(d1_d1*d2_d2 - d1_d2*d1_d2);
+    double s = (t*d1_d2 + w0_d2)/d2_d2;
+
+    Vec3D P1 = A + d1*t;
+    Vec3D P2 = C + d2*s;
+
+    return {(P1+P2)/2, (P1-P2).abs()};
+}

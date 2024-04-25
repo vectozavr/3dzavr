@@ -57,6 +57,10 @@ add_library(
         components/physics/Simplex.h
         components/physics/HitBox.h
         components/physics/HitBox.cpp
+        components/physics/GJK.h
+        components/physics/GJK.cpp
+        components/physics/EPA.h
+        components/physics/EPA.cpp
 
         io/Image.h
         io/Image.cpp
@@ -113,7 +117,8 @@ add_library(
         animation/ShowUncreation.h
         animation/RotateLeftUpLookAt.h
         animation/Decompose.h
-        animation/TranslateToPoint.h)
+        animation/TranslateToPoint.h
+)
 
 target_include_directories(3DZAVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 

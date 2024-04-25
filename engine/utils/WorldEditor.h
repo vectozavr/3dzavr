@@ -68,6 +68,8 @@ public:
 
     void update();
 
+    void setEnableLighting(bool enable = true) { _enableLighting = enable; }
+
     [[nodiscard]] std::shared_ptr<Object> selectedObject() { return _selectedObject; }
 };
 
