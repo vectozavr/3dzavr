@@ -61,12 +61,14 @@ private:
     void collisionHandler(const EPA::CollisionPoint& point,
                           std::shared_ptr<RigidObject> obj1,
                           std::shared_ptr<RigidObject> obj2) {
+
+        auto collisionInfo = std::make_shared<Group>(ObjectTag("collision_info"));
         // Support vectors on cubes
         int i = 0;
         for(const auto& edge: {point.edge1, point.edge2, point.edge3}) {
             auto vec = Object(ObjectTag("cube_v" + std::to_string(i++)));
             vec.addComponent<TriangleMesh>(TriangleMesh::ArrowTo(edge.p1, edge.p2, 0.01));
-            world->replace(vec);
+            collisionInfo->add(vec);
         }
 
         auto redMaterial = std::make_shared<Material>(MaterialTag("red"),
@@ -80,17 +82,17 @@ private:
             auto cubeEdge1 = Object(ObjectTag("cube_edge_" + std::to_string(i++)));
             cubeEdge1.addComponent<TriangleMesh>(TriangleMesh::Cube(0.1))->setMaterial(redMaterial);
             cubeEdge1.getComponent<TransformMatrix>()->translateToPoint(p.p1);
-            world->replace(cubeEdge1);
+            collisionInfo->add(cubeEdge1);
 
             auto cubeEdge2 = Object(ObjectTag("cube_edge_" + std::to_string(i++)));
             cubeEdge2.addComponent<TriangleMesh>(TriangleMesh::Cube(0.1))->setMaterial(greenMaterial);
             cubeEdge2.getComponent<TransformMatrix>()->translateToPoint(p.p2);
-            world->replace(cubeEdge2);
+            collisionInfo->add(cubeEdge2);
 
             auto cubeEdgeEPA = Object(ObjectTag("cube_edge_EPA_" + std::to_string(i++)));
             cubeEdgeEPA.addComponent<TriangleMesh>(TriangleMesh::Cube(0.1))->setMaterial(redMaterial);
             cubeEdgeEPA.getComponent<TransformMatrix>()->translateToPoint(p.support);
-            world->replace(cubeEdgeEPA);
+            collisionInfo->add(cubeEdgeEPA);
         }
 
         // EPA polytope edges
@@ -98,7 +100,7 @@ private:
         for(const auto& edge: point.polytope) {
             auto edgeObj = Object(ObjectTag("edge_EPA_" + std::to_string(i++)));
             edgeObj.addComponent<TriangleMesh>(TriangleMesh::ArrowTo(Vec3D(0), edge.support, 0.01));
-            world->replace(edgeObj);
+            collisionInfo->add(edgeObj);
         }
 
         auto blueMaterial = std::make_shared<Material>(MaterialTag("blue"),
@@ -106,13 +108,14 @@ private:
 
 
         i = 0;
-        for(const auto &p : point.points) {
+        for(const auto &p : point.collisionPlane.points) {
             auto collisionP = Object(ObjectTag("collisionP" + std::to_string(i++)));
             collisionP.addComponent<TriangleMesh>(TriangleMesh::Cube(0.1))->setMaterial(blueMaterial);
             collisionP.getComponent<TransformMatrix>()->translateToPoint(p);
-            world->replace(collisionP);
+            collisionInfo->add(collisionP);
         }
-        std::cout << "Points: " << point.points.size() << std::endl;
+        world->replace(collisionInfo);
+        std::cout << "Points: " << point.collisionPlane.points.size() << std::endl;
     }
 
 public:

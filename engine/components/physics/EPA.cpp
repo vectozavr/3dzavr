@@ -195,82 +195,6 @@ void EPA::solveCollision(std::shared_ptr<RigidObject> obj1, std::shared_ptr<Rigi
     }
 }
 
-EPA::PlanePoints EPA::findSortedPointsFromPlane(std::shared_ptr<RigidObject> obj, const Plane& plane) {
-    EPA::PlanePoints result;
-
-    std::vector<std::pair<Vec3D, double>> planePoints;
-    Vec3D origin(0, 0, 0);
-
-    auto model = obj->getComponent<TransformMatrix>()->fullModel();
-
-    for(const auto& p: obj->hitBox()) {
-        Vec3D pInWorld = Vec3D(model*p.makePoint4D());
-        if (std::abs(plane.distance(pInWorld)) < Consts::EPA_CONTACT_PLANE_DISTANCE_EPS) {
-            planePoints.emplace_back(pInWorld, 0);
-            origin += pInWorld;
-        }
-    }
-    if(planePoints.empty()) {
-        return result;
-    }
-
-    origin /= planePoints.size();
-    result.origin = origin;
-
-    planePoints[0].second = 1.0;
-    for(int i = 1; i < planePoints.size(); i++) {
-        Vec3D oa = planePoints[0].first - origin;
-        Vec3D ob = planePoints[i].first - origin;
-        double cosAngle = oa.dot(ob)/(oa.abs()*ob.abs());
-        double sign = oa.cross(ob).dot(plane.normal);
-
-        if(sign > 0) {
-            planePoints[i].second = cosAngle;
-        } else {
-            planePoints[i].second = -cosAngle - 2;
-        }
-    }
-
-    std::sort(planePoints.begin(), planePoints.end(), [](const auto& p1, const auto& p2) {
-        return p1.second > p2.second;
-    });
-
-    result.points.reserve(planePoints.size());
-    result.normals.reserve(planePoints.size());
-    for(int i = 0; i < planePoints.size(); i++) {
-        result.points.emplace_back(planePoints[i].first);
-
-        Vec3D oa = planePoints[i].first - origin;
-        Vec3D ab = planePoints[(i+1)%planePoints.size()].first - planePoints[i].first;
-        Vec3D abNormalized = ab.normalized();
-
-
-        Vec3D lineNorm = oa - abNormalized*oa.dot(abNormalized);
-        lineNorm = lineNorm.normalized();
-
-        result.normals.emplace_back(lineNorm);
-    }
-
-    return result;
-}
-
-bool EPA::PlanePoints::isPointInside(const Vec3D &point) const {
-    if(points.size() < 3) {
-        return false;
-    }
-
-    for(int i = 0; i < points.size(); i++) {
-        Vec3D op = point - points[i];
-        if(op.dot(normals[i]) > 0) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-
 std::vector<Vec3D> EPA::PlanePoints::intersectionsWithLine(const Vec3D &a, const Vec3D &b) const {
     std::vector<Vec3D> result;
 
@@ -296,8 +220,95 @@ std::vector<Vec3D> EPA::PlanePoints::intersectionsWithLine(const Vec3D &a, const
     return result;
 }
 
-std::vector<Vec3D> EPA::findPlanePointsIntersection(const EPA::PlanePoints& points1, const EPA::PlanePoints& points2, bool changedOrder) {
-    std::vector<Vec3D> result;
+void EPA::PlanePoints::computeNormals() {
+    normals.reserve(points.size());
+    for(int i = 0; i < points.size(); i++) {
+        Vec3D oa = points[i] - origin;
+        Vec3D ab = points[(i+1)%points.size()] - points[i];
+        Vec3D abNormalized = ab.normalized();
+
+        Vec3D lineNorm = oa - abNormalized*oa.dot(abNormalized);
+        lineNorm = lineNorm.normalized();
+
+        normals.emplace_back(lineNorm);
+    }
+}
+
+EPA::PlanePoints EPA::findSortedPointsFromPlane(std::shared_ptr<RigidObject> obj, const Plane& plane) {
+    EPA::PlanePoints result;
+
+    std::vector<std::pair<Vec3D, double>> planePoints;
+    Vec3D origin(0, 0, 0);
+
+    auto model = obj->getComponent<TransformMatrix>()->fullModel();
+
+    for(const auto& p: obj->hitBox()) {
+        Vec3D pInWorld = Vec3D(model*p.makePoint4D());
+        if (std::abs(plane.distance(pInWorld)) < Consts::EPA_CONTACT_PLANE_DISTANCE_EPS) {
+            // Compute the projection of pInWorld onto the collision plane
+            Vec3D ap = pInWorld - plane.point;
+            Vec3D ap_parallel = ap - plane.normal*ap.dot(plane.normal);
+            Vec3D pInWorldProjected = plane.point + ap_parallel;
+
+            planePoints.emplace_back(pInWorldProjected, 0);
+            origin += pInWorldProjected;
+        }
+    }
+    if(planePoints.empty()) {
+        return result;
+    }
+
+    origin /= planePoints.size();
+    result.origin = origin;
+
+    // sort points clockwise
+    planePoints[0].second = 1.0;
+    for(int i = 1; i < planePoints.size(); i++) {
+        Vec3D oa = planePoints[0].first - origin;
+        Vec3D ob = planePoints[i].first - origin;
+        double cosAngle = oa.dot(ob)/(oa.abs()*ob.abs());
+        double sign = oa.cross(ob).dot(plane.normal);
+
+        if(sign > 0) {
+            planePoints[i].second = cosAngle;
+        } else {
+            planePoints[i].second = -cosAngle - 2;
+        }
+    }
+
+    std::sort(planePoints.begin(), planePoints.end(), [](const auto& p1, const auto& p2) {
+        return p1.second > p2.second;
+    });
+
+    // Place sorted points into the final structure
+    result.points.reserve(planePoints.size());
+    for(auto & planePoint : planePoints) {
+        result.points.emplace_back(planePoint.first);
+    }
+
+    // Compute normals for the obtained 2D convex polygon
+    result.computeNormals();
+
+    return result;
+}
+
+bool EPA::PlanePoints::isPointInside(const Vec3D &point) const {
+    if(points.size() < 3) {
+        return false;
+    }
+
+    for(int i = 0; i < points.size(); i++) {
+        Vec3D op = point - points[i];
+        if(op.dot(normals[i]) > 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+EPA::PlanePoints EPA::findPlanePointsIntersection(const EPA::PlanePoints& points1, const EPA::PlanePoints& points2) {
+    std::vector<Vec3D> resultPoints;
 
     bool aInside = points2.isPointInside(points1.points[0]);
     for(int i = 0; i < points1.points.size(); i++) {
@@ -311,32 +322,33 @@ std::vector<Vec3D> EPA::findPlanePointsIntersection(const EPA::PlanePoints& poin
         bool bInside = points2.isPointInside(b);
 
         if(aInside) {
-            result.emplace_back(a);
+            resultPoints.emplace_back(a);
         }
 
         if(!aInside || !bInside) {
             auto newPoints = points2.intersectionsWithLine(a, b);
-            result.insert(result.end(), newPoints.begin(), newPoints.end());
+            resultPoints.insert(resultPoints.end(), newPoints.begin(), newPoints.end());
         }
 
         aInside = bInside; // the next a will be the current b
     }
 
+    std::set<Vec3D> seenPoints(resultPoints.begin(), resultPoints.end());
     for(const auto& p : points2.points) {
-        if(points1.isPointInside(p)) {
-            result.emplace_back(p);
+        if(points1.isPointInside(p) && !seenPoints.contains(p)) {
+            resultPoints.emplace_back(p);
         }
     }
 
-    if(!changedOrder && result.empty()) {
-        return findPlanePointsIntersection(points2, points1, true);
-    }
+    EPA::PlanePoints result;
+    result.points = resultPoints;
+    result.computeNormals();
 
     return result;
 }
 
 
-std::vector<Vec3D> EPA::calculateCollisionPoints(std::shared_ptr<RigidObject> obj1,
+EPA::PlanePoints EPA::calculateCollisionPoints(std::shared_ptr<RigidObject> obj1,
                                                  std::shared_ptr<RigidObject> obj2,
                                                  const Vec3D& normal) {
     std::vector<Vec3D> result;
@@ -348,14 +360,14 @@ std::vector<Vec3D> EPA::calculateCollisionPoints(std::shared_ptr<RigidObject> ob
     auto obj2PlanePoints = findSortedPointsFromPlane(obj2, collisionPlane);
 
     if(obj1PlanePoints.points.size() == 1) {
-        return {obj1PlanePoints.points[0]}; // edge to face/vertex
+        return {{obj1PlanePoints.points[0]}}; // edge to face/vertex
     }
     if(obj2PlanePoints.points.size() == 1) {
-        return {obj2PlanePoints.points[0]}; // edge to face/vertex
+        return {{obj2PlanePoints.points[0]}}; // edge to face/vertex
     }
     if(obj1PlanePoints.points.size() == 2 && obj2PlanePoints.points.size() == 2) { // vertex to vertex
-        return {Vec3D::intersectionOfLines(obj1PlanePoints.points[0], obj1PlanePoints.points[1],
-                                           obj2PlanePoints.points[0], obj2PlanePoints.points[1]).first};
+        return {{Vec3D::intersectionOfLines(obj1PlanePoints.points[0], obj1PlanePoints.points[1],
+                                           obj2PlanePoints.points[0], obj2PlanePoints.points[1]).first}};
     }
 
     return findPlanePointsIntersection(obj1PlanePoints, obj2PlanePoints);

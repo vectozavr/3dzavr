@@ -20,6 +20,7 @@ private:
     };
 public:
     Vec3D normal;
+    Vec3D point;
     double offset;
 
     Plane();

@@ -2,11 +2,13 @@
 
 Plane::Plane() : normal(1), offset() {}
 
-Plane::Plane(const Triangle &tri) : normal(tri.norm()), offset(tri.norm().dot(Vec3D(tri[0]))) {}
+Plane::Plane(const Triangle &tri) : normal(tri.norm()), offset(tri.norm().dot(Vec3D(tri[0]))), point(Vec3D(tri[0])) {}
 
-Plane::Plane(const Vec3D &normal, const Vec3D &point) : normal(normal.normalized()), offset(normal.normalized().dot(point)) {}
+Plane::Plane(const Vec3D &normal, const Vec3D &point) : normal(normal.normalized()), point(point), offset(normal.normalized().dot(point)) {}
 
-Plane::Plane(const Vec3D &normal, double offset) : normal(normal.normalized()), offset(offset) {}
+Plane::Plane(const Vec3D &normal, double offset) : normal(normal.normalized()), offset(offset) {
+    point = normal*offset;
+}
 
 double Plane::distance(const Vec3D &v) const {
     return v.dot(normal) - offset;

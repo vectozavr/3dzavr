@@ -5,16 +5,6 @@
 #include <components/geometry/Plane.h>
 
 namespace EPA {
-    struct CollisionPoint final {
-        //const Vec3D point;
-        std::vector<Vec3D> points;
-        const Vec3D normal;
-        const double depth;
-        const SupportPoint edge1;
-        const SupportPoint edge2;
-        const SupportPoint edge3;
-        const std::vector<SupportPoint> polytope;
-    };
 
     struct PlanePoints final {
         std::vector<Vec3D> points;
@@ -23,6 +13,19 @@ namespace EPA {
 
         [[nodiscard]] bool isPointInside(const Vec3D& point) const;
         [[nodiscard]] std::vector<Vec3D> intersectionsWithLine(const Vec3D& a, const Vec3D& b) const;
+
+        void computeNormals();
+    };
+
+    struct CollisionPoint final {
+        //const Vec3D point;
+        PlanePoints collisionPlane;
+        const Vec3D normal;
+        const double depth;
+        const SupportPoint edge1;
+        const SupportPoint edge2;
+        const SupportPoint edge3;
+        const std::vector<SupportPoint> polytope;
     };
 
     static std::pair<std::vector<GJK::FaceNormal>, size_t>
@@ -42,8 +45,10 @@ namespace EPA {
                                                                 const Vec3D& normal);
 
     static PlanePoints findSortedPointsFromPlane(std::shared_ptr<RigidObject> obj, const Plane& plane);
-    static std::vector<Vec3D> findPlanePointsIntersection(const PlanePoints& points1, const PlanePoints& points2, bool changedOrder = false);
-    static std::vector<Vec3D> calculateCollisionPoints(std::shared_ptr<RigidObject> obj1,
+
+    static PlanePoints findPlanePointsIntersection(const PlanePoints& points1, const PlanePoints& points2);
+
+    static PlanePoints calculateCollisionPoints(std::shared_ptr<RigidObject> obj1,
                                                        std::shared_ptr<RigidObject> obj2,
                                                        const Vec3D& normal);
 

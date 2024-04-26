@@ -4,12 +4,12 @@
 #include <cstdint>
 
 namespace Consts {
-    constexpr uint16_t STANDARD_SCREEN_WIDTH = 640; //  640 | 960
-    constexpr uint16_t STANDARD_SCREEN_HEIGHT = 480; // 480 | 720
+    constexpr uint16_t STANDARD_SCREEN_WIDTH = 960; //  640 | 960
+    constexpr uint16_t STANDARD_SCREEN_HEIGHT = 720; // 480 | 720
 
     constexpr uint16_t STANDARD_EDITOR_WIDTH = STANDARD_SCREEN_WIDTH + 300;
     constexpr uint16_t STANDARD_EDITOR_HEIGHT = STANDARD_SCREEN_HEIGHT;
-    constexpr uint16_t SCREEN_SCALE = 2;
+    constexpr uint16_t SCREEN_SCALE = 1;
 
     constexpr bool USE_LOG_FILE = true;
     constexpr bool SHOW_DEBUG_INFO = false;
