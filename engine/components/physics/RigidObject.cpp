@@ -33,7 +33,13 @@ void RigidObject::updatePhysicsState(double deltaTime) {
 
     getComponent<TransformMatrix>()->translate(_velocity * deltaTime);
     getComponent<TransformMatrix>()->rotateRelativePoint(getComponent<TransformMatrix>()->fullPosition() + _centerOfMass, _angularVelocity * deltaTime);
-    _velocity = _velocity + _acceleration * deltaTime;
+
+    _acceleration += _appliedAcceleration;
+    _velocity += _acceleration * deltaTime;
+    _acceleration = Vec3D(0,0,0);
+
+    _angularVelocity += _angularAcceleration * deltaTime;
+    _angularAcceleration = Vec3D(0,0,0);
 }
 
 void RigidObject::setVelocity(const Vec3D &velocity) {
@@ -53,7 +59,7 @@ void RigidObject::addAngularVelocity(const Vec3D &angularVelocity) {
 }
 
 void RigidObject::setAcceleration(const Vec3D &acceleration) {
-    _acceleration = acceleration;
+    _appliedAcceleration = acceleration;
 }
 
 void RigidObject::setRestitution(double restitution) {
@@ -162,13 +168,38 @@ void RigidObject::SolveCollision(const EPA::CollisionPoint &collision,
     obj1->setVelocity(velocity_parallel);
     */
 
-    /*
     Vec3D pos1 = obj1->getComponent<TransformMatrix>()->fullPosition() + obj1->centerOfMass();
     Vec3D pos2 = obj2->getComponent<TransformMatrix>()->fullPosition() + obj2->centerOfMass();
 
-    Vec3D rA = collision.point - pos1;
-    Vec3D rB = collision.point - pos2;
+    /*
+    for(const auto& p: collision.collisionPlane.points) {
 
+        Vec3D rA = p - pos1;
+        Vec3D rB = p - pos2;
+
+        Vec3D relativeVelocity = obj2->velocity() + obj2->angularVelocity().cross(rB) -
+                                    obj1->velocity() - obj1->angularVelocity().cross(rA);
+
+        // TODO: experiment with ks and kd. Maybe they should be different for different materials
+        double ks = 10.0;
+        double kd = 10.0;
+
+        //Vec3D springForce = collision.normal*collision.depth*ks - collision.normal*collision.normal.dot(relativeVelocity)*kd;
+        Vec3D springForce = collision.normal*collision.depth*ks;
+
+        if(obj1->hasCollision()) {
+            obj1->_acceleration += -springForce/obj1->mass();
+            obj1->_angularAcceleration += obj1->invInertiaTensor()*rA.cross(-springForce);
+        }
+        if(obj2->hasCollision()) {
+            obj2->_acceleration += springForce/obj2->mass();
+            obj2->_angularAcceleration += obj2->invInertiaTensor()*rB.cross(springForce);
+        }
+    }*/
+
+
+    Vec3D rA = collision.collisionPlane.origin - pos1;
+    Vec3D rB = collision.collisionPlane.origin - pos2;
     Vec3D relativeVelocity =
             obj2->velocity() + obj2->angularVelocity().cross(rB) -
             obj1->velocity() - obj1->angularVelocity().cross(rA);
@@ -190,24 +221,30 @@ void RigidObject::SolveCollision(const EPA::CollisionPoint &collision,
     double j = numerator / denominator;
 
     Vec3D impulse = collision.normal*j;
-    */
+
 
     /*TODO: Maybe we need to add property like _isPhysical here so the
      * object can have the collision, but we do not need to update its physics state
      * Now if we want the object to have collision and not being updated here we can set
      * its mass to a very large number
      */
-    /*
+
+
     if(obj1->hasCollision()) {
         obj1->addVelocity(-impulse / obj1->mass());
         obj1->addAngularVelocity(-(obj1->invInertiaTensor()*rA.cross(impulse)));
+
+        // Just a test
+        Vec3D velocity_perpendicular = collision.normal * obj1->velocity().dot(collision.normal);
+        Vec3D velocity_parallel = obj1->velocity() - velocity_perpendicular;
+        obj1->setVelocity(velocity_parallel);
     }
 
     if(obj2->hasCollision()) {
         obj2->addVelocity(impulse / obj2->mass());
         obj2->addAngularVelocity(obj2->invInertiaTensor()*rB.cross(impulse));
     }
-    */
+
 
 
     // TODO: static and dynamic friction
@@ -230,12 +267,13 @@ void RigidObject::SolveCollision(const EPA::CollisionPoint &collision,
 
         if(obj1->hasCollision()) {
             obj1->addVelocity(-frictionImpulse / obj1->mass());
-            //obj1->addAngularVelocity(-(obj1->invInertiaTensor()*rA.cross(impulse)));
+            obj1->addAngularVelocity(-(obj1->invInertiaTensor()*rA.cross(frictionImpulse)));
         }
 
         if(obj2->hasCollision()) {
             obj2->addVelocity(frictionImpulse / obj2->mass());
-            //obj2->addAngularVelocity(obj2->invInertiaTensor()*rB.cross(impulse));
+            obj2->addAngularVelocity(obj2->invInertiaTensor()*rB.cross(frictionImpulse));
         }
-    }*/
+    }
+     */
 }

@@ -23,6 +23,8 @@ private:
     Vec3D _velocity{0, 0, 0};
     Vec3D _acceleration{0, 0, 0};
     Vec3D _angularVelocity{0, 0, 0};
+    Vec3D _angularAcceleration{0, 0, 0};
+    Vec3D _appliedAcceleration{0,0,0};
 
     double _mass = 1;
     double _volume = 0;

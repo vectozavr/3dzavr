@@ -108,7 +108,7 @@ private:
 
         auto collisionP1 = Object(ObjectTag("collisionP1"));
         collisionP1.addComponent<TriangleMesh>(TriangleMesh::Cube(0.1))->setMaterial(blueMaterial);
-        collisionP1.getComponent<TransformMatrix>()->translateToPoint(point.point);
+        collisionP1.getComponent<TransformMatrix>()->translateToPoint(point.collisionPlane.origin);
         world->replace(collisionP1);
     }
 

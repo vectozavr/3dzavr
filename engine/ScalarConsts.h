@@ -4,8 +4,8 @@
 #include <cstdint>
 
 namespace Consts {
-    constexpr uint16_t STANDARD_SCREEN_WIDTH = 960; //  640 | 960
-    constexpr uint16_t STANDARD_SCREEN_HEIGHT = 720; // 480 | 720
+    constexpr uint16_t STANDARD_SCREEN_WIDTH = 640; //  640 | 960
+    constexpr uint16_t STANDARD_SCREEN_HEIGHT = 480; // 480 | 720
 
     constexpr uint16_t STANDARD_EDITOR_WIDTH = STANDARD_SCREEN_WIDTH + 300;
     constexpr uint16_t STANDARD_EDITOR_HEIGHT = STANDARD_SCREEN_HEIGHT;
@@ -24,7 +24,7 @@ namespace Consts {
     constexpr unsigned int GJK_MAX_ITERATIONS = 30;
     constexpr unsigned int EPA_MAX_ITERATIONS = 30;
     constexpr double EPA_DEPTH_EPS = 0.0001; // 1e-4
-    constexpr double EPA_CONTACT_PLANE_DISTANCE_EPS = 0.01; // 1e-4
+    constexpr double EPA_CONTACT_PLANE_DISTANCE_EPS = 0.0001; // 1e-4
 
 
     constexpr double FIXED_UPDATE_INTERVAL = 0.02; // 50 fps

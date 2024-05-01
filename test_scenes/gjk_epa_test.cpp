@@ -114,6 +114,16 @@ private:
             collisionP.getComponent<TransformMatrix>()->translateToPoint(p);
             collisionInfo->add(collisionP);
         }
+
+
+        auto blackMaterial = std::make_shared<Material>(MaterialTag("black"),
+                                                        nullptr, Color::BLACK);
+
+        auto origin = Object(ObjectTag("origin"));
+        origin.addComponent<TriangleMesh>(TriangleMesh::Cube(0.1))->setMaterial(blackMaterial);
+        origin.getComponent<TransformMatrix>()->translateToPoint(point.collisionPlane.origin);
+        collisionInfo->add(origin);
+
         world->replace(collisionInfo);
         std::cout << "Points: " << point.collisionPlane.points.size() << std::endl;
     }

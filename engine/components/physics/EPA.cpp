@@ -307,6 +307,14 @@ bool EPA::PlanePoints::isPointInside(const Vec3D &point) const {
     return true;
 }
 
+void EPA::PlanePoints::computeOrigin() {
+    origin = Vec3D(0,0,0);
+    for (const auto&p : points) {
+        origin += p;
+    }
+    origin /= points.size();
+}
+
 EPA::PlanePoints EPA::findPlanePointsIntersection(const EPA::PlanePoints& points1, const EPA::PlanePoints& points2) {
     std::vector<Vec3D> resultPoints;
 
@@ -342,6 +350,7 @@ EPA::PlanePoints EPA::findPlanePointsIntersection(const EPA::PlanePoints& points
 
     EPA::PlanePoints result;
     result.points = resultPoints;
+    result.computeOrigin();
     result.computeNormals();
 
     return result;
@@ -360,14 +369,15 @@ EPA::PlanePoints EPA::calculateCollisionPoints(std::shared_ptr<RigidObject> obj1
     auto obj2PlanePoints = findSortedPointsFromPlane(obj2, collisionPlane);
 
     if(obj1PlanePoints.points.size() == 1) {
-        return {{obj1PlanePoints.points[0]}}; // edge to face/vertex
+        return {{obj1PlanePoints.points[0]}, {}, obj1PlanePoints.points[0]}; // edge to face/vertex
     }
     if(obj2PlanePoints.points.size() == 1) {
-        return {{obj2PlanePoints.points[0]}}; // edge to face/vertex
+        return {{obj2PlanePoints.points[0]}, {}, obj2PlanePoints.points[0]}; // edge to face/vertex
     }
     if(obj1PlanePoints.points.size() == 2 && obj2PlanePoints.points.size() == 2) { // vertex to vertex
-        return {{Vec3D::intersectionOfLines(obj1PlanePoints.points[0], obj1PlanePoints.points[1],
-                                           obj2PlanePoints.points[0], obj2PlanePoints.points[1]).first}};
+        Vec3D intersection = Vec3D::intersectionOfLines(obj1PlanePoints.points[0], obj1PlanePoints.points[1],
+                                                        obj2PlanePoints.points[0], obj2PlanePoints.points[1]).first;
+        return {{intersection}, {}, intersection};
     }
 
     return findPlanePointsIntersection(obj1PlanePoints, obj2PlanePoints);
