@@ -5,6 +5,38 @@
 #include <components/geometry/TriangleMesh.h>
 #include <Consts.h>
 
+/**
+ * @class ShowCreation
+ * @brief Animates the creation of a mesh by progressively revealing its triangles.
+ *
+ * This class is a specialized animation derived from the Animation base class, designed to visually construct
+ * a mesh by progressively revealing its triangles over time. It simulates the effect of a mesh being created
+ * or drawn piece by piece, which can be used for visually appealing transitions or introductions of 3D models
+ * in graphical applications.
+ *
+ * @inherit Animation The base class providing the framework for animation timing, progression, and interpolation.
+ *
+ * @private_section
+ * _mesh A weak pointer to the TriangleMesh object being animated. This ensures that the animation does not prevent
+ *       the mesh object from being destructed and handles the case where the mesh might be deleted before the animation completes.
+ * _triangles A vector of Triangle objects representing the initial state of the mesh before the animation starts.
+ *            This is used to calculate the progressive creation effect on each triangle.
+ * _shift A value from 0 to 1 indicating the proportion of the animation duration after which each triangle starts
+ *        to appear. A smaller value results in a more staggered effect, while a value closer to 1 makes the triangles
+ *        appear more uniformly.
+ *
+ * @public_section
+ * ShowCreation Constructor that initializes the animation with the target mesh, duration, shift value, looping behavior,
+ *                and interpolation type.
+ *                @param triangleMesh A weak pointer to the TriangleMesh object to animate.
+ *                @param duration The duration of the animation in seconds.
+ *                @param shift The shift value controlling the staggered appearance of triangles.
+ *                @param looped The looping behavior of the animation (None or Continue).
+ *                @param interpolationType The interpolation type for the animation (e.g., Linear, Bezier).
+ *
+ * @fn update Overrides the pure virtual update function from the Animation class. It calculates and applies the
+ *            creation effect to the mesh based on the current progress of the animation.
+ */
 class ShowCreation final : public Animation {
 private:
     const std::weak_ptr<TriangleMesh> _mesh;

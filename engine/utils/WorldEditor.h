@@ -10,7 +10,14 @@ extern "C" {
 #include "io/microui/microui.h"
 }
 
-
+/**
+ * @class WorldEditor
+ * @brief Manages the world editing interface, including UI and object manipulation.
+ *
+ * This class is responsible for handling the world editor's user interface and interactions,
+ * such as selecting and manipulating objects within the world. It integrates with various
+ * controllers for object and camera control, and manages rendering settings.
+ */
 class WorldEditor {
 private:
     std::unique_ptr<mu_Context> _ctx;
